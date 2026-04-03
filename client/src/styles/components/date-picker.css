@@ -6,10 +6,8 @@
 }
 
 .date-picker-popover {
-  position: absolute;
-  top: calc(100% + 8px);
-  left: 0;
-  z-index: 1000;
+  position: fixed;
+  z-index: 10001;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);

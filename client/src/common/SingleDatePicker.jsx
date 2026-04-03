@@ -8,7 +8,9 @@ import { fmtDate, fmtDisplay } from '../utils/formatters';
 
 export default function SingleDatePicker({ value, onChange, placeholder = "Select Date", maxDate, className, disabled }) {
   const [open, setOpen] = useState(false);
+  const [popoverStyle, setPopoverStyle] = useState({});
   const containerRef = useRef(null);
+  const buttonRef = useRef(null);
 
   useEffect(() => {
     const handleOutside = (e) => {
@@ -18,6 +20,19 @@ export default function SingleDatePicker({ value, onChange, placeholder = "Selec
     };
     if (open) document.addEventListener('mousedown', handleOutside);
     return () => document.removeEventListener('mousedown', handleOutside);
+  }, [open]);
+
+  // Position the popover using fixed positioning to escape overflow:hidden
+  useEffect(() => {
+    if (open && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setPopoverStyle({
+        position: 'fixed',
+        top: rect.bottom + 8,
+        left: rect.left,
+        zIndex: 10001,
+      });
+    }
   }, [open]);
 
   // Lock body scroll when picker is open
@@ -42,6 +57,7 @@ export default function SingleDatePicker({ value, onChange, placeholder = "Selec
   return (
     <div className={`date-picker-dropdown ${className || ''}`} ref={containerRef}>
       <button
+        ref={buttonRef}
         type="button"
         className="form-input d-flex items-center justify-between w-full"
         onClick={() => !disabled && setOpen(!open)}
@@ -57,7 +73,7 @@ export default function SingleDatePicker({ value, onChange, placeholder = "Selec
       </button>
 
       {open && (
-        <div className="date-picker-popover fade-in">
+        <div className="date-picker-popover fade-in" style={popoverStyle}>
           <DayPicker
             mode="single"
             selected={selectedDate}
