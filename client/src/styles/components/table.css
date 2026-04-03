@@ -1,0 +1,224 @@
+/* ── Transactions Table View ─────────────────────────────────── */
+.table-view-container {
+  width: 100%;
+}
+
+.table-view-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 24px;
+  padding: 0 4px;
+}
+
+.table-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.data-table th {
+  padding: 14px 16px;
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+  background: rgba(0, 0, 0, 0.15);
+  white-space: nowrap;
+  font-weight: 700;
+}
+
+[data-theme="light"] .data-table th {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.data-table td {
+  padding: 14px 16px;
+  font-size: var(--font-size-sm);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.col-action {
+  padding-right: 20px !important;
+}
+
+.data-table tr:last-child td {
+  border-bottom: none;
+}
+
+.data-table tbody tr {
+  transition: background 0.15s;
+}
+
+.data-table tbody tr:hover td {
+  background: rgba(88, 166, 255, 0.04);
+}
+
+.tx-card-pill {
+  display: inline-block;
+  padding: 3px 10px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 99px;
+  font-size: 0.73rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+/* ── Empty state ─────────────────────────────────────────────── */
+.empty-state {
+  text-align: center;
+  padding: 80px 20px 100px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.empty-state-card {
+  text-align: center;
+  padding: 80px 32px 100px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  position: relative;
+  overflow: hidden;
+}
+
+.empty-state-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 0%, rgba(88, 166, 255, 0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.empty-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+  position: relative;
+}
+
+.empty-icon-sellers {
+  background: linear-gradient(135deg, rgba(88, 166, 255, 0.15), rgba(188, 140, 255, 0.15));
+  border: 1px solid rgba(88, 166, 255, 0.2);
+  color: var(--accent);
+}
+
+.empty-icon-orders {
+  background: linear-gradient(135deg, rgba(63, 185, 80, 0.15), rgba(88, 166, 255, 0.15));
+  border: 1px solid rgba(63, 185, 80, 0.2);
+  color: var(--green);
+}
+
+.empty-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.empty-sub {
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  max-width: 360px;
+  line-height: 1.5;
+}
+
+.empty-cta {
+  margin-top: 12px;
+}
+
+/* Scrollbar */
+* {
+  scrollbar-color: var(--border) transparent;
+  scrollbar-width: thin;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 99px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+
+/* ════════════════════════════════════════════════════════════════
+   RESPONSIVE — TABLET  ≤ 900px
+   ════════════════════════════════════════════════════════════════ */
+@media (max-width: 900px) {
+  .cards-grid {
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  }
+
+  .filter-grid,
+  .filter-dropdowns {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .stats-row,
+  .stats-row.stats-row-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   RESPONSIVE — MOBILE  ≤ 640px
+   (Only table/empty-state specific. All page-hero, stat, filter,
+    modal, layout rules are in layout-mobile.css which loads last)
+   ════════════════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+  .empty-state,
+  .empty-state-card {
+    padding: 60px 20px 80px;
+  }
+
+  .empty-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 16px;
+  }
+
+  .empty-title {
+    font-size: 1.1rem;
+  }
+
+  /* Make data tables smaller on mobile */
+  .data-table th {
+    padding: 10px 10px;
+    font-size: 0.65rem;
+  }
+
+  .data-table td {
+    padding: 10px 10px;
+    font-size: 0.72rem;
+  }
+}

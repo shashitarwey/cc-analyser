@@ -1,0 +1,182 @@
+/* ── Auth Page ───────────────────────────────────────────────── */
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(ellipse at 20% 60%, rgba(88, 166, 255, 0.07) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 30%, rgba(188, 140, 255, 0.07) 0%, transparent 60%),
+    var(--bg);
+  padding: 20px;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 40px 36px;
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.5);
+  animation: slideUp 0.3s cubic-bezier(.34, 1.56, .64, 1);
+}
+
+.auth-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.5rem;
+  font-weight: 800;
+  background: linear-gradient(90deg, #58a6ff, #bc8cff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 8px;
+}
+
+.auth-tagline {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 28px;
+}
+
+.auth-tabs {
+  display: flex;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 4px;
+  gap: 4px;
+  margin-bottom: 24px;
+}
+
+.auth-tab {
+  flex: 1;
+  padding: 8px;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.auth-tab.active {
+  background: var(--accent);
+  color: #0d1117;
+}
+
+/* ── Password toggle ────────────────────────────────────────── */
+.input-password-wrap {
+  position: relative;
+}
+
+.input-password-wrap .form-input {
+  padding-right: 40px;
+}
+
+.btn-pw-toggle {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: color 0.15s;
+}
+
+.btn-pw-toggle:hover {
+  color: var(--text);
+}
+
+/* ── Forgot / Reset Password Pages ─────────────────────────── */
+.auth-subtitle {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.auth-alt-link {
+  text-align: center;
+  margin-top: 16px;
+}
+
+.auth-alt-link a {
+  font-size: 0.82rem;
+  color: var(--accent);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: opacity 0.15s;
+}
+
+.auth-alt-link a:hover {
+  opacity: 0.8;
+}
+
+/* Sent / Success state */
+.forgot-pw-sent {
+  text-align: center;
+  padding: 8px 0;
+}
+
+.forgot-pw-sent-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(88, 166, 255, 0.1);
+  color: var(--accent);
+  margin-bottom: 16px;
+}
+
+.forgot-pw-sent-icon.success {
+  background: rgba(63, 185, 80, 0.1);
+  color: var(--success, #3fb950);
+}
+
+.forgot-pw-sent h2 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0 0 10px;
+}
+
+.forgot-pw-sent p {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin: 0 0 8px;
+}
+
+.forgot-pw-sent strong {
+  color: var(--text);
+}
+
+.forgot-pw-sent-hint {
+  font-size: 0.78rem !important;
+  color: var(--text-muted) !important;
+  margin-top: 12px !important;
+}
+
+.forgot-pw-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 20px;
+}

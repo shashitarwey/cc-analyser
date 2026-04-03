@@ -1,0 +1,286 @@
+/* ── Profile Page ───────────────────────────────────────────── */
+.profile-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  max-width: 960px;
+  align-items: start;
+}
+
+.profile-grid--single {
+  grid-template-columns: 1fr;
+  max-width: 520px;
+}
+
+.profile-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 28px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.profile-card:hover {
+  border-color: var(--accent);
+}
+
+.profile-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.profile-card-header h2 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0;
+}
+
+.profile-card-header svg {
+  color: var(--accent);
+}
+
+.profile-card .form-group {
+  margin-bottom: 18px;
+}
+
+.profile-card .form-footer {
+  margin-top: 24px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.profile-form-actions {
+  justify-content: space-between;
+}
+
+/* ── Link card (navigates to change password) ─────────────── */
+.profile-card--link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22px 28px;
+  text-decoration: none;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.profile-card--link:hover {
+  border-color: var(--accent);
+  box-shadow: 0 4px 32px rgba(88, 166, 255, 0.1);
+}
+
+.profile-card-link-content {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.profile-card-link-content svg:first-child {
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.profile-card-link-content h2 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 4px;
+}
+
+.profile-card-link-content p {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.profile-card-link-arrow {
+  color: var(--text-muted);
+  transition: transform 0.2s, color 0.2s;
+}
+
+.profile-card--link:hover .profile-card-link-arrow {
+  color: var(--accent);
+  transform: translateX(3px);
+}
+
+/* ── Password match / mismatch ────────────────────────────── */
+.pw-mismatch {
+  font-size: 0.8rem;
+  color: var(--danger);
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.pw-match {
+  font-size: 0.8rem;
+  color: var(--success, #3fb950);
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ── Password rules (reuses auth styles) ──────────────────── */
+.pw-rules {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 10px;
+}
+
+.pw-rule {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  transition: color 0.15s;
+}
+
+.pw-rule.ok {
+  color: var(--success, #3fb950);
+}
+
+.pw-rule.fail {
+  color: var(--text-muted);
+}
+
+/* ── Danger Zone: Account Deletion ─────────────────────────── */
+.danger-zone {
+  border-color: rgba(248, 81, 73, 0.3);
+}
+
+.danger-zone:hover {
+  border-color: rgba(248, 81, 73, 0.5);
+}
+
+.danger-zone-header svg {
+  color: var(--danger, #f85149) !important;
+}
+
+.danger-zone-header h2 {
+  color: var(--danger, #f85149) !important;
+}
+
+.danger-zone-desc {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.danger-zone-desc strong {
+  color: var(--text);
+}
+
+.btn-danger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: rgba(248, 81, 73, 0.15);
+  color: var(--danger, #f85149);
+  border: 1px solid rgba(248, 81, 73, 0.3);
+  border-radius: var(--radius-sm, 8px);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: rgba(248, 81, 73, 0.25);
+  border-color: rgba(248, 81, 73, 0.5);
+}
+
+.btn-danger:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Deletion confirmation */
+.deletion-confirm {
+  margin-top: 4px;
+}
+
+.deletion-confirm-label {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.deletion-confirm-input {
+  margin-bottom: 12px;
+  border-color: rgba(248, 81, 73, 0.3) !important;
+}
+
+.deletion-confirm-input:focus {
+  border-color: var(--danger, #f85149) !important;
+  box-shadow: 0 0 0 3px rgba(248, 81, 73, 0.1) !important;
+}
+
+.deletion-confirm-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+/* Pending deletion warning banner */
+.deletion-pending {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.deletion-warning-banner {
+  display: flex;
+  gap: 12px;
+  padding: 14px 16px;
+  background: rgba(227, 179, 65, 0.08);
+  border: 1px solid rgba(227, 179, 65, 0.25);
+  border-radius: var(--radius-sm, 8px);
+  color: #e3b341;
+}
+
+.deletion-warning-banner svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.deletion-warning-banner strong {
+  display: block;
+  font-size: 0.9rem;
+  margin-bottom: 4px;
+}
+
+.deletion-warning-banner p {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.deletion-warning-banner p strong {
+  display: inline;
+  color: var(--text);
+}
+
+/* ── Responsive ───────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .profile-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-card {
+    padding: 20px;
+  }
+}

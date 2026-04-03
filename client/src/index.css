@@ -1,0 +1,22 @@
+/* ── CardVault CSS Barrel ──────────────────────────────────── */
+/* All styles are split into modular files for maintainability  */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+@import './styles/base.css';
+@import './styles/layout.css';
+@import './styles/layout-page.css';
+@import './styles/auth.css';
+@import './styles/components/card-widget.css';
+@import './styles/components/date-picker.css';
+@import './styles/components/billing.css';
+@import './styles/components/buttons.css';
+@import './styles/components/modal.css';
+@import './styles/components/table.css';
+@import './styles/components/global-search.css';
+@import './styles/components/profile.css';
+@import './styles/components/analytics.css';
+@import './styles/components/ledger.css';
+
+/* Must be last — contains @media overrides */
+@import './styles/layout-mobile.css';

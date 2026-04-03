@@ -1,0 +1,43 @@
+const mongoose = require('mongoose');
+
+const cardSchema = new mongoose.Schema(
+    {
+        user_id: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User',
+            required: true,
+        },
+        bank_name: {
+            type: String,
+            required: [true, 'Bank name is required'],
+            trim: true,
+        },
+        card_network: {
+            type: String,
+            required: [true, 'Card network is required'],
+            enum: ['Visa', 'Mastercard', 'AmEx', 'RuPay'],
+        },
+        last_four_digit: {
+            type: String,
+            required: [true, 'Last 4 digits are required'],
+            match: [/^\d{4}$/, 'last_four_digit must be exactly 4 digits'],
+        },
+        name_on_card: {
+            type: String,
+            required: [true, 'Name on card is required'],
+            trim: true,
+        },
+        cashback_enabled: { type: Boolean, default: false },
+        cashback_percent: { type: Number, default: 0, min: 0, max: 100 },
+        cashback_limit: { type: Number, default: 0, min: 0 },
+        cashback_period: { type: String, enum: ['monthly', 'quarterly', 'half-yearly', 'yearly'], default: 'monthly' },
+        // Billing cycle reminder fields
+        billing_date: { type: Number, min: 1, max: 31, default: null }, // Day statement is generated
+        due_date:     { type: Number, min: 1, max: 31, default: null }, // Day payment is due
+    },
+    { timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } }
+);
+
+cardSchema.index({ user_id: 1, bank_name: 1 });
+
+module.exports = mongoose.model('Card', cardSchema);

@@ -1,0 +1,284 @@
+/* ── Bank Section ────────────────────────────────────────────── */
+.bank-section {
+  margin-bottom: 36px;
+}
+
+.bank-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.bank-name-badge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.bank-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), #bc8cff);
+  flex-shrink: 0;
+}
+
+.bank-name {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.bank-total {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.bank-spend {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+  /* slightly smaller gap gives cards more width */
+}
+
+/* ── Credit Card Widget ──────────────────────────────────────── */
+.card-widget {
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  /* Reduced vertical padding for sleekness */
+  min-height: 180px;
+  /* Constrain height to maintain wide proportions */
+  position: relative;
+  /* Removed overflow: hidden so tooltips don't get clipped */
+  cursor: pointer;
+  transition: transform 0.25s cubic-bezier(.34, 1.56, .64, 1), box-shadow 0.25s;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.card-widget:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  filter: brightness(1.12);
+}
+
+/* Color themes */
+.card-color-indigo {
+  background: linear-gradient(135deg, #1e2a5a 0%, #1a1f3a 100%);
+}
+
+.card-color-purple {
+  background: linear-gradient(135deg, #2d1b5e 0%, #1a1228 100%);
+}
+
+.card-color-teal {
+  background: linear-gradient(135deg, #0e3a3a 0%, #0d2424 100%);
+}
+
+.card-color-rose {
+  background: linear-gradient(135deg, #5e1a2d 0%, #2d0f18 100%);
+}
+
+.card-color-amber {
+  background: linear-gradient(135deg, #4a2e00 0%, #2a1a00 100%);
+}
+
+.card-color-emerald {
+  background: linear-gradient(135deg, #0a3a1e 0%, #072010 100%);
+}
+
+.card-color-sky {
+  background: linear-gradient(135deg, #0e2e4a 0%, #071824 100%);
+}
+
+.card-color-slate {
+  background: linear-gradient(135deg, #1e2530 0%, #12171e 100%);
+}
+
+.card-chip {
+  width: 38px;
+  height: 28px;
+  background: linear-gradient(135deg, #d4af37 0%, #f5d76e 50%, #c9a227 100%);
+  border-radius: 5px;
+  margin-bottom: 16px;
+  position: relative;
+  z-index: 1;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.card-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+  position: relative;
+  z-index: 1;
+}
+
+.card-bank {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.card-more-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.5);
+  padding: 4px;
+  border-radius: 6px;
+  transition: color 0.2s, background 0.2s;
+  line-height: 0;
+}
+
+.card-more-btn:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+
+
+.card-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  position: relative;
+  /* ← sit above ::before */
+  z-index: 2;
+}
+
+.card-delete-btn:hover {
+  color: #f85149 !important;
+  background: rgba(248, 81, 73, 0.15) !important;
+}
+
+.card-last-four-digit {
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 4px;
+  position: relative;
+  z-index: 1;
+}
+
+.card-name {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.55);
+  margin-bottom: 20px;
+  font-weight: 500;
+  position: relative;
+  z-index: 1;
+}
+
+/* LTF / fee badge */
+.card-badges-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+  position: relative;
+  z-index: 1;
+}
+
+.card-badge {
+  display: inline-block;
+  border-radius: 6px;
+  padding: 3px 10px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.badge-ltf {
+  background: rgba(63, 185, 80, 0.2);
+  border: 1px solid rgba(63, 185, 80, 0.4);
+  color: #3fb950;
+}
+
+.badge-fee {
+  background: rgba(248, 81, 73, 0.18);
+  border: 1px solid rgba(248, 81, 73, 0.35);
+  color: #f85149;
+}
+
+/* Status badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 6px;
+  padding: 3px 10px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.badge-success {
+  background: rgba(63, 185, 80, 0.15);
+  border: 1px solid rgba(63, 185, 80, 0.35);
+  color: #3fb950;
+}
+
+.badge-danger {
+  background: rgba(248, 81, 73, 0.15);
+  border: 1px solid rgba(248, 81, 73, 0.35);
+  color: #f85149;
+}
+
+.badge-surface {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+}
+
+
+/* Card network badge */
+.card-network-badge {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  position: relative;
+  z-index: 1;
+  white-space: nowrap;
+}
+
+.card-spend-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  position: relative;
+  z-index: 1;
+  margin-top: auto;
+}
+
+.card-spend-label {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 500;
+}
+
+.card-spend-amount {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #fff;
+}
+

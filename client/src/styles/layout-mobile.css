@@ -1,0 +1,1489 @@
+/* ── Mobile Layout Overrides ────────────────────────────── */
+@media (max-width: 640px) {
+
+  /* ── Global overflow fix ─────────────────────── */
+  html, body, #root {
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+
+  .hide-on-mobile {
+    display: none !important;
+  }
+
+  .show-on-mobile-only {
+    display: flex !important;
+  }
+
+  /* Page top bars (Orders / Sellers) stack on mobile */
+  .page-top-bar {
+    align-items: flex-start;
+    row-gap: 10px;
+  }
+
+  .page-top-bar-left {
+    flex: 1 1 auto;
+  }
+
+  .page-top-bar-actions {
+    width: 100%;
+    margin-left: 0;
+    flex-wrap: wrap;
+  }
+
+  /* Shrink page content padding on mobile */
+  .page-content {
+    padding: 16px 12px;
+  }
+
+  /* Give content breathing room from sticky header */
+  .main-content {
+    padding-top: 20px;
+  }
+
+  /* ── Tables: horizontal scroll on mobile ─────── */
+  .table-card {
+    overflow: visible;
+  }
+
+  .table-responsive-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 0 -1px;
+  }
+
+  /* ── Page hero mobile ──────────────────────────── */
+  .page-hero {
+    padding: 16px 12px 14px;
+    margin-bottom: 0;
+  }
+
+  /* Hide back button on mobile — phone has native back */
+  .page-hero .btn-back-circle {
+    display: none;
+  }
+
+  /* Also hide the ledger divider next to back button */
+  .ledger-hero-divider {
+    display: none;
+  }
+
+  .page-hero-inner {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .page-hero-left {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .page-hero-title {
+    font-size: 1.15rem;
+  }
+
+  /* Keep actions inline on the right when only 1-2 buttons */
+  .page-hero-actions {
+    flex-wrap: wrap;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  /* When actions have a search bar (Orders page), go full width below */
+  .page-hero-actions:has(.search-bar) {
+    width: 100%;
+    flex-basis: 100%;
+  }
+
+  .page-hero-actions .search-bar {
+    max-width: none;
+    flex: 1 1 auto;
+    min-width: 120px;
+  }
+
+  .page-hero-actions .btn {
+    flex-shrink: 0;
+  }
+
+  .profit-badge {
+    font-size: 0.75rem;
+    padding: 3px 10px;
+  }
+
+  /* Stats cards stack vertically on mobile */
+  .stats-row,
+  .stats-row.stats-row-4 {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .stat-card {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+  }
+
+  .stat-card-value {
+    font-size: 1.1rem;
+  }
+
+  /* Filter grid single column on mobile */
+  .filter-grid,
+  .filter-dropdowns {
+    grid-template-columns: 1fr;
+  }
+
+  .filter-date-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .filter-date-sep {
+    display: none;
+  }
+
+  /* ── Dashboard hero / bank / cards ────────────── */
+  .hero-bar {
+    padding: 16px 16px 14px;
+  }
+
+  .hero-label {
+    font-size: 0.68rem;
+    margin-bottom: 4px;
+  }
+
+  .hero-amount {
+    font-size: 1.5rem;
+    margin-bottom: 14px;
+  }
+
+  .filter-presets {
+    gap: 5px;
+  }
+
+  .period-pill {
+    padding: 5px 10px;
+    font-size: 0.74rem;
+  }
+
+  .filter-custom-range {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 12px;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .date-range-input {
+    width: 100%;
+  }
+
+  .date-range-sep {
+    display: none;
+  }
+
+  .main-content {
+    padding: 20px 12px;
+  }
+
+  /* Dashboard sort: left-align on mobile */
+  .dashboard-sort-bar {
+    justify-content: flex-start !important;
+    margin-top: 16px !important;
+    margin-bottom: 16px !important;
+  }
+
+  .bank-section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .bank-name {
+    font-size: 0.95rem;
+  }
+
+  .bank-total {
+    font-size: 0.78rem;
+  }
+
+  .cards-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .card-widget {
+    padding: 18px;
+  }
+
+  .card-spend-amount {
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+
+  .fab {
+    bottom: 24px;
+    right: 20px;
+    width: 48px;
+    height: 48px;
+  }
+
+  /* ── Modals — near full-screen on mobile ───────── */
+  .modal-overlay {
+    padding: 0;
+    align-items: flex-end;
+  }
+
+  .modal {
+    border-radius: 20px 20px 0 0;
+    max-width: 100% !important;
+    max-height: 92vh;
+    padding: 24px 18px;
+    overflow-y: auto;
+  }
+
+  .confirm-modal {
+    border-radius: 20px 20px 0 0 !important;
+    padding: 28px 18px !important;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .auth-card {
+    border-radius: 20px 20px 0 0;
+    margin-top: auto;
+    padding: 32px 20px;
+  }
+
+  .auth-page {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  /* ── Page content on mobile ────────────────────── */
+  .page-content {
+    padding: 16px 12px;
+  }
+
+  /* Hide back button in table view header too */
+  .table-view-header .btn-back-circle {
+    display: none;
+  }
+
+  /* Profile grid: full width on mobile */
+  .profile-grid,
+  .profile-grid--single {
+    max-width: 100%;
+  }
+
+  .profile-card {
+    padding: 20px 16px;
+  }
+
+  /* Filter panel: prevent overflow on mobile */
+  .filter-panel {
+    overflow: visible;
+  }
+
+  .filter-panel-body {
+    padding: 14px 12px;
+  }
+
+  /* ── Table view (transaction detail) mobile ────── */
+  .table-view-container {
+    padding: 16px 12px 20px !important;
+  }
+
+  /* Fix header vertical alignment — all elements same height */
+  .header-inner {
+    height: 52px;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .header-inner>* {
+    display: flex;
+    align-items: center;
+  }
+
+  /* Ledger stats mobile overrides are in ledger.css */
+
+
+  .app-header {
+    padding: 0 12px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .header-actions {
+    gap: 4px;
+  }
+
+  /* ── Hamburger button ─────────────────────────────── */
+  .btn-hamburger {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    color: var(--text);
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+    flex-shrink: 0;
+  }
+
+  .btn-hamburger:hover {
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  /* ── Mobile search input (real input in header) ────── */
+  .mobile-search-wrap {
+    display: flex !important;
+    align-items: center;
+    gap: 6px;
+    flex: 1;
+    min-width: 0;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 99px;
+    padding: 0 12px;
+    height: 34px;
+    margin: 0 8px;
+    transition: border-color 0.2s;
+  }
+
+  .mobile-search-wrap:focus-within {
+    border-color: var(--accent);
+  }
+
+  .mobile-search-icon {
+    color: var(--text-muted);
+    flex-shrink: 0;
+  }
+
+  .mobile-search-input {
+    border: none;
+    background: transparent;
+    outline: none;
+    color: var(--text);
+    font-size: 0.85rem;
+    font-family: inherit;
+    width: 100%;
+    min-width: 0;
+    padding: 0;
+    height: 100%;
+  }
+
+  .mobile-search-input::placeholder {
+    color: var(--text-muted);
+  }
+
+  .mobile-search-clear {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 2px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    transition: color 0.15s;
+  }
+
+  .mobile-search-clear:hover {
+    color: var(--text);
+  }
+
+  /* ── Inline search results panel ──────────────────── */
+  .gs-inline-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.35);
+    z-index: 199;
+  }
+
+  .gs-inline-panel {
+    position: fixed;
+    top: 60px;
+    /* just below header */
+    left: 0;
+    right: 0;
+    max-height: 60vh;
+    overflow-y: auto;
+    background: #0d1117;
+    border-bottom: 1px solid var(--border);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+    z-index: 200;
+    animation: fadeSlideDown 0.2s ease;
+  }
+
+  [data-theme="light"] .gs-inline-panel {
+    background: #ffffff;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  }
+
+  @keyframes fadeSlideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* ── Mobile slide-out drawer ──────────────────────── */
+  .mobile-menu-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(4px);
+    z-index: 9999;
+    animation: fadeIn 0.2s ease;
+  }
+
+  .mobile-menu-drawer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 270px;
+    max-width: 80vw;
+    background: #0d1117;
+    border-right: 1px solid var(--border);
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    animation: slideInLeft 0.25s ease-out;
+    box-shadow: 8px 0 30px rgba(0, 0, 0, 0.4);
+  }
+
+  [data-theme="light"] .mobile-menu-drawer {
+    background: #ffffff;
+    box-shadow: 8px 0 30px rgba(0, 0, 0, 0.15);
+  }
+
+  @keyframes slideInLeft {
+    from {
+      transform: translateX(-100%);
+      opacity: 0.8;
+    }
+
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  .mobile-menu-user {
+    padding: 24px 20px 16px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .mobile-menu-links {
+    flex: 1;
+    padding: 12px 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .mobile-menu-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 20px;
+    font-size: 0.92rem;
+    font-weight: 500;
+    color: var(--text);
+    text-decoration: none;
+    transition: background 0.15s, color 0.15s;
+  }
+
+  .mobile-menu-link:hover {
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  .mobile-menu-link.active {
+    color: var(--accent);
+    background: rgba(88, 166, 255, 0.08);
+    font-weight: 600;
+    border-left: 3px solid var(--accent);
+    padding-left: 17px;
+  }
+
+  .mobile-menu-footer {
+    border-top: 1px solid var(--border);
+    padding: 12px 20px;
+  }
+
+  .mobile-menu-logout {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 12px 0;
+    background: none;
+    border: none;
+    color: var(--red);
+    font-size: 0.92rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+
+  .mobile-menu-logout:hover {
+    opacity: 0.8;
+  }
+
+  .table-view-header {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .table-view-header>.d-flex {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .table-view-header>.text-right {
+    text-align: right;
+    flex-shrink: 0;
+    padding-left: 0;
+    margin: 0;
+  }
+
+  .table-view-header h2 {
+    font-size: 0.85rem;
+    margin-bottom: 1px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .table-view-header .text-md {
+    font-size: 0.7rem;
+  }
+
+  .table-view-header .text-sm.text-uppercase {
+    font-size: 0.6rem;
+    letter-spacing: 0.04em;
+  }
+
+  .table-view-header .text-2xl {
+    font-size: 1rem;
+    font-weight: 700;
+  }
+
+  .table-view-header .btn-back-circle {
+    width: 34px;
+    height: 34px;
+    flex-shrink: 0;
+  }
+
+  .table-view-header .ml-16 {
+    margin-left: 8px;
+    min-width: 0;
+  }
+
+  .table-filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .table-filters>* {
+    width: 100%;
+  }
+
+  .table-filters .d-flex:not(.date-filter-group) {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .date-filter-group {
+    flex-direction: row !important;
+    gap: 8px !important;
+  }
+
+  .date-separator {
+    display: none !important;
+  }
+
+  .date-filter-group>div {
+    flex: 1;
+    min-width: 0;
+    /* prevents flex child from overflowing */
+    overflow: hidden;
+    /* clips To Date from going off-screen */
+    display: flex;
+    flex-direction: column;
+  }
+
+  .date-filter-group .react-datepicker-wrapper {
+    width: 100%;
+  }
+
+  .date-filter-group .form-input {
+    padding: 6px 8px;
+    font-size: 12px;
+    height: 34px;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  /* Constrain the inner flex row so text stays inside */
+  .date-filter-group .form-input>div {
+    min-width: 0;
+    overflow: hidden;
+    flex: 1;
+  }
+
+  .date-filter-group .form-input span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    /* no display:block — keep inline inside flex so icon + text stay side by side */
+    min-width: 0;
+    flex: 1;
+  }
+
+  .w-160,
+  .w-220 {
+    width: 100% !important;
+  }
+
+  /* Pagination */
+  .table-paginator-wrap {
+    padding: 10px 12px;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: center !important;
+    /* !important needed — .justify-between defined later overrides */
+    gap: 6px;
+    overflow: visible;
+  }
+
+  /* Hide the verbose "Showing X to Y of Z entries" on mobile — saves space */
+  .table-paginator-wrap>.text-md {
+    display: none;
+  }
+
+  .table-page-pill {
+    font-size: 0.72rem;
+    white-space: nowrap;
+    padding: 5px 12px !important;
+  }
+
+  .table-paginator-wrap .btn-sm {
+    padding: 6px 12px;
+    font-size: 0.75rem;
+    white-space: nowrap;
+  }
+
+  .table-paginator-wrap .d-flex {
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  /* ── Date picker: centered fixed modal on mobile ───────── */
+  .date-picker-popover {
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    z-index: 2000;
+    width: calc(100vw - 32px);
+    max-width: 340px;
+    padding: 12px;
+    /* reset absolute positioning that causes start-jump */
+    bottom: auto !important;
+    right: auto !important;
+    animation: fadeIn 0.15s ease !important;
+    /* cancel slideUp from absolute pos */
+  }
+
+  .date-picker-popover-header {
+    display: flex;
+    /* visible on mobile */
+  }
+
+  .date-picker-mobile-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 1999;
+    animation: fadeIn 0.15s ease;
+  }
+
+  /* Prevent table card from clipping the fixed popover */
+  .table-card {
+    overflow: visible;
+  }
+}
+
+/* ── Password rules checklist ───────────────────────────────── */
+.pw-rules {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.pw-rule {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.pw-rule.ok {
+  color: #3fb950;
+}
+
+.pw-rule.fail {
+  color: var(--text-muted);
+}
+
+.date-range-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.date-range-trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 10px 16px;
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.date-trigger-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  flex: 1;
+}
+
+.date-trigger-preset {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.2;
+}
+
+.date-trigger-range {
+  font-size: 0.72rem;
+  font-weight: 400;
+  color: var(--text-muted);
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+}
+
+.date-range-trigger:hover {
+  background: var(--surface2);
+  border-color: var(--accent);
+}
+
+.date-range-subtitle {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+  text-align: center;
+  width: 100%;
+  letter-spacing: 0.01em;
+}
+
+.date-icon {
+  color: var(--text-muted);
+}
+
+.date-chevron {
+  color: var(--text-muted);
+  transition: transform 0.2s;
+}
+
+.date-chevron.open {
+  transform: rotate(180deg);
+}
+
+.date-range-popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 1000;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+  display: flex;
+  min-width: unset;
+  /* Remove min-width to allow compact fit */
+  width: max-content;
+  overflow: hidden;
+  animation: slideUp 0.2s ease-out;
+}
+
+.date-range-sidebar {
+  width: 180px;
+  background: var(--surface2);
+  border-right: 1px solid var(--border);
+  padding: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.date-presets-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+}
+
+.date-preset-btn {
+  background: transparent;
+  border: none;
+  text-align: left;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.date-preset-btn:hover {
+  background: rgba(139, 148, 158, 0.15);
+}
+
+.date-preset-btn.active {
+  background: var(--accent);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+[data-theme="light"] .date-preset-btn.active {
+  color: #ffffff;
+}
+
+.date-range-calendar {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.date-range-footer {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+}
+
+/* React DayPicker Overrides */
+.rdp-root,
+.rdp {
+  --rdp-cell-size: 40px !important;
+  --rdp-accent-color: var(--accent) !important;
+  --rdp-background-color: transparent !important;
+  background: transparent !important;
+  color: var(--text) !important;
+  margin: 0 !important;
+}
+
+.rdp-day_selected,
+.rdp-day_selected:focus-visible,
+.rdp-day_selected:hover {
+  background-color: var(--accent) !important;
+  color: #ffffff !important;
+  font-weight: 700;
+}
+
+.rdp-day_range_middle {
+  background-color: rgba(88, 166, 255, 0.15) !important;
+  color: var(--text) !important;
+}
+
+.rdp-button:hover:not(.rdp-day_selected) {
+  background-color: var(--surface2) !important;
+}
+
+.rdp-day,
+.rdp-nav_button {
+  color: var(--text);
+}
+
+.rdp-day:not(.rdp-day_selected):not(.rdp-day_outside) {
+  background-color: transparent !important;
+  color: var(--text) !important;
+}
+
+.rdp-day_outside {
+  color: var(--text-muted) !important;
+  opacity: 0.5;
+}
+
+.rdp-head_cell {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.rdp-caption {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.rdp-nav {
+  position: absolute;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+}
+
+.rdp-nav_button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.rdp-caption_label {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0 auto;
+}
+
+/* ── Utility Classes ────────────────────────────────────── */
+.clickable {
+  cursor: pointer;
+}
+
+.bank-total-label {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  margin-right: 8px;
+}
+
+/* Z-Index utils for Dropdowns */
+.z-10 {
+  z-index: 10;
+}
+
+.z-9 {
+  z-index: 9;
+}
+
+/* ── Shimmer Loading Effect ────────────────────────────────────── */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.shimmer {
+  background: linear-gradient(90deg, var(--surface2) 25%, rgba(139, 148, 158, 0.2) 50%, var(--surface2) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite linear;
+  border-radius: var(--radius-sm);
+}
+
+[data-theme="light"] .shimmer {
+  background: linear-gradient(90deg, #e1e4e8 25%, #f6f8fa 50%, #e1e4e8 75%);
+  background-size: 200% 100%;
+}
+
+.shimmer-text {
+  height: 14px;
+  width: 100%;
+  border-radius: 4px;
+}
+
+.shimmer-card {
+  height: 200px;
+  width: 100%;
+  border-radius: var(--radius);
+}
+
+.shimmer-table-row {
+  height: 48px;
+  width: 100%;
+  margin-bottom: 8px;
+  border-radius: 6px;
+}
+
+.z-8 {
+  z-index: 8;
+}
+
+.col-span-full {
+  grid-column: 1 / -1;
+}
+
+/* Spacing & Flex */
+.w-full {
+  width: 100%;
+}
+
+.flex-1 {
+  flex: 1;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.items-end {
+  align-items: flex-end;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.flex-wrap {
+  flex-wrap: wrap;
+}
+
+.d-block {
+  display: block;
+}
+
+.d-flex {
+  display: flex;
+}
+
+.ml-16 {
+  margin-left: 16px;
+}
+
+.mb-6 {
+  margin-bottom: 6px;
+}
+
+.mb-10 {
+  margin-bottom: 10px;
+}
+
+.mb-12 {
+  margin-bottom: 12px;
+}
+
+.mb-24 {
+  margin-bottom: 24px;
+}
+
+.mt-8 {
+  margin-top: 8px;
+}
+
+.mt-24 {
+  margin-top: 24px;
+}
+
+.mr-8 {
+  margin-right: 8px;
+}
+
+.gap-8 {
+  gap: 8px;
+}
+
+.gap-12 {
+  gap: 12px;
+}
+
+.gap-16 {
+  gap: 16px;
+}
+
+.p-8 {
+  padding: 8px;
+}
+
+.py-6-px-10 {
+  padding: 6px 10px;
+}
+
+.py-6-px-12 {
+  padding: 6px 12px;
+}
+
+.pr-32 {
+  padding-right: 32px;
+}
+
+.max-w-520 {
+  max-width: 520px;
+}
+
+.white-space-nowrap {
+  white-space: nowrap;
+}
+
+/* Text formats */
+.text-right {
+  text-align: right;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-muted {
+  color: var(--text-muted);
+}
+
+.text-green {
+  color: var(--green);
+}
+
+.text-base {
+  color: var(--text);
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+.font-bold {
+  font-weight: 700;
+}
+
+.text-uppercase {
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.text-xs {
+  font-size: 0.75rem;
+}
+
+.text-sm {
+  font-size: 0.8rem;
+}
+
+.text-md {
+  font-size: 0.85rem;
+}
+
+.text-xl {
+  font-size: 1.2rem;
+  margin: 0 0 4px;
+}
+
+.text-2xl {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+/* Table specfic layout utils */
+.w-220 {
+  width: 220px;
+}
+
+/* Utility width for date pickers */
+.w-160 {
+  width: 180px;
+}
+
+.w-40 {
+  width: 40px;
+}
+
+.table-paginator-wrap {
+  padding: 16px 20px;
+  border-top: 1px solid var(--border);
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.table-page-pill {
+  background: var(--surface2);
+  border-radius: var(--radius-sm);
+}
+
+/* ── Validation Errors ────────────────────────────────────── */
+.form-error {
+  color: #ff4d4d;
+  font-size: 0.72rem;
+  margin-top: 4px;
+  font-weight: 500;
+  display: block;
+}
+
+.form-input.error {
+  border-color: rgba(255, 77, 77, 0.5) !important;
+}
+
+.form-input.error:focus {
+  border-color: #ff4d4d !important;
+  box-shadow: 0 0 0 3px rgba(255, 77, 77, 0.1) !important;
+}
+
+/* ── Disabled States ─────────────────────────────────────── */
+.form-input:disabled,
+.form-select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: rgba(13, 17, 23, 0.2);
+  border-color: var(--border);
+  color: var(--text-muted);
+}
+
+.custom-dropdown-icon.disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.custom-dropdown-input-wrapper input:disabled {
+  pointer-events: none;
+}
+
+/* ── Back Button Circle ──────────────────────────────────── */
+.btn-back-circle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #1a202c;
+  color: #ffffff;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.btn-back-circle:hover {
+  background: #2d3748;
+  transform: translateY(-1px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.btn-back-circle:active {
+  transform: translateY(0);
+}
+
+[data-theme="light"] .btn-back-circle {
+  background: #e2e8f0;
+  color: #1a202c;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="light"] .btn-back-circle:hover {
+  background: #cbd5e0;
+}
+
+/* ── Native date input (mobile SingleDatePicker) ─────────── */
+.mobile-date-native {
+  width: 100%;
+  height: 34px;
+  padding: 6px 10px;
+  font-size: 12px;
+  color: var(--text);
+  cursor: pointer;
+  /* Remove browser default calendar icon on some browsers */
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+/* Make the native date picker text colour visible in dark mode */
+.mobile-date-native::-webkit-datetime-edit {
+  color: var(--text);
+}
+
+.mobile-date-native::-webkit-calendar-picker-indicator {
+  filter: invert(0.7);
+  cursor: pointer;
+}
+
+[data-theme='dark'] .mobile-date-native::-webkit-calendar-picker-indicator {
+  filter: invert(0.8);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   REACT-DAY-PICKER OVERRIDES
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Shared: accent color matches app blue ─────────────────── */
+.rdp-root {
+  --rdp-accent-color: #58a6ff;
+  --rdp-today-color: #58a6ff;
+}
+
+/* ── Light mode range styles ───────────────────────────────── */
+[data-theme='light'] .rdp-root {
+  --rdp-accent-background-color: rgba(88, 166, 255, 0.15);
+  --rdp-range_middle-background-color: rgba(88, 166, 255, 0.12);
+  --rdp-range_start-date-background-color: #58a6ff;
+  --rdp-range_end-date-background-color: #58a6ff;
+  --rdp-range_start-color: #ffffff;
+  --rdp-range_end-color: #ffffff;
+  /* Use transparent half-fill so range blends nicely */
+  --rdp-range_start-background: linear-gradient(90deg,
+      transparent 50%,
+      rgba(88, 166, 255, 0.12) 50%);
+  --rdp-range_end-background: linear-gradient(90deg,
+      rgba(88, 166, 255, 0.12) 50%,
+      transparent 50%);
+}
+
+/* ── Dark mode range styles — remove white background ──────── */
+[data-theme='dark'] .rdp-root {
+  /* Replace the default #f0f0ff with a dark-friendly blue tint */
+  --rdp-accent-background-color: rgba(88, 166, 255, 0.18);
+  --rdp-range_middle-background-color: rgba(88, 166, 255, 0.15);
+  --rdp-range_start-date-background-color: #58a6ff;
+  --rdp-range_end-date-background-color: #58a6ff;
+  --rdp-range_start-color: #0d1117;
+  --rdp-range_end-color: #0d1117;
+  /* Dark-transparent half-fill — NO white */
+  --rdp-range_start-background: linear-gradient(90deg,
+      transparent 50%,
+      rgba(88, 166, 255, 0.15) 50%);
+  --rdp-range_end-background: linear-gradient(90deg,
+      rgba(88, 166, 255, 0.15) 50%,
+      transparent 50%);
+}
+
+/* ── Sort Select Dropdown ────────────────────────────────────── */
+.sort-select {
+  background: transparent;
+  color: transparent;
+  border: none;
+  cursor: pointer;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.01;
+  z-index: 10;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.sort-select option {
+  background: var(--surface);
+  color: var(--text);
+}
+
+/* Day text colour in dark mode */
+[data-theme='dark'] .rdp-root {
+  color: var(--text);
+}
+
+/* ── Range middle: soft blue highlight ─────────────────────── */
+.rdp-root .rdp-day.rdp-range_middle .rdp-day_button {
+  background: transparent;
+  border-radius: 0;
+}
+
+/* ══════════════════════════════════════════════════════════
+   DATE-RANGE-DROPDOWN MOBILE LAYOUT
+   Must be at the END of file to win cascade over base styles
+   ═══════════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+  .date-range-popover {
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    bottom: auto !important;
+    right: auto !important;
+    transform: translate(-50%, -50%) !important;
+    width: calc(100vw - 24px);
+    max-width: 360px;
+    flex-direction: column;
+    z-index: 2000;
+    animation: fadeIn 0.15s ease;
+  }
+
+  .date-range-sidebar {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    padding: 10px 12px;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .date-presets-title {
+    display: none;
+  }
+
+  .date-preset-btn {
+    display: inline-block;
+    width: auto;
+    padding: 5px 11px;
+    font-size: 0.72rem;
+    white-space: nowrap;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    text-align: center;
+  }
+
+  .date-range-calendar {
+    padding: 8px;
+  }
+}

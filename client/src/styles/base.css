@@ -1,0 +1,172 @@
+/* ── Base Reset & Variables ───────────────────────────────── */
+
+/* Hide number input spinners */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type=number] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+/* ── Scroll lock when any date picker is open ─────────────── */
+body.picker-open {
+  overflow: hidden;
+  /* Prevent iOS rubber-band scroll from bleeding through */
+  touch-action: none;
+}
+
+
+/* ── CSS Variables ────────────────────────────────────────────── */
+:root {
+  --bg: #0d1117;
+  --surface: #161b22;
+  --surface2: #21262d;
+  --border: rgba(255, 255, 255, 0.08);
+  --text: #e6edf3;
+  --text-muted: #8b949e;
+  --font-size-base: 14px;
+  --font-size-sm: 12px;
+  --font-size-xs: 11px;
+  --accent: #58a6ff;
+  --green: #3fb950;
+  --amber: #d29922;
+  --red: #f85149;
+  --success: #3fb950;
+  --danger: #f85149;
+  --info: #58a6ff;
+  --radius: 16px;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+}
+
+[data-theme="light"] {
+  --bg: #f8f9fa;
+  --surface: #ffffff;
+  --surface2: #e9ecef;
+  --border: rgba(0, 0, 0, 0.12);
+  --text: #1a1a1a;
+  --text-muted: #6c757d;
+  --accent: #1f6feb;
+  --green: #2da44e;
+  --amber: #bf8700;
+  --red: #cf222e;
+  --success: #2da44e;
+  --danger: #cf222e;
+  --info: #1f6feb;
+}
+
+/* ── Base ─────────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── Custom CSS Tooltips ────────────────────────────────────────────── */
+[data-tooltip] {
+  position: relative;
+}
+
+[data-tooltip]::before {
+  content: attr(data-tooltip);
+  position: absolute;
+  top: calc(100% + 8px);
+  /* Positioned below the button */
+  left: 50%;
+  transform: translateX(-50%) translateY(-4px);
+  /* Start slightly higher */
+  padding: 8px 12px;
+  background-color: var(--text);
+  /* Inverse background for high contrast */
+  color: var(--bg);
+  /* Inverse text color */
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 6px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+  z-index: 99999;
+}
+
+[data-tooltip]:hover::before {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0px);
+  transition-delay: 2s;
+  /* User requested 2s delay */
+}
+
+.card-more-btn[data-tooltip]::before {
+  left: auto;
+  right: 0;
+  transform: translateX(0) translateY(-2px);
+}
+
+.card-more-btn[data-tooltip]:hover::before {
+  transform: translateX(0) translateY(0px);
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: var(--font-size-base);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+/* ── Icon Button (ActionMenu trigger, etc.) ──────────────────── */
+.icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.icon-btn:hover {
+  background: var(--surface2);
+  color: var(--text);
+  border-color: var(--border);
+}
+
+/* ── Utility: font-medium ──────────────────────────────────── */
+.font-medium {
+  font-weight: 500;
+}
+
+/* ── Utility: fade-in animation ────────────────────────────── */
+.fade-in {
+  animation: fadeIn 0.2s ease;
+}
+
+/* ── Utility: text colors for danger/success ───────────────── */
+.text-danger {
+  color: var(--danger);
+}
+
+.text-success {
+  color: var(--success);
+}

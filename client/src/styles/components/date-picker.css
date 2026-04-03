@@ -1,0 +1,124 @@
+/* ── Single Date Picker ────────────────────────────────────────── */
+.date-picker-dropdown {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+.date-picker-popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 1000;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+  padding: 16px;
+  animation: slideUp 0.15s ease-out;
+}
+
+/* ── Mobile backdrop for date picker ─────────────────────── */
+.date-picker-mobile-backdrop {
+  display: none;
+}
+
+.date-picker-popover-header {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.date-picker-popover-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.date-picker-close-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: var(--surface2);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.date-picker-close-btn:hover {
+  background: var(--border);
+}
+
+/* ── Date Range Dropdown ───────────────────────────────────────── */
+.cashback-section {
+  margin-top: 16px;
+  position: relative;
+  z-index: 1;
+}
+
+.cashback-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.cashback-label {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.55);
+  font-weight: 500;
+}
+
+.cashback-pct {
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.cashback-pct.safe {
+  color: #3fb950;
+}
+
+.cashback-pct.warn {
+  color: #d29922;
+}
+
+.cashback-pct.danger {
+  color: #f85149;
+}
+
+.progress-track {
+  height: 6px;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.12);
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  border-radius: 99px;
+  transition: width 0.5s cubic-bezier(.4, 0, .2, 1);
+}
+
+.progress-bar.safe {
+  background: linear-gradient(90deg, #238636, #3fb950);
+}
+
+.progress-bar.warn {
+  background: linear-gradient(90deg, #9e6a03, #d29922);
+}
+
+.progress-bar.danger {
+  background: linear-gradient(90deg, #da3633, #f85149);
+}
+
+.cashback-limit-note {
+  margin-top: 5px;
+  font-size: 0.66rem;
+  color: rgba(255, 255, 255, 0.4);
+}
+
