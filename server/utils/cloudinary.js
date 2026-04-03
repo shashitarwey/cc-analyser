@@ -1,8 +1,3 @@
-// Workaround: skip TLS cert verification for Cloudinary uploads
-// (fixes UNABLE_TO_GET_ISSUER_CERT_LOCALLY in dev/proxy environments)
-// Remove this line in production if you have proper CA certificates configured.
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-
 const cloudinary = require('cloudinary').v2;
 const logger = require('./logger');
 
