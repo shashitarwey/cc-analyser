@@ -233,23 +233,23 @@
     height: 48px;
   }
 
-  /* ── Modals — near full-screen on mobile ───────── */
+  /* ── Modals — centered with margins on mobile ───────── */
   .modal-overlay {
-    padding: 0;
-    align-items: flex-end;
+    padding: 12px;
+    align-items: center;
   }
 
   .modal {
-    border-radius: 20px 20px 0 0;
+    border-radius: 16px;
     max-width: 100% !important;
-    max-height: 92vh;
-    padding: 24px 18px;
+    max-height: 85vh;
+    padding: 22px 16px;
     overflow-y: auto;
   }
 
   .confirm-modal {
-    border-radius: 20px 20px 0 0 !important;
-    padding: 28px 18px !important;
+    border-radius: 16px !important;
+    padding: 24px 16px !important;
   }
 
   .form-row {
