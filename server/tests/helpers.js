@@ -7,12 +7,12 @@ const JWT_SECRET = process.env.JWT_SECRET || 'cardvault_secret_change_in_prod';
 async function createTestUser(overrides = {}) {
   const password = overrides.password || 'Test@1234';
   const hashed = await bcrypt.hash(password, 4); // low rounds for speed
+  const { password: _pw, ...rest } = overrides;
   const user = await User.create({
-    name: overrides.name || 'Test User',
-    email: overrides.email || 'test@example.com',
+    name: 'Test User',
+    email: 'test@example.com',
+    ...rest,
     password: hashed,
-    ...overrides,
-    password: hashed, // ensure hashed
   });
   const token = jwt.sign(
     { id: user._id, email: user.email, name: user.name },
