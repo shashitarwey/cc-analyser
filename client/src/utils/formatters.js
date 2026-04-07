@@ -69,3 +69,18 @@ export const profitColor = (value) =>
  */
 export const pickTruthy = (obj) =>
     Object.fromEntries(Object.entries(obj).filter(([, v]) => v !== '' && v !== null && v !== undefined));
+
+/**
+ * Return ordinal suffix for a number (1st, 2nd, 3rd, 4th, 11th, 21st, etc.)
+ * @param {number} n
+ * @returns {string}
+ */
+export const ordinalSuffix = (n) => {
+    const mod100 = n % 100;
+    if (mod100 >= 11 && mod100 <= 13) return `${n}th`;
+    const mod10 = n % 10;
+    if (mod10 === 1) return `${n}st`;
+    if (mod10 === 2) return `${n}nd`;
+    if (mod10 === 3) return `${n}rd`;
+    return `${n}th`;
+};

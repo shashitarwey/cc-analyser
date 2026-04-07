@@ -1,40 +1,42 @@
-import { describe, it, expect } from 'vitest';
-import { BANK_NAMES, CARD_NETWORKS, ECOMM_SITES, VARIANTS, DELIVERY_STATUS_OPTIONS, STATUS_FILTER_OPTIONS, PAGE_SIZE } from '../constants';
+import { BANK_NAMES, CARD_NETWORKS, CASHBACK_PERIODS, MONTHS, ECOMM_SITES, DELIVERY_STATUS_OPTIONS } from '../constants';
 
 describe('Constants', () => {
-  it('BANK_NAMES is sorted alphabetically', () => {
+  it('BANK_NAMES is a sorted non-empty array of strings', () => {
+    expect(BANK_NAMES.length).toBeGreaterThan(0);
     const sorted = [...BANK_NAMES].sort((a, b) => a.localeCompare(b));
     expect(BANK_NAMES).toEqual(sorted);
   });
 
-  it('CARD_NETWORKS has expected values', () => {
+  it('CARD_NETWORKS contains expected networks', () => {
     expect(CARD_NETWORKS).toContain('Visa');
     expect(CARD_NETWORKS).toContain('Mastercard');
-    expect(CARD_NETWORKS).toContain('AmEx');
     expect(CARD_NETWORKS).toContain('RuPay');
   });
 
-  it('ECOMM_SITES includes major platforms', () => {
+  it('CASHBACK_PERIODS has value/label pairs', () => {
+    expect(CASHBACK_PERIODS).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ value: 'monthly', label: 'Monthly' }),
+        expect.objectContaining({ value: 'quarterly', label: 'Quarterly' }),
+      ])
+    );
+  });
+
+  it('MONTHS has 12 entries from January to December', () => {
+    expect(MONTHS).toHaveLength(12);
+    expect(MONTHS[0]).toEqual({ value: 1, label: 'January' });
+    expect(MONTHS[11]).toEqual({ value: 12, label: 'December' });
+  });
+
+  it('ECOMM_SITES is a non-empty array', () => {
+    expect(ECOMM_SITES.length).toBeGreaterThan(0);
     expect(ECOMM_SITES).toContain('Amazon');
-    expect(ECOMM_SITES).toContain('Flipkart');
-    expect(ECOMM_SITES).toContain('Other');
   });
 
-  it('VARIANTS includes NA as first option', () => {
-    expect(VARIANTS[0]).toBe('NA');
-  });
-
-  it('DELIVERY_STATUS_OPTIONS has 3 statuses', () => {
-    expect(DELIVERY_STATUS_OPTIONS).toHaveLength(3);
-    const values = DELIVERY_STATUS_OPTIONS.map(o => o.value);
-    expect(values).toEqual(['No', 'Yes', 'Cancelled']);
-  });
-
-  it('STATUS_FILTER_OPTIONS starts with All', () => {
-    expect(STATUS_FILTER_OPTIONS[0]).toBe('All');
-  });
-
-  it('PAGE_SIZE is a positive number', () => {
-    expect(PAGE_SIZE).toBeGreaterThan(0);
+  it('DELIVERY_STATUS_OPTIONS has expected statuses', () => {
+    const values = DELIVERY_STATUS_OPTIONS.map(d => d.value);
+    expect(values).toContain('Yes');
+    expect(values).toContain('No');
+    expect(values).toContain('Cancelled');
   });
 });

@@ -64,7 +64,7 @@ const { invalidateSummaryCache } = require('../utils/cache');
 // Allowed fields for card creation/update
 const CARD_FIELDS = [
     'bank_name', 'card_network', 'last_four_digit', 'name_on_card',
-    'cashback_enabled', 'cashback_percent', 'cashback_limit', 'cashback_period',
+    'cashback_enabled', 'cashback_percent', 'cashback_limit', 'cashback_period', 'cashback_reset_day', 'cashback_cycle_start_month',
     'billing_date', 'due_date'
 ];
 

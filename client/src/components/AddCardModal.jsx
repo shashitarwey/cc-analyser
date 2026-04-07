@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { createCard, updateCard } from '../api';
-import { BANK_NAMES, CARD_NETWORKS, CASHBACK_PERIODS } from '../constants';
+import { BANK_NAMES, CARD_NETWORKS, CASHBACK_PERIODS, MONTHS } from '../constants';
 import SearchableDropdown from '../common/SearchableDropdown';
 
 const EMPTY = {
   bank_name: '', card_network: 'Visa', last_four_digit: '', name_on_card: '',
-  cashback_enabled: false, cashback_percent: 0, cashback_limit: 0, cashback_period: 'monthly',
+  cashback_enabled: false, cashback_percent: 0, cashback_limit: 0, cashback_period: 'monthly', cashback_reset_day: 1, cashback_cycle_start_month: 1,
   billing_date: '', due_date: '',
 };
 
@@ -24,7 +24,9 @@ export default function AddCardModal({ editCard, onClose, onSave }) {
       cashback_enabled: !!editCard.cashback_enabled,
       cashback_percent: editCard.cashback_percent || 5,
       cashback_limit:   editCard.cashback_limit   || 5000,
-      cashback_period:  editCard.cashback_period  || 'monthly',
+      cashback_period:           editCard.cashback_period           || 'monthly',
+      cashback_reset_day:        editCard.cashback_reset_day        || 1,
+      cashback_cycle_start_month: editCard.cashback_cycle_start_month || 1,
       billing_date:     editCard.billing_date     || '',
       due_date:         editCard.due_date          || '',
     } : EMPTY);
@@ -148,18 +150,45 @@ export default function AddCardModal({ editCard, onClose, onSave }) {
                     {errors.cashback_limit && <div className="form-error">{errors.cashback_limit}</div>}
                   </div>
                 </div>
-                <div className="form-group z-8">
-                  <label className="form-label">Cashback Period</label>
-                  <SearchableDropdown
-                    options={CASHBACK_PERIODS.map(p => p.label)}
-                    value={CASHBACK_PERIODS.find(p => p.value === form.cashback_period)?.label || ''}
-                    onChange={label => {
-                      const found = CASHBACK_PERIODS.find(p => p.label === label);
-                      if (found) set('cashback_period', found.value);
-                    }}
-                    required
-                  />
+                <div className="form-row">
+                  <div className="form-group z-8">
+                    <label className="form-label">Cashback Period</label>
+                    <SearchableDropdown
+                      options={CASHBACK_PERIODS.map(p => p.label)}
+                      value={CASHBACK_PERIODS.find(p => p.value === form.cashback_period)?.label || ''}
+                      onChange={label => {
+                        const found = CASHBACK_PERIODS.find(p => p.label === label);
+                        if (found) set('cashback_period', found.value);
+                      }}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Resets On (Day)</label>
+                    <input
+                      className="form-input"
+                      type="number" min="1" max="31" placeholder="e.g. 1"
+                      value={form.cashback_reset_day}
+                      onChange={e => set('cashback_reset_day', e.target.value ? parseInt(e.target.value) : '')}
+                    />
+                    <div className="form-hint">Day of month cashback cycle resets</div>
+                  </div>
                 </div>
+                {form.cashback_period !== 'monthly' && (
+                  <div className="form-group z-7">
+                    <label className="form-label">Cycle Start Month</label>
+                    <SearchableDropdown
+                      options={MONTHS.map(m => m.label)}
+                      value={MONTHS.find(m => m.value === form.cashback_cycle_start_month)?.label || ''}
+                      onChange={label => {
+                        const found = MONTHS.find(m => m.label === label);
+                        if (found) set('cashback_cycle_start_month', found.value);
+                      }}
+                      required
+                    />
+                    <div className="form-hint">Month when the first cycle of the year begins</div>
+                  </div>
+                )}
               </>
             )}
 

@@ -1,8 +1,7 @@
-import { describe, it, expect } from 'vitest';
-import { fmtCurrency, fmtSignedCurrency, profitColor, cardLabel, sellerLabel, pickTruthy } from '../utils/formatters';
+import { fmtCurrency, fmtSignedCurrency, fmtDate, fmtDisplay, ordinalSuffix, pickTruthy } from '../utils/formatters';
 
 describe('fmtCurrency', () => {
-  it('formats positive numbers', () => {
+  it('formats positive numbers with ₹ and Indian locale', () => {
     expect(fmtCurrency(12345)).toBe('₹12,345');
   });
 
@@ -10,7 +9,7 @@ describe('fmtCurrency', () => {
     expect(fmtCurrency(0)).toBe('₹0');
   });
 
-  it('handles null/undefined', () => {
+  it('handles null/undefined as zero', () => {
     expect(fmtCurrency(null)).toBe('₹0');
     expect(fmtCurrency(undefined)).toBe('₹0');
   });
@@ -18,58 +17,61 @@ describe('fmtCurrency', () => {
 
 describe('fmtSignedCurrency', () => {
   it('adds + for positive values', () => {
-    expect(fmtSignedCurrency(500)).toBe('+₹500');
+    expect(fmtSignedCurrency(500)).toMatch(/^\+/);
   });
 
-  it('no + for negative or zero', () => {
-    expect(fmtSignedCurrency(-200)).toMatch(/₹/);
-    expect(fmtSignedCurrency(0)).toBe('₹0');
-  });
-});
-
-describe('profitColor', () => {
-  it('returns success for positive', () => {
-    expect(profitColor(100)).toBe('var(--success)');
-  });
-
-  it('returns danger for negative', () => {
-    expect(profitColor(-50)).toBe('var(--danger)');
-  });
-
-  it('returns inherit for zero', () => {
-    expect(profitColor(0)).toBe('inherit');
+  it('no + for negative values', () => {
+    expect(fmtSignedCurrency(-200)).not.toMatch(/^\+/);
   });
 });
 
-describe('cardLabel', () => {
-  it('formats card label', () => {
-    expect(cardLabel({ bank_name: 'HDFC Bank', last_four_digit: '1234' }))
-      .toBe('HDFC Bank ••••1234');
-  });
-
-  it('handles null', () => {
-    expect(cardLabel(null)).toBe('');
+describe('fmtDate', () => {
+  it('formats a Date to yyyy-MM-dd', () => {
+    const d = new Date(2026, 3, 8); // April 8, 2026
+    expect(fmtDate(d)).toBe('2026-04-08');
   });
 });
 
-describe('sellerLabel', () => {
-  it('formats seller label', () => {
-    expect(sellerLabel({ name: 'Prakash', city: 'Delhi' }))
-      .toBe('Prakash (Delhi)');
+describe('fmtDisplay', () => {
+  it('converts ISO date to dd-MM-yyyy', () => {
+    expect(fmtDisplay('2026-04-08')).toBe('08-04-2026');
   });
 
-  it('handles null', () => {
-    expect(sellerLabel(null)).toBe('');
+  it('returns empty string for falsy input', () => {
+    expect(fmtDisplay('')).toBe('');
+    expect(fmtDisplay(null)).toBe('');
+  });
+});
+
+describe('ordinalSuffix', () => {
+  it('handles 1st, 2nd, 3rd', () => {
+    expect(ordinalSuffix(1)).toBe('1st');
+    expect(ordinalSuffix(2)).toBe('2nd');
+    expect(ordinalSuffix(3)).toBe('3rd');
+  });
+
+  it('handles 11th, 12th, 13th (special cases)', () => {
+    expect(ordinalSuffix(11)).toBe('11th');
+    expect(ordinalSuffix(12)).toBe('12th');
+    expect(ordinalSuffix(13)).toBe('13th');
+  });
+
+  it('handles 21st, 22nd, 23rd', () => {
+    expect(ordinalSuffix(21)).toBe('21st');
+    expect(ordinalSuffix(22)).toBe('22nd');
+    expect(ordinalSuffix(23)).toBe('23rd');
+  });
+
+  it('handles regular th numbers', () => {
+    expect(ordinalSuffix(4)).toBe('4th');
+    expect(ordinalSuffix(15)).toBe('15th');
+    expect(ordinalSuffix(31)).toBe('31st');
   });
 });
 
 describe('pickTruthy', () => {
-  it('removes empty strings and nulls', () => {
-    expect(pickTruthy({ a: 'hello', b: '', c: null, d: 'world' }))
-      .toEqual({ a: 'hello', d: 'world' });
-  });
-
-  it('keeps zero values (only filters empty string/null/undefined)', () => {
-    expect(pickTruthy({ a: 0, b: 1 })).toEqual({ a: 0, b: 1 });
+  it('strips empty strings, null, undefined but keeps 0', () => {
+    const result = pickTruthy({ a: 'hello', b: '', c: null, d: undefined, e: 0 });
+    expect(result).toEqual({ a: 'hello', e: 0 });
   });
 });

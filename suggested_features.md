@@ -192,4 +192,4 @@
 5. **Seller Contact Details + Payment Mode** — Quick schema expansions.
 6. **Monthly Budget Widget** — New feature area, high engagement.
 7. **PDF Export** — Builds on CSV export infra.
-8. **Tests + CI/CD** — Stabilize before adding more features.
+8. ~~**Tests + CI/CD** — Stabilize before adding more features.~~ Done

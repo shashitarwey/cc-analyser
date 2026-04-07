@@ -3,7 +3,7 @@ const router = express.Router();
 const Card = require('../models/Card');
 const Transaction = require('../models/Transaction');
 const Order = require('../models/Order');
-const { toObjectId, buildDateRange } = require('../utils/helpers');
+const { toObjectId, buildDateRange, getCashbackCycleStart } = require('../utils/helpers');
 const { cacheMiddleware } = require('../utils/cache');
 
 /**
@@ -61,10 +61,33 @@ router.get('/', cacheMiddleware(300), async (req, res, next) => {
         ]);
         const ordMap = ordAgg.reduce((m, r) => { m[r._id.toString()] = r.total; return m; }, {});
 
+        // Aggregate cashback earned per card in its current reset cycle
+        const cbCards = cards.filter(c => c.cashback_enabled && c.cashback_limit > 0);
+        const cbCycleMap = {};
+        if (cbCards.length) {
+            // Group cards by their cycle start date to minimize queries
+            const cycleGroups = {};
+            for (const c of cbCards) {
+                const cycleStart = getCashbackCycleStart(c.cashback_reset_day, c.cashback_period, c.cashback_cycle_start_month);
+                const key = cycleStart.toISOString();
+                if (!cycleGroups[key]) cycleGroups[key] = { start: cycleStart, cardIds: [] };
+                cycleGroups[key].cardIds.push(c._id);
+            }
+            // Run one aggregation per distinct cycle start
+            for (const { start, cardIds } of Object.values(cycleGroups)) {
+                const agg = await Order.aggregate([
+                    { $match: { card_id: { $in: cardIds }, order_date: { $gte: start }, delivery_status: { $ne: 'Cancelled' } } },
+                    { $group: { _id: '$card_id', earned: { $sum: '$cashback' } } }
+                ]);
+                for (const r of agg) cbCycleMap[r._id.toString()] = r.earned;
+            }
+        }
+
         const cardSummaries = cards.map(card => {
             const id = card._id.toString();
             const total_spend = (txMap[id] || 0) + (ordMap[id] || 0);
-            return { ...card.toObject(), total_spend };
+            const cashback_earned_cycle = cbCycleMap[id] || 0;
+            return { ...card.toObject(), total_spend, cashback_earned_cycle };
         });
 
         const bankMap = {};

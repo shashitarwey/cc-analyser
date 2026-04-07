@@ -1,7 +1,7 @@
 import React from 'react';
 import { MoreVertical, Trash2, Plus, CalendarClock, AlertCircle } from 'lucide-react';
 import { NETWORK_COLORS } from '../constants';
-import { fmtCurrency } from '../utils/formatters';
+import { fmtCurrency, ordinalSuffix } from '../utils/formatters';
 
 const BANK_GRADIENTS = [
   'linear-gradient(135deg,#1e2a5a,#1a1f3a)',
@@ -20,13 +20,12 @@ const bankGradient = (name) => {
   return BANK_GRADIENTS[Math.abs(h) % BANK_GRADIENTS.length];
 };
 
-const cashbackStatus = (spend, limit, percent) => {
+const cashbackStatus = (earnedInCycle, limit) => {
   if (limit <= 0) return null;
-  const earned   = spend * ((percent || 0) / 100);
-  const remaining  = Math.max(limit - earned, 0);
+  const remaining  = Math.max(limit - earnedInCycle, 0);
   const remainPct  = (remaining / limit) * 100;
   const cls = remainPct === 0 ? 'danger' : remainPct < 25 ? 'warn' : 'safe';
-  return { cls, pct: remainPct, remaining };
+  return { cls, pct: remainPct, remaining, earned: earnedInCycle };
 };
 
 // Returns days until due this month (or next month if already passed)
@@ -47,7 +46,7 @@ const billingStatus = (dueDay) => {
 const CardWidget = ({ card, profit = undefined, onAddTx, onViewDetails, onEdit, onDelete }) => {
   const spend = card.total_spend || 0;
   const net   = NETWORK_COLORS[card.card_network] || NETWORK_COLORS.Visa;
-  const cb    = card.cashback_enabled ? cashbackStatus(spend, card.cashback_limit, card.cashback_percent) : null;
+  const cb    = card.cashback_enabled ? cashbackStatus(card.cashback_earned_cycle || 0, card.cashback_limit) : null;
   const bill  = billingStatus(card.due_date);
 
   return (
@@ -97,12 +96,12 @@ const CardWidget = ({ card, profit = undefined, onAddTx, onViewDetails, onEdit, 
         <div className="cashback-section">
           <div className="cashback-meta">
             <span className="cashback-label">
-              {card.cashback_percent}% cashback cap: ₹{card.cashback_limit.toLocaleString('en-IN')}
+              {card.cashback_percent}% cashback · ₹{cb.earned.toLocaleString('en-IN')} / ₹{card.cashback_limit.toLocaleString('en-IN')}
             </span>
             <span className={`cashback-pct ${cb.cls}`}>
               {cb.cls === 'danger'
                 ? '⚠ Limit reached'
-                : `₹${cb.remaining.toLocaleString('en-IN')} eligible left`}
+                : `₹${cb.remaining.toLocaleString('en-IN')} left`}
             </span>
           </div>
           <div className="progress-track">
@@ -111,7 +110,7 @@ const CardWidget = ({ card, profit = undefined, onAddTx, onViewDetails, onEdit, 
           <div className="cashback-limit-note">Resets {{
             'monthly': 'monthly', 'quarterly': 'quarterly',
             'half-yearly': 'every 6 months', 'yearly': 'yearly'
-          }[card.cashback_period] || 'monthly'}</div>
+          }[card.cashback_period] || 'monthly'} on {ordinalSuffix(card.cashback_reset_day || 1)}</div>
         </div>
       )}
 
@@ -126,17 +125,17 @@ const CardWidget = ({ card, profit = undefined, onAddTx, onViewDetails, onEdit, 
               ? bill.daysLeft === 0 ? 'Due TODAY!' : `Due in ${bill.daysLeft}d — pay now!`
               : bill.urgency === 'warning'
               ? `Due in ${bill.daysLeft} days`
-              : `Due on ${card.due_date}${[,'st','nd','rd'][card.due_date] || 'th'} of month`}
+              : `Due on ${ordinalSuffix(card.due_date)} of month`}
           </span>
           {card.billing_date && (
-            <span className="billing-statement-chip">Stmt: {card.billing_date}{[,'st','nd','rd'][card.billing_date] || 'th'}</span>
+            <span className="billing-statement-chip">Stmt: {ordinalSuffix(card.billing_date)}</span>
           )}
         </div>
       )}
       {!bill && card.billing_date && (
         <div className="billing-reminder billing-ok">
           <CalendarClock size={13} />
-          <span>Statement: {card.billing_date}{[,'st','nd','rd'][card.billing_date] || 'th'} of month</span>
+          <span>Statement: {ordinalSuffix(card.billing_date)} of month</span>
         </div>
       )}
     </div>
