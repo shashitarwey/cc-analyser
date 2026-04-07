@@ -8,6 +8,9 @@ const authMiddleware = require('./middleware/auth');
 
 const app = express();
 
+// Trust proxy (required for express-rate-limit behind Render/Nginx/load balancers)
+app.set('trust proxy', 1);
+
 // ── CORS — restrict to frontend origin ───────────────────────────────────────
 const allowedOrigins = (process.env.CORS_ORIGINS || 'http://localhost:3000').split(',');
 app.use(cors({
