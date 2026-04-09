@@ -92,7 +92,8 @@ export default function AddOrderModal({ onClose, onSuccess, editOrder, cards, se
   };
 
   const recalcAmounts = (field, value) => {
-    const q = field === 'quantity' ? (Number(value) || 1) : (Number(form.quantity) || 1);
+    const rawQ = field === 'quantity' ? value : form.quantity;
+    const q = rawQ === '' ? 1 : (Number(rawQ) || 1);
     const uOrder = field === 'unit_order_amount' ? Number(value) : Number(form.unit_order_amount);
     const uReturn = field === 'unit_return_amount' ? Number(value) : Number(form.unit_return_amount);
     const oAmt = uOrder * q;
@@ -102,14 +103,14 @@ export default function AddOrderModal({ onClose, onSuccess, editOrder, cards, se
       cb = Math.round(oAmt * (selectedCard.cashback_percent / 100));
     }
     const update = { [field]: value, order_amount: oAmt, return_amount: rAmt, cashback: cb };
-    if (field === 'quantity') update.quantity = Math.max(1, Number(value) || 1);
+    if (field === 'quantity') update.quantity = value === '' ? '' : Math.max(1, Number(value) || 1);
     setForm(f => ({ ...f, ...update }));
     if (errors[field]) setErrors(err => ({ ...err, [field]: '' }));
   };
 
   const variantOptions = VARIANTS.map(v => v === 'NA' ? 'NA' : v);
   const statusOptions = DELIVERY_STATUS_OPTIONS;
-  const estProfit = (Number(form.return_amount) || 0) - (Number(form.order_amount) || 0) + (Number(form.cashback) || 0);
+  const estProfit = Math.round(((Number(form.return_amount) || 0) - (Number(form.order_amount) || 0) + (Number(form.cashback) || 0)) * 100) / 100;
 
   return (
     <div className="modal-backdrop" onClick={e => e.target === e.currentTarget && onClose()}>
