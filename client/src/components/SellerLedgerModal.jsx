@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getOrders, getSellerLedger, deleteSellerPayment } from '../api';
+import { getAllOrders, getSellerLedger, deleteSellerPayment } from '../api';
 import { X, Plus, Trash2, Camera, ExternalLink } from 'lucide-react';
 import { fmtCurrency, fmtDisplay } from '../utils/formatters';
 import toast from 'react-hot-toast';
@@ -13,8 +13,8 @@ export default function SellerLedgerModal({ seller, onClose, onAddPayment }) {
   const fetchLedger = async () => {
     setLoading(true);
     try {
-      const resOrders = await getOrders({ seller_id: seller._id, limit: 1000 });
-      const activeOrders = (Array.isArray(resOrders) ? resOrders : (resOrders.items || [])).filter(o => o.delivery_status !== 'Cancelled');
+      const resOrders = await getAllOrders({ seller_id: seller._id });
+      const activeOrders = resOrders.filter(o => o.delivery_status !== 'Cancelled');
       
       const mappedOrders = activeOrders.map(o => ({
         id: o._id,

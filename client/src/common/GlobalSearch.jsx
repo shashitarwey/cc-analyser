@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Search, X, CreditCard, ShoppingBag, Users, ArrowRight, MapPin } from 'lucide-react';
-import { getCards, getSellers, getOrders } from '../api';
+import { getCards, getAllSellers, getAllOrders } from '../api';
 import { useNavigate } from 'react-router-dom';
 import { fmtCurrency } from '../utils/formatters';
 
@@ -23,7 +23,7 @@ export default function GlobalSearch({ onClose, inline = false, externalQuery = 
   useEffect(() => {
     const load = async () => {
       try {
-        const [c, s, o] = await Promise.all([getCards(), getSellers(), getOrders()]);
+        const [c, s, o] = await Promise.all([getCards(), getAllSellers(), getAllOrders()]);
         setCards(c);
         setSellers(s);
         setOrders(o);

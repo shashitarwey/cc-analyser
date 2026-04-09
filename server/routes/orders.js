@@ -3,7 +3,7 @@ const router = express.Router();
 const Order = require('../models/Order');
 const Card = require('../models/Card');
 const Seller = require('../models/Seller');
-const { pickFields } = require('../utils/helpers');
+const { pickFields, parsePagination, paginatedResponse } = require('../utils/helpers');
 const { invalidateSummaryCache } = require('../utils/cache');
 
 /**
@@ -77,14 +77,15 @@ const ORDER_FIELDS = [
     'variant', 'model_ordered', 'id_used', 'delivery_status', 'ecomm_site'
 ];
 
-// GET all orders for the logged-in user with filters
+// GET orders for the logged-in user with filters + server-side pagination
 router.get('/', async (req, res, next) => {
     try {
         const {
             order_date_from, order_date_to,
             delivery_date_from, delivery_date_to,
             seller_id, card_id, delivery_status,
-            model_ordered, ecomm_site
+            model_ordered, ecomm_site,
+            all
         } = req.query;
 
         const filter = { user_id: req.user.id };
@@ -107,11 +108,23 @@ router.get('/', async (req, res, next) => {
         if (model_ordered) filter.model_ordered = { $regex: model_ordered, $options: 'i' };
         if (ecomm_site) filter.ecomm_site = ecomm_site;
 
-        const orders = await Order.find(filter)
+        const query = Order.find(filter)
             .populate('card_id', 'bank_name last_four_digit card_network')
             .populate('seller_id', 'name city')
             .sort({ order_date: -1 });
-        res.json(orders);
+
+        if (all === 'true') {
+            const orders = await query;
+            return res.json(orders);
+        }
+
+        const { pageNum, limitNum, skip } = parsePagination(req.query);
+        const [orders, total] = await Promise.all([
+            query.skip(skip).limit(limitNum),
+            Order.countDocuments(filter)
+        ]);
+
+        res.json(paginatedResponse(orders, total, pageNum, limitNum));
     } catch (err) { next(err); }
 });
 

@@ -5,7 +5,7 @@ const Seller = require('../models/Seller');
 const Order = require('../models/Order');
 const SellerPayment = require('../models/SellerPayment');
 const { uploadToCloudinary } = require('../utils/cloudinary');
-const { toObjectId } = require('../utils/helpers');
+const { toObjectId, parsePagination, paginatedResponse } = require('../utils/helpers');
 
 /**
  * @swagger
@@ -119,11 +119,23 @@ const upload = multer({
     limits: { fileSize: 1024 * 1024 } // 1MB limit
 });
 
-// Get all sellers with dynamically aggregated stats
+// Get sellers with dynamically aggregated stats + server-side pagination
 router.get('/', async (req, res, next) => {
     try {
+        const { all } = req.query;
         const userId = toObjectId(req.user.id);
-        const sellers = await Seller.find({ user_id: req.user.id }).sort({ name: 1 });
+        const { pageNum, limitNum, skip } = parsePagination(req.query);
+
+        let sellers, total;
+        if (all === 'true') {
+            sellers = await Seller.find({ user_id: req.user.id }).sort({ name: 1 });
+            total = sellers.length;
+        } else {
+            [sellers, total] = await Promise.all([
+                Seller.find({ user_id: req.user.id }).sort({ name: 1 }).skip(skip).limit(limitNum),
+                Seller.countDocuments({ user_id: req.user.id })
+            ]);
+        }
 
         // Aggregate order stats per seller
         const stats = await Order.aggregate([
@@ -179,7 +191,11 @@ router.get('/', async (req, res, next) => {
             };
         });
 
-        res.json(sellersWithStats);
+        if (all === 'true') {
+            res.json(sellersWithStats);
+        } else {
+            res.json(paginatedResponse(sellersWithStats, total, pageNum, limitNum));
+        }
     } catch (err) { next(err); }
 });
 

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { getOrders, deleteOrder, getCards, getSellers } from '../api';
+import { getOrders, deleteOrder, getCards, getAllSellers } from '../api';
 import AddOrderModal from '../components/AddOrderModal';
 import ActionMenu from '../common/ActionMenu';
 import Pagination from '../common/Pagination';
@@ -23,6 +23,7 @@ export default function OrdersPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
+  const [totalOrders, setTotalOrders] = useState(0);
   const [cards, setCards] = useState([]);
   const [sellers, setSellers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -31,6 +32,7 @@ export default function OrdersPage() {
   const [showFilters, setShowFilters] = useState(false);
   const [openMenu, setOpenMenu] = useState(null);
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(PAGE_SIZE);
   const [confirm, setConfirm] = useState(null);
 
   // Pre-fill seller filter if navigated from SellersPage
@@ -38,20 +40,21 @@ export default function OrdersPage() {
   const [filters, setFilters] = useState({ ...EMPTY_FILTERS, seller_id: initSellerId });
   const debounceRef = useRef(null);
 
-  const fetchOrders = useCallback(async (f) => {
+  const fetchOrders = useCallback(async (f, p = page, ps = pageSize) => {
     try {
-      const params = pickTruthy(f || filters);
-      const fetched = await getOrders(params);
-      setOrders(fetched);
-    } catch (err) { console.error('Failed to load cards/sellers', err);
+      const params = { ...pickTruthy(f || filters), page: p, limit: ps };
+      const { items, page: pageInfo } = await getOrders(params);
+      setOrders(items);
+      setTotalOrders(pageInfo.item_total);
+    } catch (err) { console.error('Failed to load orders', err);
       toast.error('Failed to load orders');
     }
-  }, [filters]);
+  }, [filters, page, pageSize]);
 
   const clearFilters = async () => {
     setFilters(EMPTY_FILTERS);
     setPage(1);
-    await fetchOrders(EMPTY_FILTERS);
+    await fetchOrders(EMPTY_FILTERS, 1, pageSize);
   };
 
   const handleSearchChange = (value) => {
@@ -59,17 +62,18 @@ export default function OrdersPage() {
     setFilters(next);
     setPage(1);
     clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => fetchOrders(next), 450);
+    debounceRef.current = setTimeout(() => fetchOrders(next, 1, pageSize), 450);
   };
 
-  const loadData = async () => {
+  const loadData = async (p = page, ps = pageSize) => {
     try {
       setLoading(true);
       const initParams = initSellerId ? { seller_id: initSellerId } : {};
-      const [fetchedOrders, fetchedCards, fetchedSellers] = await Promise.all([
-        getOrders(initParams), getCards(), getSellers()
+      const [ordersRes, fetchedCards, fetchedSellers] = await Promise.all([
+        getOrders({ ...initParams, page: p, limit: ps }), getCards(), getAllSellers()
       ]);
-      setOrders(fetchedOrders);
+      setOrders(ordersRes.items);
+      setTotalOrders(ordersRes.page.item_total);
       setCards(fetchedCards);
       setSellers(fetchedSellers);
     } catch (err) { console.error('Failed to load orders', err);
@@ -93,7 +97,9 @@ export default function OrdersPage() {
         try {
           await deleteOrder(id);
           toast.success('Order deleted');
-          loadData();
+          const newPage = orders.length === 1 && page > 1 ? page - 1 : page;
+          setPage(newPage);
+          fetchOrders(filters, newPage, pageSize);
         } catch (err) {
           toast.error(err.response?.data?.error || 'Failed to delete order');
         }
@@ -134,9 +140,8 @@ export default function OrdersPage() {
   const sourceOptions = ['All', ...ECOMM_SITES];
   const hasActiveFilters = Object.entries(filters).some(([k, v]) => k !== 'model_ordered' && v);
 
-  // Pagination
-  const totalPages  = Math.ceil(orders.length / PAGE_SIZE);
-  const pageOrders  = orders.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  // Pagination (server-side)
+  const totalPages  = Math.ceil(totalOrders / pageSize);
   const activeSeller = initSellerId ? sellers.find(s => s._id === initSellerId) : null;
 
   return (
@@ -155,14 +160,14 @@ export default function OrdersPage() {
             <div className="page-hero-title-group">
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
                 <h1 className="page-hero-title">Order Tracker</h1>
-                {orders.length > 0 && (
+                {totalOrders > 0 && (
                   <span className={`profit-badge ${totalProfit >= 0 ? 'profit-badge-positive' : 'profit-badge-negative'}`}>
                     Profit: {fmtSignedCurrency(totalProfit)}
                   </span>
                 )}
               </div>
-              {orders.length > 0 && (
-                <span className="page-hero-subtitle">{orders.length} order{orders.length !== 1 ? 's' : ''} tracked</span>
+              {totalOrders > 0 && (
+                <span className="page-hero-subtitle">{totalOrders} order{totalOrders !== 1 ? 's' : ''} tracked</span>
               )}
             </div>
           </div>
@@ -286,12 +291,12 @@ export default function OrdersPage() {
 
             <div className="filter-panel-footer">
               <button className="btn btn-secondary btn-sm" onClick={clearFilters}>Clear All</button>
-              <button className="btn btn-primary btn-sm" onClick={() => { setPage(1); fetchOrders(filters); }}>Apply Filters</button>
+              <button className="btn btn-primary btn-sm" onClick={() => { setPage(1); fetchOrders(filters, 1, pageSize); }}>Apply Filters</button>
             </div>
           </div>
         )}
 
-        {orders.length === 0 ? (
+        {totalOrders === 0 ? (
           <div className="empty-state-card">
             <div className="empty-icon empty-icon-orders">
               <ShoppingBag size={32} />
@@ -320,6 +325,7 @@ export default function OrdersPage() {
               <table className="data-table">
                 <thead>
                   <tr>
+                    <th>#</th>
                     <th>Order Date</th>
                     <th>Delivery Date</th>
                     <th>Item</th>
@@ -335,13 +341,16 @@ export default function OrdersPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {pageOrders.map(order => {
+                  {orders.map((order, index) => {
                     const profit      = order.return_amount - order.order_amount + order.cashback;
                     const isCancelled = order.delivery_status === 'Cancelled';
                     const isDelivered = order.delivery_status === 'Yes';
 
                     return (
                       <tr key={order._id} style={isCancelled ? { opacity: 0.5 } : {}}>
+                        <td style={{ whiteSpace: 'nowrap', color: 'var(--text-muted)' }}>
+                          {(page - 1) * pageSize + index + 1}
+                        </td>
                         <td style={{ whiteSpace: 'nowrap' }}>
                           <div className="font-medium">{new Date(order.order_date).toLocaleDateString('en-GB')}</div>
                         </td>
@@ -402,9 +411,11 @@ export default function OrdersPage() {
             <Pagination
               page={page}
               totalPages={totalPages}
-              totalItems={orders.length}
-              pageSize={PAGE_SIZE}
-              onPage={setPage}
+              totalItems={totalOrders}
+              pageSize={pageSize}
+              onPage={p => { setPage(p); fetchOrders(filters, p, pageSize); }}
+              onPageSize={size => { setPageSize(size); setPage(1); fetchOrders(filters, 1, size); }}
+              label="orders"
             />
           </div>
         )}
@@ -413,7 +424,7 @@ export default function OrdersPage() {
       {showModal && (
         <AddOrderModal
           onClose={() => { setShowModal(false); setEditOrder(null); }}
-          onSuccess={loadData}
+          onSuccess={() => fetchOrders(filters, page, pageSize)}
           editOrder={editOrder}
           cards={cards}
           sellers={sellers}

@@ -52,13 +52,15 @@ export const deleteTransaction = (id) => API.delete(`/transactions/${id}`).then(
 export const getSummary = (from_date, to_date) => API.get('/summary', { params: { from_date, to_date } }).then(r => r.data);
 
 // ── Orders ──
-export const getOrders = (params) => API.get('/orders', { params }).then(r => r.data);
+export const getOrders = (params) => API.get('/orders', { params }).then(r => r.data);  // returns { orders, total, page, limit }
+export const getAllOrders = (params) => API.get('/orders', { params: { ...params, all: true } }).then(r => r.data);  // returns array
 export const addOrder = (data) => API.post('/orders', data).then(r => r.data);
 export const updateOrder = (id, d) => API.put(`/orders/${id}`, d).then(r => r.data);
 export const deleteOrder = (id) => API.delete(`/orders/${id}`).then(r => r.data);
 
 // ── Sellers ──
-export const getSellers = () => API.get('/sellers').then(r => r.data);
+export const getSellers = (params) => API.get('/sellers', { params }).then(r => r.data);  // returns { sellers, total, page, limit }
+export const getAllSellers = () => API.get('/sellers', { params: { all: true } }).then(r => r.data);  // returns array of all sellers (for dropdowns)
 export const getSeller = (id) => API.get(`/sellers/${id}`).then(r => r.data);
 export const addSeller = (data) => API.post('/sellers', data).then(r => r.data);
 export const updateSeller = (id, d) => API.put(`/sellers/${id}`, d).then(r => r.data);

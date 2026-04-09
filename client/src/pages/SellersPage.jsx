@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { getSellers, deleteSeller } from '../api';
 import { Plus, Trash2, Pencil, BookText, Wallet, MapPin, TrendingUp, TrendingDown, ChevronLeft, Phone, Users } from 'lucide-react';
 import { fmtCurrency, fmtSignedCurrency, profitColor } from '../utils/formatters';
@@ -13,6 +13,7 @@ import Pagination from '../common/Pagination';
 
 export default function SellersPage() {
   const [sellers, setSellers] = useState([]);
+  const [totalSellers, setTotalSellers] = useState(0);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(null);
@@ -20,22 +21,23 @@ export default function SellersPage() {
   const [confirm, setConfirm] = useState(null);
   const [paymentSeller, setPaymentSeller] = useState(null);
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(PAGE_SIZE);
   const navigate = useNavigate();
 
-  const loadSellers = async () => {
+  const fetchSellers = useCallback(async (p = page, ps = pageSize) => {
     try {
       setLoading(true);
-      const data = await getSellers();
-      setSellers(data);
-      setPage(1);
+      const { items, page: pageInfo } = await getSellers({ page: p, limit: ps });
+      setSellers(items);
+      setTotalSellers(pageInfo.item_total);
     } catch (err) { console.error('Failed to load sellers', err);
       toast.error('Failed to load sellers');
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, pageSize]);
 
-  useEffect(() => { loadSellers(); }, []);
+  useEffect(() => { fetchSellers(); }, []);  // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleDelete = (seller) => {
     setConfirm({
@@ -45,7 +47,9 @@ export default function SellersPage() {
         try {
           await deleteSeller(seller._id);
           toast.success('Seller deleted');
-          loadSellers();
+          const newPage = sellers.length === 1 && page > 1 ? page - 1 : page;
+          setPage(newPage);
+          fetchSellers(newPage, pageSize);
         } catch (err) {
           toast.error(err.response?.data?.error || 'Failed to delete seller');
         }
@@ -58,11 +62,10 @@ export default function SellersPage() {
     setShowAddModal(true);
   };
 
-  // Pagination
-  const totalPages  = Math.ceil(sellers.length / PAGE_SIZE);
-  const pageSellers = sellers.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  // Pagination (server-side)
+  const totalPages = Math.ceil(totalSellers / pageSize);
 
-  // Aggregate stats across all sellers
+  // Aggregate stats across current page sellers
   const totalDue      = sellers.reduce((s, x) => s + (x.due_balance  || 0), 0);
   const totalReceived = sellers.reduce((s, x) => s + (x.total_received || 0), 0);
   const totalProfit   = sellers.reduce((s, x) => s + (x.profit        || 0), 0);
@@ -82,8 +85,8 @@ export default function SellersPage() {
             </button>
             <div className="page-hero-title-group">
               <h1 className="page-hero-title">Sellers Tracking</h1>
-              {!loading && sellers.length > 0 && (
-                <span className="page-hero-subtitle">{sellers.length} seller{sellers.length !== 1 ? 's' : ''} registered</span>
+              {!loading && totalSellers > 0 && (
+                <span className="page-hero-subtitle">{totalSellers} seller{totalSellers !== 1 ? 's' : ''} registered</span>
               )}
             </div>
           </div>
@@ -98,7 +101,7 @@ export default function SellersPage() {
 
       <div className="page-content">
         {/* Stats bar — only when sellers exist */}
-        {!loading && sellers.length > 0 && (
+        {!loading && totalSellers > 0 && (
           <div className="stats-row">
             <div className="stat-card">
               <div className="stat-card-header">
@@ -147,7 +150,7 @@ export default function SellersPage() {
               ))}
             </div>
           </div>
-        ) : sellers.length === 0 ? (
+        ) : totalSellers === 0 ? (
           <div className="empty-state-card">
             <div className="empty-icon empty-icon-sellers">
               <Users size={32} />
@@ -177,7 +180,7 @@ export default function SellersPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {pageSellers.map(seller => (
+                  {sellers.map(seller => (
                     <tr
                       key={seller._id}
                       onClick={() => navigate(`/sellers/${seller._id}/ledger`)}
@@ -230,9 +233,11 @@ export default function SellersPage() {
             <Pagination
               page={page}
               totalPages={totalPages}
-              totalItems={sellers.length}
-              pageSize={PAGE_SIZE}
-              onPage={setPage}
+              totalItems={totalSellers}
+              pageSize={pageSize}
+              onPage={p => { setPage(p); fetchSellers(p, pageSize); }}
+              onPageSize={size => { setPageSize(size); setPage(1); fetchSellers(1, size); }}
+              label="sellers"
             />
           </div>
         )}
@@ -241,7 +246,7 @@ export default function SellersPage() {
       {showAddModal && (
         <AddSellerModal
           onClose={() => { setShowAddModal(false); setEditSeller(null); }}
-          onSuccess={loadSellers}
+          onSuccess={() => fetchSellers(page, pageSize)}
           editSeller={editSeller}
         />
       )}
@@ -259,7 +264,7 @@ export default function SellersPage() {
         <AddPaymentModal
           seller={paymentSeller}
           onClose={() => setPaymentSeller(null)}
-          onSuccess={loadSellers}
+          onSuccess={() => fetchSellers(page, pageSize)}
         />
       )}
     </>

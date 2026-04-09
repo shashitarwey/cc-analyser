@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { toast } from 'react-hot-toast';
 import { Plus, ArrowUpDown } from 'lucide-react';
 import useSummary from '../hooks/useSummary';
-import { deleteCard, getOrders } from '../api';
+import { deleteCard, getAllOrders } from '../api';
 import DateRangeDropdown from '../common/DateRangeDropdown';
 import CardWidget from '../components/CardWidget';
 import AddCardModal from '../components/AddCardModal';
@@ -25,7 +25,7 @@ export default function DashboardPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    getOrders()
+    getAllOrders()
       .then(data => setOrders(data))
       .catch(err => console.error('Failed to load orders', err));
   }, []);

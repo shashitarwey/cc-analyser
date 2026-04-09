@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getSeller, getOrders, getSellerLedger, deleteSellerPayment } from '../api';
+import { getSeller, getAllOrders, getSellerLedger, deleteSellerPayment } from '../api';
 import { ChevronLeft, Wallet, MapPin, TrendingUp, TrendingDown, Trash2, Pencil, BookOpen } from 'lucide-react';
 import { fmtCurrency, fmtDisplay, fmtSignedCurrency, profitColor } from '../utils/formatters';
 import toast from 'react-hot-toast';
@@ -23,12 +23,12 @@ export default function SellerLedgerPage() {
     try {
       const [sellerData, resOrders, resPayments] = await Promise.all([
         getSeller(id),
-        getOrders({ seller_id: id, limit: 1000 }),
+        getAllOrders({ seller_id: id }),
         getSellerLedger(id)
       ]);
       setSeller(sellerData);
 
-      const allOrders = Array.isArray(resOrders) ? resOrders : (resOrders.items || []);
+      const allOrders = resOrders;
       const mappedOrders = allOrders.map(o => ({
         id: o._id, type: 'ORDER',
         date: new Date(o.order_date),

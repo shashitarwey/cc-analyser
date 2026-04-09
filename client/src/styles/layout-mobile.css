@@ -675,34 +675,25 @@
   /* Pagination */
   .table-paginator-wrap {
     padding: 10px 12px;
-    flex-wrap: nowrap;
-    align-items: center;
     justify-content: center !important;
-    /* !important needed — .justify-between defined later overrides */
-    gap: 6px;
-    overflow: visible;
   }
 
-  /* Hide the verbose "Showing X to Y of Z entries" on mobile — saves space */
-  .table-paginator-wrap>.text-md {
+  .table-paginator-wrap > .text-md {
     display: none;
   }
 
-  .table-page-pill {
-    font-size: 0.72rem;
-    white-space: nowrap;
-    padding: 5px 12px !important;
+  .table-paginator-wrap > .d-flex {
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .table-paginator-wrap .rows-per-page-label {
+    display: none;
   }
 
   .table-paginator-wrap .btn-sm {
-    padding: 6px 12px;
-    font-size: 0.75rem;
-    white-space: nowrap;
-  }
-
-  .table-paginator-wrap .d-flex {
-    gap: 6px;
-    flex-shrink: 0;
+    padding: 6px 10px;
   }
 
   /* ── Date picker: centered fixed modal on mobile ───────── */
@@ -1255,6 +1246,27 @@
 .table-page-pill {
   background: var(--surface2);
   border-radius: var(--radius-sm);
+}
+
+/* ── Pagination Select ───────────────────────────────────── */
+.pagination-select {
+  background: var(--surface2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  cursor: pointer;
+  outline: none;
+}
+
+.pagination-select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(88, 166, 255, 0.15);
+}
+
+.pagination-select option {
+  background: var(--surface);
+  color: var(--text);
 }
 
 /* ── Validation Errors ────────────────────────────────────── */

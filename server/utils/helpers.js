@@ -89,4 +89,37 @@ function getCashbackCycleStart(resetDay = 1, period = 'monthly', startMonth = 1)
     return candidates[candidates.length - 1];
 }
 
-module.exports = { pickFields, toObjectId, buildDateRange, getCashbackCycleStart };
+/**
+ * Parse page/limit from query params and return skip, pageNum, limitNum.
+ * @param {Object} query - req.query
+ * @returns {{ pageNum: number, limitNum: number, skip: number }}
+ */
+function parsePagination(query) {
+    const pageNum = Math.max(1, parseInt(query.page) || 1);
+    const limitNum = Math.min(100, Math.max(1, parseInt(query.limit) || 10));
+    return { pageNum, limitNum, skip: (pageNum - 1) * limitNum };
+}
+
+/**
+ * Build a standardized paginated response.
+ * @param {Array} items - The data items for the current page
+ * @param {number} total - Total item count across all pages
+ * @param {number} current - Current page number
+ * @param {number} size - Page size
+ * @returns {{ items: Array, page: Object }}
+ */
+function paginatedResponse(items, total, current, size) {
+    return {
+        items,
+        page: {
+            type: 'number',
+            current,
+            size,
+            item_total: total,
+            has_next: current * size < total,
+            has_previous: current > 1
+        }
+    };
+}
+
+module.exports = { pickFields, toObjectId, buildDateRange, getCashbackCycleStart, parsePagination, paginatedResponse };
