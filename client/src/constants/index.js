@@ -95,6 +95,7 @@ export const ECOMM_SITES = [
     'Realme Store',
     'Reliance Digital',
     'Tata Neu',
+    'Croma',
     'Other'
 ];
 
