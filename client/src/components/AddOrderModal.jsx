@@ -61,7 +61,7 @@ export default function AddOrderModal({ onClose, onSuccess, editOrder, cards, se
     if (!form.model_ordered.trim()) e.model_ordered = 'Item name is required';
     if (!form.card_id) e.card_id = 'Please select a card';
     if (!form.seller_id) e.seller_id = 'Please select a seller';
-    if (!form.id_used.trim()) e.id_used = 'ID / Account is required';
+    if (!form.id_used.trim()) e.id_used = 'Account is required';
     if (!form.order_date) e.order_date = 'Order date is required';
     if (!form.unit_order_amount || Number(form.unit_order_amount) <= 0) e.unit_order_amount = 'Enter order amount';
     if (form.unit_return_amount === '' || Number(form.unit_return_amount) < 0) e.unit_return_amount = 'Enter return amount';
@@ -162,7 +162,7 @@ export default function AddOrderModal({ onClose, onSuccess, editOrder, cards, se
               </div>
 
               <div className="form-group">
-                <label className="form-label">ID Used / Account <span style={{ color: 'var(--danger)' }}>*</span></label>
+                <label className="form-label">Account <span style={{ color: 'var(--danger)' }}>*</span></label>
                 <input
                   type="text"
                   className={`form-input ${errors.id_used ? 'error' : ''}`}

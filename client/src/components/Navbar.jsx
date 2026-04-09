@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { CreditCard, LogOut, Sun, Moon, Search, Menu, X as XIcon, ShoppingBag, Users, UserCog, BarChart3 } from 'lucide-react';
+import { CreditCard, LogOut, Sun, Moon, Search, Menu, X as XIcon, ShoppingBag, Users, UserCog, BarChart3, History } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import GlobalSearch from '../common/GlobalSearch';
@@ -61,6 +61,7 @@ export default function Navbar() {
               <Link to="/orders" className="text-sm font-medium" style={{ textDecoration: 'none', color: 'var(--text)' }}>Orders</Link>
               <Link to="/sellers" className="text-sm font-medium" style={{ textDecoration: 'none', color: 'var(--text)' }}>Sellers</Link>
               <Link to="/analytics" className="text-sm font-medium" style={{ textDecoration: 'none', color: 'var(--text)' }}>Analytics</Link>
+              <Link to="/activity" className="text-sm font-medium" style={{ textDecoration: 'none', color: 'var(--text)' }}>Activity</Link>
             </div>
           )}
 
@@ -141,6 +142,9 @@ export default function Navbar() {
               </Link>
               <Link to="/analytics" className={`mobile-menu-link${location.pathname === '/analytics' ? ' active' : ''}`}>
                   <BarChart3 size={18} /> Analytics
+              </Link>
+              <Link to="/activity" className={`mobile-menu-link${location.pathname === '/activity' ? ' active' : ''}`}>
+                  <History size={18} /> Activity Log
               </Link>
             </div>
             <div className="mobile-menu-footer">

@@ -4,6 +4,7 @@ const Card = require('../models/Card');
 const Transaction = require('../models/Transaction');
 const { pickFields } = require('../utils/helpers');
 const { invalidateSummaryCache } = require('../utils/cache');
+const { logActivity } = require('../utils/activityLogger');
 
 /**
  * @swagger
@@ -83,6 +84,7 @@ router.post('/', async (req, res, next) => {
         data.user_id = req.user.id;
         const card = await Card.create(data);
         invalidateSummaryCache(req);
+        logActivity(req.user.id, 'created', 'card', card._id, `Added card: ${data.bank_name} •••• ${data.last_four_digit}`, card);
         res.status(201).json(card);
     } catch (err) {
         res.status(400).json({ error: err.message });
@@ -92,13 +94,17 @@ router.post('/', async (req, res, next) => {
 router.put('/:id', async (req, res, next) => {
     try {
         const data = pickFields(req.body, CARD_FIELDS);
+        const oldCard = await Card.findOne({ _id: req.params.id, user_id: req.user.id });
+        if (!oldCard) return res.status(404).json({ error: 'Card not found' });
+
         const card = await Card.findOneAndUpdate(
             { _id: req.params.id, user_id: req.user.id },
             data,
             { new: true, runValidators: true }
         );
-        if (!card) return res.status(404).json({ error: 'Card not found' });
         invalidateSummaryCache(req);
+        const changedFields = Object.keys(data).filter(k => String(oldCard[k]) !== String(card[k]));
+        logActivity(req.user.id, 'updated', 'card', card._id, `Updated card: ${card.bank_name} •••• ${card.last_four_digit}`, card, changedFields);
         res.json(card);
     } catch (err) {
         res.status(400).json({ error: err.message });
@@ -111,6 +117,7 @@ router.delete('/:id', async (req, res, next) => {
         if (!card) return res.status(404).json({ error: 'Card not found' });
         await Transaction.deleteMany({ card_id: req.params.id });
         invalidateSummaryCache(req);
+        logActivity(req.user.id, 'deleted', 'card', card._id, `Deleted card: ${card.bank_name} •••• ${card.last_four_digit}`, card);
         res.json({ success: true });
     } catch (err) { next(err); }
 });

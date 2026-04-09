@@ -44,6 +44,7 @@ app.use('/api/orders', authMiddleware, require('./routes/orders'));
 app.use('/api/sellers', authMiddleware, require('./routes/sellers'));
 app.use('/api/summary', authMiddleware, require('./routes/summary'));
 app.use('/api/analytics', authMiddleware, require('./routes/analytics'));
+app.use('/api/activity', authMiddleware, require('./routes/activity'));
 
 // ── Health check endpoint (public) ───────────────────────────────────────────
 app.get('/api/health', async (_req, res) => {

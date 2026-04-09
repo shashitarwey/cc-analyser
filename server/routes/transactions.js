@@ -6,6 +6,7 @@ const Card = require('../models/Card');
 const Order = require('../models/Order');
 const { buildDateRange } = require('../utils/helpers');
 const { invalidateSummaryCache } = require('../utils/cache');
+const { logActivity } = require('../utils/activityLogger');
 
 /**
  * @swagger
@@ -214,6 +215,7 @@ router.post('/', async (req, res, next) => {
         if (!card) return res.status(400).json({ error: 'Card not found or not yours' });
         const tx = await Transaction.create({ card_id, amount, description, date });
         invalidateSummaryCache(req);
+        logActivity(req.user.id, 'created', 'transaction', tx._id, `Added transaction: ₹${amount} — ${description || 'No description'}`, tx);
         res.status(201).json(tx);
     } catch (err) {
         res.status(400).json({ error: err.message });
@@ -229,6 +231,7 @@ router.delete('/:id', async (req, res, next) => {
             return res.status(404).json({ error: 'Transaction not found' });
         await tx.deleteOne();
         invalidateSummaryCache(req);
+        logActivity(req.user.id, 'deleted', 'transaction', tx._id, `Deleted transaction: ₹${tx.amount} — ${tx.description || 'No description'}`, tx);
         res.json({ success: true });
     } catch (err) { next(err); }
 });

@@ -1415,6 +1415,343 @@
       transparent 50%);
 }
 
+/* ── Activity Log Filter ────────────────────────────────────── */
+.al-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 16px;
+}
+
+.al-filter-wrap {
+  width: 180px;
+}
+
+/* ── Activity Log ───────────────────────────────────────────── */
+.al-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.al-item {
+  border-bottom: 1px solid var(--border);
+}
+
+.al-item:last-child {
+  border-bottom: none;
+}
+
+.al-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.al-item-header:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.al-item-left {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  flex: 1;
+  min-width: 0;
+}
+
+.al-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.al-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.al-desc {
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1.4;
+}
+
+.al-tags {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+  flex-wrap: wrap;
+}
+
+.al-tag {
+  font-size: 0.72rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.al-tag-entity {
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: var(--surface2);
+}
+
+.al-tag-action {
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: var(--surface2);
+}
+
+.al-tag-time {
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.al-expand-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.al-expand-btn:hover {
+  color: var(--text);
+  background: var(--surface2);
+}
+
+.al-snapshot {
+  padding: 0 20px 16px 70px;
+}
+
+.al-snapshot-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 8px 16px;
+  padding: 14px 16px;
+  background: var(--surface2);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+
+.al-snapshot-field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.al-snapshot-key {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.al-snapshot-val {
+  font-size: 0.82rem;
+  color: var(--text);
+  word-break: break-word;
+}
+
+
+.al-tag-changed {
+  color: var(--warning, #f0883e);
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgba(240, 136, 62, 0.1);
+}
+
+.al-changed-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 16px;
+  background: var(--surface2);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+
+.al-changed-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.82rem;
+}
+
+.al-changed-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  min-width: 90px;
+}
+
+.al-changed-arrow {
+  color: var(--warning, #f0883e);
+  font-weight: 700;
+}
+
+.al-changed-value {
+  color: var(--text);
+  font-weight: 500;
+}
+
+/* ── Activity Log History Button ─────────────────────────── */
+.al-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.al-history-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+}
+
+.al-history-btn:hover {
+  color: var(--accent);
+  background: var(--surface2);
+}
+
+/* ── History Panel (slide-in) ───────────────────────────── */
+.al-panel-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+}
+
+.al-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(520px, 90vw);
+  background: var(--bg);
+  border-left: 1px solid var(--border);
+  z-index: 1001;
+  display: flex;
+  flex-direction: column;
+  box-shadow: -8px 0 30px rgba(0, 0, 0, 0.3);
+}
+
+.al-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.al-panel-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.al-panel-count {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  padding: 2px 8px;
+  background: var(--surface2);
+  border-radius: 4px;
+}
+
+.al-panel-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0;
+}
+
+/* ── Timeline ───────────────────────────────────────────── */
+.al-timeline {
+  padding: 16px 0;
+}
+
+.al-timeline-item {
+  display: flex;
+  gap: 0;
+}
+
+.al-timeline-line {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 32px;
+  flex-shrink: 0;
+  padding-top: 20px;
+}
+
+.al-timeline-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.al-timeline-connector {
+  width: 2px;
+  flex: 1;
+  background: var(--border);
+}
+
+.al-timeline-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.al-timeline-content .al-item {
+  border-bottom: none;
+}
+
+.al-timeline-content .al-item-header {
+  padding: 10px 14px 10px 0;
+}
+
+.al-timeline-content .al-snapshot {
+  padding: 0 14px 12px 0;
+}
+
+@media (max-width: 600px) {
+  .al-item-header {
+    padding: 12px 14px;
+  }
+  .al-snapshot {
+    padding: 0 14px 12px 14px;
+  }
+  .al-snapshot-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .al-panel {
+    width: 100vw;
+  }
+}
+
 /* ── Toggle Button ──────────────────────────────────────────── */
 .toggle-btn {
   width: 36px;

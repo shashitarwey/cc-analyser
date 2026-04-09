@@ -78,3 +78,7 @@ export const updateSellerPayment = (id, data) => API.put(`/sellers/payment/${id}
 }).then(r => r.data);
 
 export const deleteSellerPayment = (id) => API.delete(`/sellers/payment/${id}`).then(r => r.data);
+
+// ── Activity Log ──
+export const getActivityLogs = (params) => API.get('/activity', { params }).then(r => r.data);
+export const getEntityHistory = (entityId) => API.get(`/activity/entity/${entityId}`).then(r => r.data);

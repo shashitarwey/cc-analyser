@@ -5,6 +5,7 @@ const Card = require('../models/Card');
 const Seller = require('../models/Seller');
 const { pickFields, parsePagination, paginatedResponse } = require('../utils/helpers');
 const { invalidateSummaryCache } = require('../utils/cache');
+const { logActivity } = require('../utils/activityLogger');
 
 /**
  * @swagger
@@ -149,6 +150,18 @@ router.post('/', async (req, res, next) => {
         const newOrder = new Order(data);
         await newOrder.save();
         invalidateSummaryCache(req);
+        const orderDate = new Date(data.order_date).toLocaleDateString('en-GB');
+
+        // Build snapshot with resolved names
+        const snap = newOrder.toObject();
+        const [cardDoc, sellerDoc] = await Promise.all([
+            Card.findById(newOrder.card_id, 'bank_name last_four_digit'),
+            Seller.findById(newOrder.seller_id, 'name city')
+        ]);
+        if (cardDoc) snap.card_id = `${cardDoc.bank_name} •••• ${cardDoc.last_four_digit}`;
+        if (sellerDoc) snap.seller_id = `${sellerDoc.name}, ${sellerDoc.city}`;
+
+        logActivity(req.user.id, 'created', 'order', newOrder._id, `Added order: ${data.model_ordered} | ${data.ecomm_site} | ₹${data.order_amount} | ${orderDate}`, snap);
         res.status(201).json(newOrder);
     } catch (err) {
         res.status(400).json({ error: err.message });
@@ -172,13 +185,34 @@ router.put('/:id', async (req, res, next) => {
             if (!seller) return res.status(400).json({ error: 'Invalid seller_id — seller not found or not yours' });
         }
 
+        // Fetch old order to compute changed fields
+        const oldOrder = await Order.findOne({ _id: req.params.id, user_id: req.user.id });
+        if (!oldOrder) return res.status(404).json({ error: 'Order not found' });
+
         const updatedOrder = await Order.findOneAndUpdate(
             { _id: req.params.id, user_id: req.user.id },
             data,
             { new: true, runValidators: true }
         );
-        if (!updatedOrder) return res.status(404).json({ error: 'Order not found' });
         invalidateSummaryCache(req);
+
+        // Compute which fields actually changed
+        const changedFields = Object.keys(data).filter(k => String(oldOrder[k]) !== String(updatedOrder[k]));
+
+        const oDate = new Date(updatedOrder.order_date).toLocaleDateString('en-GB');
+        const orderTag = `${updatedOrder.model_ordered} | ${updatedOrder.ecomm_site} | ₹${updatedOrder.order_amount} | ${oDate}`;
+        const desc = `Updated order: ${orderTag}`;
+
+        // Build snapshot with resolved names
+        const snap = updatedOrder.toObject();
+        const [cardDoc, sellerDoc] = await Promise.all([
+            Card.findById(updatedOrder.card_id, 'bank_name last_four_digit'),
+            Seller.findById(updatedOrder.seller_id, 'name city')
+        ]);
+        if (cardDoc) snap.card_id = `${cardDoc.bank_name} •••• ${cardDoc.last_four_digit}`;
+        if (sellerDoc) snap.seller_id = `${sellerDoc.name}, ${sellerDoc.city}`;
+
+        logActivity(req.user.id, 'updated', 'order', updatedOrder._id, desc, snap, changedFields);
         res.json(updatedOrder);
     } catch (err) {
         res.status(400).json({ error: err.message });
@@ -191,6 +225,17 @@ router.delete('/:id', async (req, res, next) => {
         const deletedOrder = await Order.findOneAndDelete({ _id: req.params.id, user_id: req.user.id });
         if (!deletedOrder) return res.status(404).json({ error: 'Order not found' });
         invalidateSummaryCache(req);
+        const delDate = new Date(deletedOrder.order_date).toLocaleDateString('en-GB');
+
+        const snap = deletedOrder.toObject();
+        const [cardDoc, sellerDoc] = await Promise.all([
+            Card.findById(deletedOrder.card_id, 'bank_name last_four_digit'),
+            Seller.findById(deletedOrder.seller_id, 'name city')
+        ]);
+        if (cardDoc) snap.card_id = `${cardDoc.bank_name} •••• ${cardDoc.last_four_digit}`;
+        if (sellerDoc) snap.seller_id = `${sellerDoc.name}, ${sellerDoc.city}`;
+
+        logActivity(req.user.id, 'deleted', 'order', deletedOrder._id, `Deleted order: ${deletedOrder.model_ordered} | ${deletedOrder.ecomm_site} | ₹${deletedOrder.order_amount} | ${delDate}`, snap);
         res.json({ success: true });
     } catch (err) { next(err); }
 });

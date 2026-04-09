@@ -8,6 +8,7 @@ import SellerLedgerPage from './pages/SellerLedgerPage';
 import ProfilePage from './pages/ProfilePage';
 import ChangePasswordPage from './pages/ChangePasswordPage';
 import OrderAnalyticsPage from './pages/OrderAnalyticsPage';
+import ActivityLogPage from './pages/ActivityLogPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import Navbar from './components/Navbar';
@@ -57,6 +58,7 @@ export default function App() {
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/profile/change-password" element={<ChangePasswordPage />} />
           <Route path="/analytics" element={<OrderAnalyticsPage />} />
+          <Route path="/activity" element={<ActivityLogPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </ErrorBoundary>

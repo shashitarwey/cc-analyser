@@ -6,6 +6,7 @@ const Order = require('../models/Order');
 const SellerPayment = require('../models/SellerPayment');
 const { uploadToCloudinary } = require('../utils/cloudinary');
 const { toObjectId, parsePagination, paginatedResponse } = require('../utils/helpers');
+const { logActivity } = require('../utils/activityLogger');
 
 /**
  * @swagger
@@ -246,6 +247,7 @@ router.post('/', async (req, res, next) => {
             phone: phone || ''
         });
         const savedSeller = await newSeller.save();
+        logActivity(req.user.id, 'created', 'seller', savedSeller._id, `Added seller: ${name}, ${city}`, savedSeller);
         res.status(201).json(savedSeller);
     } catch (err) {
         res.status(400).json({ error: err.message });
@@ -261,12 +263,16 @@ router.put('/:id', async (req, res, next) => {
         if (city !== undefined) update.city = city;
         if (phone !== undefined) update.phone = phone;
 
+        const oldSeller = await Seller.findOne({ _id: req.params.id, user_id: req.user.id });
+        if (!oldSeller) return res.status(404).json({ error: 'Seller not found' });
+
         const updatedSeller = await Seller.findOneAndUpdate(
             { _id: req.params.id, user_id: req.user.id },
             update,
             { new: true, runValidators: true }
         );
-        if (!updatedSeller) return res.status(404).json({ error: 'Seller not found' });
+        const changedFields = Object.keys(update).filter(k => String(oldSeller[k]) !== String(updatedSeller[k]));
+        logActivity(req.user.id, 'updated', 'seller', updatedSeller._id, `Updated seller: ${updatedSeller.name}`, updatedSeller, changedFields);
         res.json(updatedSeller);
     } catch (err) {
         res.status(400).json({ error: err.message });
@@ -283,6 +289,7 @@ router.delete('/:id', async (req, res, next) => {
 
         const deletedSeller = await Seller.findOneAndDelete({ _id: req.params.id, user_id: req.user.id });
         if (!deletedSeller) return res.status(404).json({ error: 'Seller not found' });
+        logActivity(req.user.id, 'deleted', 'seller', deletedSeller._id, `Deleted seller: ${deletedSeller.name}`, deletedSeller);
         res.json({ success: true });
     } catch (err) { next(err); }
 });
@@ -321,6 +328,7 @@ router.post('/payment', upload.single('receipt'), async (req, res, next) => {
             receipt_url
         });
         const savedPayment = await newPayment.save();
+        logActivity(req.user.id, 'created', 'seller_payment', savedPayment._id, `Added payment of ₹${amount} to ${seller.name}`, savedPayment);
         res.status(201).json(savedPayment);
     } catch (err) {
         res.status(400).json({ error: err.message });
@@ -342,12 +350,16 @@ router.put('/payment/:id', upload.single('receipt'), async (req, res, next) => {
             update.receipt_url = '';
         }
 
+        const oldPayment = await SellerPayment.findOne({ _id: req.params.id, user_id: req.user.id });
+        if (!oldPayment) return res.status(404).json({ error: 'Payment not found' });
+
         const updated = await SellerPayment.findOneAndUpdate(
             { _id: req.params.id, user_id: req.user.id },
             update,
             { new: true, runValidators: true }
         );
-        if (!updated) return res.status(404).json({ error: 'Payment not found' });
+        const changedFields = Object.keys(update).filter(k => String(oldPayment[k]) !== String(updated[k]));
+        logActivity(req.user.id, 'updated', 'seller_payment', updated._id, `Updated payment of ₹${updated.amount}`, updated, changedFields);
         res.json(updated);
     } catch (err) {
         res.status(400).json({ error: err.message });
@@ -362,6 +374,7 @@ router.delete('/payment/:id', async (req, res, next) => {
             user_id: req.user.id
         });
         if (!deletedPayment) return res.status(404).json({ error: 'Payment not found' });
+        logActivity(req.user.id, 'deleted', 'seller_payment', deletedPayment._id, `Deleted payment of ₹${deletedPayment.amount}`, deletedPayment);
         res.json({ success: true });
     } catch (err) { next(err); }
 });
