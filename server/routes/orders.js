@@ -74,7 +74,7 @@ const { invalidateSummaryCache } = require('../utils/cache');
 const ORDER_FIELDS = [
     'card_id', 'seller_id', 'order_date', 'delivered_date',
     'order_amount', 'return_amount', 'quantity', 'cashback',
-    'variant', 'model_ordered', 'id_used', 'delivery_status', 'ecomm_site'
+    'variant', 'model_ordered', 'id_used', 'delivery_status', 'ecomm_site', 'is_cleared'
 ];
 
 // GET orders for the logged-in user with filters + server-side pagination

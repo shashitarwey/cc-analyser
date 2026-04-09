@@ -28,7 +28,8 @@ const OrderSchema = new mongoose.Schema({
         trim: true,
         required: true
     },
-    seller_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Seller', required: true }
+    seller_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Seller', required: true },
+    is_cleared: { type: Boolean, default: false }
 }, { timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } });
 
 OrderSchema.index({ user_id: 1, order_date: -1 });

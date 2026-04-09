@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { getOrders, deleteOrder, getCards, getAllSellers } from '../api';
+import { getOrders, deleteOrder, updateOrder, getCards, getAllSellers } from '../api';
 import AddOrderModal from '../components/AddOrderModal';
 import ActionMenu from '../common/ActionMenu';
 import Pagination from '../common/Pagination';
@@ -105,6 +105,15 @@ export default function OrdersPage() {
         }
       }
     });
+  };
+
+  const handleToggleClear = async (order) => {
+    try {
+      await updateOrder(order._id, { is_cleared: !order.is_cleared });
+      setOrders(prev => prev.map(o => o._id === order._id ? { ...o, is_cleared: !o.is_cleared } : o));
+    } catch (err) {
+      toast.error('Failed to update order');
+    }
   };
 
   if (loading) {
@@ -337,6 +346,7 @@ export default function OrdersPage() {
                     <th>Cashback</th>
                     <th>Profit</th>
                     <th>Status</th>
+                    <th>Clear</th>
                     <th className="text-right col-action">Actions</th>
                   </tr>
                 </thead>
@@ -389,6 +399,12 @@ export default function OrdersPage() {
                           <span className={`badge ${isDelivered ? 'badge-success' : isCancelled ? 'badge-danger' : 'badge-surface'}`}>
                             {isDelivered ? 'Delivered' : isCancelled ? 'Cancelled' : 'Pending'}
                           </span>
+                        </td>
+                        <td>
+                          <button
+                            className={`toggle-btn ${order.is_cleared ? 'toggle-on' : 'toggle-off'}`}
+                            onClick={e => { e.stopPropagation(); handleToggleClear(order); }}
+                          />
                         </td>
                         <td className="text-right col-action">
                           <ActionMenu

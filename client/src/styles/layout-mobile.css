@@ -1415,6 +1415,45 @@
       transparent 50%);
 }
 
+/* ── Toggle Button ──────────────────────────────────────────── */
+.toggle-btn {
+  width: 36px;
+  height: 20px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  transition: background 0.2s;
+  padding: 0;
+}
+
+.toggle-btn::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  transition: left 0.2s;
+}
+
+.toggle-off {
+  background: var(--border);
+}
+
+.toggle-off::after {
+  left: 2px;
+}
+
+.toggle-on {
+  background: var(--success);
+}
+
+.toggle-on::after {
+  left: 18px;
+}
+
 /* ── Sort Select Dropdown ────────────────────────────────────── */
 .sort-select {
   background: transparent;
