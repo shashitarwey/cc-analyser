@@ -19,5 +19,6 @@ const ActivityLogSchema = new mongoose.Schema({
 }, { timestamps: { createdAt: 'created_at' } });
 
 ActivityLogSchema.index({ user_id: 1, created_at: -1 });
+ActivityLogSchema.index({ created_at: 1 }, { expireAfterSeconds: 90 * 24 * 60 * 60 }); // TTL: auto-delete after 90 days
 
 module.exports = mongoose.model('ActivityLog', ActivityLogSchema);

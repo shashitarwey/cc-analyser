@@ -10,6 +10,7 @@ const Transaction = require('../models/Transaction');
 const Order = require('../models/Order');
 const Seller = require('../models/Seller');
 const SellerPayment = require('../models/SellerPayment');
+const ActivityLog = require('../models/ActivityLog');
 const logger = require('./logger');
 
 const GRACE_PERIOD_DAYS = 7;
@@ -27,11 +28,12 @@ async function purgeUser(user) {
         logger.info('Deleted transactions', { userId, count: txResult.deletedCount });
     }
 
-    // Delete orders, seller payments, sellers, cards
+    // Delete orders, seller payments, sellers, cards, activity logs
     const ordResult = await Order.deleteMany({ user_id: userId });
     const spResult = await SellerPayment.deleteMany({ user_id: userId });
     const selResult = await Seller.deleteMany({ user_id: userId });
     const cardResult = await Card.deleteMany({ user_id: userId });
+    await ActivityLog.deleteMany({ user_id: userId });
 
     logger.info('Purged user data', {
         userId,
