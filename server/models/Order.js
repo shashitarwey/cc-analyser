@@ -25,7 +25,7 @@ const OrderSchema = new mongoose.Schema({
     },
     ecomm_site: {
         type: String,
-        enum: ['Flipkart', 'Amazon', 'Myntra', 'Ajio', 'Samsung Store', 'Oneplus Store', 'Realme Store', 'Reliance Digital', 'Other'],
+        enum: ['Flipkart', 'Amazon', 'Myntra', 'Ajio', 'Samsung Store', 'Oneplus Store', 'Realme Store', 'Reliance Digital', 'Tata Neu', 'Croma', 'Other'],
         required: true
     },
     seller_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Seller', required: true }
