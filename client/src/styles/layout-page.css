@@ -457,3 +457,55 @@
   border: 1px solid rgba(248, 81, 73, 0.3);
   color: var(--danger);
 }
+
+/* ── Order row clickable (opens remark modal) ──────────────── */
+tr.order-row-clickable {
+  cursor: pointer;
+  transition: background 0.12s;
+}
+
+tr.order-row-clickable:hover {
+  background: rgba(88, 166, 255, 0.06);
+}
+
+/* ── Remark modal content ──────────────────────────────────── */
+.remark-order-summary {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+
+.remark-summary-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.remark-summary-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.remark-view {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.remark-view-line {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--text);
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+}

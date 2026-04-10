@@ -20,6 +20,9 @@ const baseRules = (optional = false) => {
         body('delivery_status').optional().isIn(DELIVERY).withMessage(`delivery_status must be one of ${DELIVERY.join(', ')}`),
         opt(body('ecomm_site').isString().trim().notEmpty()).withMessage('ecomm_site is required'),
         body('is_cleared').optional().isBoolean().withMessage('is_cleared must be boolean'),
+        body('remark').optional({ nullable: true }).isString().withMessage('remark must be a string')
+            .bail()
+            .isLength({ max: 200 }).withMessage('remark must be 200 characters or fewer'),
     ];
 };
 

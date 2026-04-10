@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { getOrders, getAllOrders, deleteOrder, updateOrder, getCards, getAllSellers } from '../api';
 import AddOrderModal from '../components/AddOrderModal';
+import OrderRemarkModal from '../components/OrderRemarkModal';
 import ActionMenu from '../common/ActionMenu';
 import Pagination from '../common/Pagination';
-import { ShoppingBag, MapPin, Pencil, Trash2, Filter, Search, X as XIcon, ChevronLeft, Download } from 'lucide-react';
+import { ShoppingBag, MapPin, Pencil, Trash2, Filter, Search, X as XIcon, ChevronLeft, Download, MessageSquare } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { ECOMM_SITES, PAGE_SIZE, STATUS_FILTER_OPTIONS } from '../constants';
 import { fmtCurrency, fmtSignedCurrency, cardLabel, sellerLabel, pickTruthy } from '../utils/formatters';
@@ -35,6 +36,7 @@ export default function OrdersPage() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(PAGE_SIZE);
   const [confirm, setConfirm] = useState(null);
+  const [remarkOrder, setRemarkOrder] = useState(null);
 
   // Pre-fill seller filter if navigated from SellersPage
   const initSellerId = location.state?.seller_id || '';
@@ -383,10 +385,26 @@ export default function OrdersPage() {
                     const isCancelled = order.delivery_status === 'Cancelled';
                     const isDelivered = order.delivery_status === 'Yes';
 
+                    const hasRemark = Boolean(order.remark && order.remark.trim());
+
                     return (
-                      <tr key={order._id} style={isCancelled ? { opacity: 0.5 } : {}}>
+                      <tr
+                        key={order._id}
+                        className="order-row-clickable"
+                        style={isCancelled ? { opacity: 0.5 } : {}}
+                        onClick={() => setRemarkOrder(order)}
+                      >
                         <td style={{ whiteSpace: 'nowrap', color: 'var(--text-muted)' }}>
-                          {(page - 1) * pageSize + index + 1}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <span>{(page - 1) * pageSize + index + 1}</span>
+                            {hasRemark && (
+                              <MessageSquare
+                                size={13}
+                                style={{ flexShrink: 0, color: 'var(--accent)' }}
+                                aria-label="Has remark"
+                              />
+                            )}
+                          </div>
                         </td>
                         <td style={{ whiteSpace: 'nowrap' }}>
                           <div className="font-medium">{new Date(order.order_date).toLocaleDateString('en-GB')}</div>
@@ -427,18 +445,19 @@ export default function OrdersPage() {
                             {isDelivered ? 'Delivered' : isCancelled ? 'Cancelled' : 'Pending'}
                           </span>
                         </td>
-                        <td>
+                        <td onClick={e => e.stopPropagation()}>
                           <button
                             className={`toggle-btn ${order.is_cleared ? 'toggle-on' : 'toggle-off'}`}
                             onClick={e => { e.stopPropagation(); handleToggleClear(order); }}
                           />
                         </td>
-                        <td className="text-right col-action">
+                        <td className="text-right col-action" onClick={e => e.stopPropagation()}>
                           <ActionMenu
                             id={order._id}
                             openId={openMenu}
                             onToggle={setOpenMenu}
                             items={[
+                              { label: hasRemark ? 'Edit Remark' : 'Add Remark', icon: <MessageSquare size={14} />, onClick: () => setRemarkOrder(order) },
                               { label: 'Edit Order', icon: <Pencil size={14} />, onClick: () => { setEditOrder(order); setShowModal(true); } },
                               { label: 'Delete',     icon: <Trash2 size={14} />, onClick: () => handleDelete(order._id), color: 'var(--danger)', className: 'border-top' },
                             ]}
@@ -471,6 +490,16 @@ export default function OrdersPage() {
           editOrder={editOrder}
           cards={cards}
           sellers={sellers}
+        />
+      )}
+
+      {remarkOrder && (
+        <OrderRemarkModal
+          order={remarkOrder}
+          onClose={() => setRemarkOrder(null)}
+          onSaved={(updated) => {
+            setOrders(prev => prev.map(o => o._id === updated._id ? { ...o, remark: updated.remark } : o));
+          }}
         />
       )}
 

@@ -29,7 +29,8 @@ const OrderSchema = new mongoose.Schema({
         required: true
     },
     seller_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Seller', required: true },
-    is_cleared: { type: Boolean, default: false }
+    is_cleared: { type: Boolean, default: false },
+    remark: { type: String, default: '', trim: true }
 }, { timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } });
 
 OrderSchema.index({ user_id: 1, order_date: -1 });
