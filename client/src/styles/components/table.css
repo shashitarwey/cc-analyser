@@ -62,6 +62,32 @@
   background: rgba(88, 166, 255, 0.04);
 }
 
+/* ── Freeze first column on horizontal scroll ────────────── */
+.table-freeze-first th:first-child,
+.table-freeze-first td:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  background: var(--surface);
+}
+
+.table-freeze-first th:first-child {
+  z-index: 3;
+  background: #15191f;
+}
+
+[data-theme="light"] .table-freeze-first th:first-child {
+  background: #f0f1f3;
+}
+
+.table-freeze-first tbody tr:hover td:first-child {
+  background: #1a1f27;
+}
+
+[data-theme="light"] .table-freeze-first tbody tr:hover td:first-child {
+  background: #ebeef3;
+}
+
 .tx-card-pill {
   display: inline-block;
   padding: 3px 10px;

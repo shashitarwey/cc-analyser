@@ -331,7 +331,7 @@ export default function OrdersPage() {
             )}
 
             <div className="table-responsive-wrapper">
-              <table className="data-table">
+              <table className="data-table table-freeze-first">
                 <thead>
                   <tr>
                     <th>#</th>
