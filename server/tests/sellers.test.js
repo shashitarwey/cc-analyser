@@ -36,8 +36,8 @@ describe('Sellers Routes', () => {
         .send({ name: 'A', city: 'X' });
       const res = await request(app).get('/api/sellers').set(authHeader(token));
       expect(res.status).toBe(200);
-      expect(res.body).toHaveLength(1);
-      expect(res.body[0]).toHaveProperty('due_balance');
+      expect(res.body.items).toHaveLength(1);
+      expect(res.body.items[0]).toHaveProperty('due_balance');
     });
   });
 

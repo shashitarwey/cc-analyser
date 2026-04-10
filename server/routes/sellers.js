@@ -7,6 +7,16 @@ const SellerPayment = require('../models/SellerPayment');
 const { uploadToCloudinary } = require('../utils/cloudinary');
 const { toObjectId, parsePagination, paginatedResponse } = require('../utils/helpers');
 const { logActivity } = require('../utils/activityLogger');
+const validate = require('../middleware/validate');
+const {
+    createRules,
+    updateRules,
+    idRule,
+    sellerIdRule,
+    paymentCreateRules,
+    paymentUpdateRules,
+    paymentIdRule,
+} = require('../validators/sellers.validator');
 
 /**
  * @swagger
@@ -201,7 +211,7 @@ router.get('/', async (req, res, next) => {
 });
 
 // Get a single seller by ID with stats
-router.get('/:id', async (req, res, next) => {
+router.get('/:id', idRule, validate, async (req, res, next) => {
     try {
         const seller = await Seller.findOne({ _id: req.params.id, user_id: req.user.id });
         if (!seller) return res.status(404).json({ error: 'Seller not found' });
@@ -236,10 +246,9 @@ router.get('/:id', async (req, res, next) => {
 });
 
 // Add a seller
-router.post('/', async (req, res, next) => {
+router.post('/', createRules, validate, async (req, res, next) => {
     try {
         const { name, city, phone } = req.body;
-        if (!name || !city) return res.status(400).json({ error: 'Name and city are required' });
         const newSeller = new Seller({
             user_id: req.user.id,
             name,
@@ -255,7 +264,7 @@ router.post('/', async (req, res, next) => {
 });
 
 // Update a seller
-router.put('/:id', async (req, res, next) => {
+router.put('/:id', updateRules, validate, async (req, res, next) => {
     try {
         const { name, city, phone } = req.body;
         const update = {};
@@ -280,7 +289,7 @@ router.put('/:id', async (req, res, next) => {
 });
 
 // Delete a seller
-router.delete('/:id', async (req, res, next) => {
+router.delete('/:id', idRule, validate, async (req, res, next) => {
     try {
         const ordersCount = await Order.countDocuments({ seller_id: req.params.id, user_id: req.user.id });
         if (ordersCount > 0) {
@@ -295,7 +304,7 @@ router.delete('/:id', async (req, res, next) => {
 });
 
 // Get ledger for a specific seller
-router.get('/:sellerId/payment', async (req, res, next) => {
+router.get('/:sellerId/payment', sellerIdRule, validate, async (req, res, next) => {
     try {
         const payments = await SellerPayment.find({
             seller_id: req.params.sellerId,
@@ -306,7 +315,7 @@ router.get('/:sellerId/payment', async (req, res, next) => {
 });
 
 // Add a payment
-router.post('/payment', upload.single('receipt'), async (req, res, next) => {
+router.post('/payment', upload.single('receipt'), paymentCreateRules, validate, async (req, res, next) => {
     try {
         const { seller_id, amount, payment_date, notes } = req.body;
 
@@ -336,7 +345,7 @@ router.post('/payment', upload.single('receipt'), async (req, res, next) => {
 });
 
 // Update a payment
-router.put('/payment/:id', upload.single('receipt'), async (req, res, next) => {
+router.put('/payment/:id', upload.single('receipt'), paymentUpdateRules, validate, async (req, res, next) => {
     try {
         const { amount, payment_date, notes } = req.body;
         const update = {};
@@ -367,7 +376,7 @@ router.put('/payment/:id', upload.single('receipt'), async (req, res, next) => {
 });
 
 // Delete a payment
-router.delete('/payment/:id', async (req, res, next) => {
+router.delete('/payment/:id', paymentIdRule, validate, async (req, res, next) => {
     try {
         const deletedPayment = await SellerPayment.findOneAndDelete({
             _id: req.params.id,

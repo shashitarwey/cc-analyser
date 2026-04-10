@@ -152,9 +152,9 @@
 - ~~Unit & Integration Tests — Jest + Supertest (server, 42 tests), Vitest + React Testing Library (client, 31 tests)~~ ✅
 - ~~API Documentation — Swagger/OpenAPI at `/api/docs` using swagger-jsdoc + swagger-ui-express~~ ✅
 - ~~CI/CD Pipeline — GitHub Actions: server tests, client tests, client build with artifact upload~~ ✅
-- **Input Validation Library** — Replace Mongoose-only validation with `express-validator` or `joi` for request bodies
+- ~~Input Validation Library — `express-validator` with per-route validator modules and a shared `validate` middleware that returns 400 + first error message~~ ✅
 - **Rate Limiting Improvements** — Per-user rate limits (currently global), configurable windows
-- **Database Indexes Audit** — Review and add compound indexes for common query patterns
+- ~~Database Indexes Audit — Compound indexes on Order (user_id+delivery_status+seller_id, card_id+order_date), ActivityLog (user_id+entity_id), User (deletion_requested_at sparse)~~ ✅
 - **Error Tracking** — Integrate Sentry for production error monitoring
 
 ---

@@ -3,6 +3,15 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const authMiddleware = require('../middleware/auth');
+const validate = require('../middleware/validate');
+const {
+    registerRules,
+    loginRules,
+    updateProfileRules,
+    changePasswordRules,
+    forgotPasswordRules,
+    resetPasswordRules,
+} = require('../validators/auth.validator');
 const logger = require('../utils/logger');
 
 const router = express.Router();
@@ -144,23 +153,9 @@ const signToken = (user) =>
  */
 
 // POST /api/auth/register
-router.post('/register', async (req, res) => {
+router.post('/register', registerRules, validate, async (req, res) => {
     try {
         const { name, email, password } = req.body;
-        if (!name || !email || !password)
-            return res.status(400).json({ error: 'Name, email and password are required' });
-
-        // Validate password complexity
-        if (password.length < 8)
-            return res.status(400).json({ error: 'Password must be at least 8 characters' });
-        if (!/[A-Z]/.test(password))
-            return res.status(400).json({ error: 'Password must contain at least one uppercase letter' });
-        if (!/[a-z]/.test(password))
-            return res.status(400).json({ error: 'Password must contain at least one lowercase letter' });
-        if (!/[0-9]/.test(password))
-            return res.status(400).json({ error: 'Password must contain at least one number' });
-        if (!/[^A-Za-z0-9]/.test(password))
-            return res.status(400).json({ error: 'Password must contain at least one special character' });
 
         const exists = await User.findOne({ email });
         if (exists) return res.status(409).json({ error: 'Email already registered' });
@@ -175,11 +170,9 @@ router.post('/register', async (req, res) => {
 });
 
 // POST /api/auth/login
-router.post('/login', async (req, res) => {
+router.post('/login', loginRules, validate, async (req, res) => {
     try {
         const { email, password } = req.body;
-        if (!email || !password)
-            return res.status(400).json({ error: 'email and password are required' });
 
         const user = await User.findOne({ email });
         if (!user || !(await user.comparePassword(password)))
@@ -201,22 +194,10 @@ router.post('/login', async (req, res) => {
     }
 });
 
-// Helper: validate password complexity (reuses same rules as register)
-function validatePassword(password) {
-    if (password.length < 8) return 'Password must be at least 8 characters';
-    if (!/[A-Z]/.test(password)) return 'Password must contain at least one uppercase letter';
-    if (!/[a-z]/.test(password)) return 'Password must contain at least one lowercase letter';
-    if (!/[0-9]/.test(password)) return 'Password must contain at least one number';
-    if (!/[^A-Za-z0-9]/.test(password)) return 'Password must contain at least one special character';
-    return null;
-}
-
 // PUT /api/auth/profile — update name and/or email (protected)
-router.put('/profile', authMiddleware, async (req, res) => {
+router.put('/profile', authMiddleware, updateProfileRules, validate, async (req, res) => {
     try {
         const { name, email } = req.body;
-        if (!name && !email)
-            return res.status(400).json({ error: 'At least one of name or email is required' });
 
         const update = {};
         if (name !== undefined) update.name = name.trim();
@@ -241,11 +222,9 @@ router.put('/profile', authMiddleware, async (req, res) => {
 });
 
 // PUT /api/auth/change-password — change password with old password verification (protected)
-router.put('/change-password', authMiddleware, async (req, res) => {
+router.put('/change-password', authMiddleware, changePasswordRules, validate, async (req, res) => {
     try {
         const { old_password, new_password } = req.body;
-        if (!old_password || !new_password)
-            return res.status(400).json({ error: 'Old password and new password are required' });
 
         const user = await User.findById(req.user.id);
         if (!user) return res.status(404).json({ error: 'User not found' });
@@ -253,10 +232,6 @@ router.put('/change-password', authMiddleware, async (req, res) => {
         // Verify old password
         const isMatch = await user.comparePassword(old_password);
         if (!isMatch) return res.status(401).json({ error: 'Old password is incorrect' });
-
-        // Validate new password complexity
-        const validationError = validatePassword(new_password);
-        if (validationError) return res.status(400).json({ error: validationError });
 
         // Ensure new password is different
         const isSame = await bcrypt.compare(new_password, user.password);
@@ -342,10 +317,9 @@ const PasswordResetToken = require('../models/PasswordResetToken');
 const { sendPasswordResetEmail } = require('../utils/mailer');
 
 // POST /api/auth/forgot-password — send reset email (public)
-router.post('/forgot-password', async (req, res) => {
+router.post('/forgot-password', forgotPasswordRules, validate, async (req, res) => {
     try {
         const { email } = req.body;
-        if (!email) return res.status(400).json({ error: 'Email is required' });
 
         // Always return 200 to prevent email enumeration
         const user = await User.findOne({ email: email.trim().toLowerCase() });
@@ -371,16 +345,10 @@ router.post('/forgot-password', async (req, res) => {
 });
 
 // POST /api/auth/reset-password/:token — reset password using token (public)
-router.post('/reset-password/:token', async (req, res) => {
+router.post('/reset-password/:token', resetPasswordRules, validate, async (req, res) => {
     try {
         const { token } = req.params;
         const { password } = req.body;
-
-        if (!password) return res.status(400).json({ error: 'New password is required' });
-
-        // Validate password complexity
-        const validationError = validatePassword(password);
-        if (validationError) return res.status(400).json({ error: validationError });
 
         // Verify token
         const tokenDoc = await PasswordResetToken.verifyToken(token);

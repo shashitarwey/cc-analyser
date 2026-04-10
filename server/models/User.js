@@ -11,6 +11,8 @@ const userSchema = new mongoose.Schema(
     { timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } }
 );
 
+userSchema.index({ deletion_requested_at: 1 }, { sparse: true });
+
 userSchema.methods.comparePassword = function (plain) {
     return bcrypt.compare(plain, this.password);
 };

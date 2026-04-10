@@ -5,6 +5,8 @@ const Transaction = require('../models/Transaction');
 const { pickFields } = require('../utils/helpers');
 const { invalidateSummaryCache } = require('../utils/cache');
 const { logActivity } = require('../utils/activityLogger');
+const validate = require('../middleware/validate');
+const { createRules, updateRules, idRule } = require('../validators/cards.validator');
 
 /**
  * @swagger
@@ -78,7 +80,7 @@ router.get('/', async (req, res, next) => {
     } catch (err) { next(err); }
 });
 
-router.post('/', async (req, res, next) => {
+router.post('/', createRules, validate, async (req, res, next) => {
     try {
         const data = pickFields(req.body, CARD_FIELDS);
         data.user_id = req.user.id;
@@ -91,7 +93,7 @@ router.post('/', async (req, res, next) => {
     }
 });
 
-router.put('/:id', async (req, res, next) => {
+router.put('/:id', updateRules, validate, async (req, res, next) => {
     try {
         const data = pickFields(req.body, CARD_FIELDS);
         const oldCard = await Card.findOne({ _id: req.params.id, user_id: req.user.id });
@@ -111,7 +113,7 @@ router.put('/:id', async (req, res, next) => {
     }
 });
 
-router.delete('/:id', async (req, res, next) => {
+router.delete('/:id', idRule, validate, async (req, res, next) => {
     try {
         const card = await Card.findOneAndDelete({ _id: req.params.id, user_id: req.user.id });
         if (!card) return res.status(404).json({ error: 'Card not found' });

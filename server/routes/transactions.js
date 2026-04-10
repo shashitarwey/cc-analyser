@@ -7,6 +7,8 @@ const Order = require('../models/Order');
 const { buildDateRange } = require('../utils/helpers');
 const { invalidateSummaryCache } = require('../utils/cache');
 const { logActivity } = require('../utils/activityLogger');
+const validate = require('../middleware/validate');
+const { createRules, idRule } = require('../validators/transactions.validator');
 
 /**
  * @swagger
@@ -207,7 +209,7 @@ router.get('/', async (req, res, next) => {
 });
 
 // POST /api/transactions
-router.post('/', async (req, res, next) => {
+router.post('/', createRules, validate, async (req, res, next) => {
     try {
         const { card_id, amount, description, date } = req.body;
         // Verify card belongs to current user
@@ -223,7 +225,7 @@ router.post('/', async (req, res, next) => {
 });
 
 // DELETE /api/transactions/:id
-router.delete('/:id', async (req, res, next) => {
+router.delete('/:id', idRule, validate, async (req, res, next) => {
     try {
         // Verify ownership through the card
         const tx = await Transaction.findById(req.params.id).populate('card_id', 'user_id');

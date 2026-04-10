@@ -33,6 +33,7 @@ const OrderSchema = new mongoose.Schema({
 }, { timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } });
 
 OrderSchema.index({ user_id: 1, order_date: -1 });
-OrderSchema.index({ card_id: 1, delivery_status: 1 });
+OrderSchema.index({ user_id: 1, delivery_status: 1, seller_id: 1 });
+OrderSchema.index({ card_id: 1, order_date: -1 });
 
 module.exports = mongoose.model('Order', OrderSchema);

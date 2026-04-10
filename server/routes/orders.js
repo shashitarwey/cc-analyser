@@ -6,6 +6,8 @@ const Seller = require('../models/Seller');
 const { pickFields, parsePagination, paginatedResponse } = require('../utils/helpers');
 const { invalidateSummaryCache } = require('../utils/cache');
 const { logActivity } = require('../utils/activityLogger');
+const validate = require('../middleware/validate');
+const { createRules, updateRules, idRule } = require('../validators/orders.validator');
 
 /**
  * @swagger
@@ -130,7 +132,7 @@ router.get('/', async (req, res, next) => {
 });
 
 // POST a new order — verify ownership of card_id and seller_id
-router.post('/', async (req, res, next) => {
+router.post('/', createRules, validate, async (req, res, next) => {
     try {
         const data = pickFields(req.body, ORDER_FIELDS);
         data.user_id = req.user.id;
@@ -169,7 +171,7 @@ router.post('/', async (req, res, next) => {
 });
 
 // PUT update an order — verify ownership of card_id and seller_id if changed
-router.put('/:id', async (req, res, next) => {
+router.put('/:id', updateRules, validate, async (req, res, next) => {
     try {
         const data = pickFields(req.body, ORDER_FIELDS);
 
@@ -220,7 +222,7 @@ router.put('/:id', async (req, res, next) => {
 });
 
 // DELETE an order
-router.delete('/:id', async (req, res, next) => {
+router.delete('/:id', idRule, validate, async (req, res, next) => {
     try {
         const deletedOrder = await Order.findOneAndDelete({ _id: req.params.id, user_id: req.user.id });
         if (!deletedOrder) return res.status(404).json({ error: 'Order not found' });

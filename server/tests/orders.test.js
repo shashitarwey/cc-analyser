@@ -64,7 +64,7 @@ describe('Orders Routes', () => {
         .get('/api/orders')
         .set(authHeader(token));
       expect(res.status).toBe(200);
-      expect(res.body).toHaveLength(1);
+      expect(res.body.items).toHaveLength(1);
     });
 
     it('should filter by seller', async () => {
@@ -75,7 +75,7 @@ describe('Orders Routes', () => {
         .get('/api/orders')
         .query({ seller_id: sellerId })
         .set(authHeader(token));
-      expect(res.body).toHaveLength(1);
+      expect(res.body.items).toHaveLength(1);
     });
   });
 
