@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { DayPicker } from 'react-day-picker';
-import { format, parseISO } from 'date-fns';
+import { parseISO } from 'date-fns';
 import { Calendar as CalendarIcon, ChevronDown } from 'lucide-react';
 import 'react-day-picker/style.css';
 

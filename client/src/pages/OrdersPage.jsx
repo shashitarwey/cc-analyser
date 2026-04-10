@@ -1,13 +1,14 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { getOrders, deleteOrder, updateOrder, getCards, getAllSellers } from '../api';
+import { getOrders, getAllOrders, deleteOrder, updateOrder, getCards, getAllSellers } from '../api';
 import AddOrderModal from '../components/AddOrderModal';
 import ActionMenu from '../common/ActionMenu';
 import Pagination from '../common/Pagination';
-import { ShoppingBag, MapPin, Pencil, Trash2, Filter, Search, X as XIcon, ChevronLeft } from 'lucide-react';
+import { ShoppingBag, MapPin, Pencil, Trash2, Filter, Search, X as XIcon, ChevronLeft, Download } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { ECOMM_SITES, PAGE_SIZE, STATUS_FILTER_OPTIONS } from '../constants';
 import { fmtCurrency, fmtSignedCurrency, cardLabel, sellerLabel, pickTruthy } from '../utils/formatters';
-import SingleDatePicker from '../common/SingleDatePicker';
+import { exportOrdersCSV } from '../utils/orderExport';
+import DateRangeDropdown from '../common/DateRangeDropdown';
 import SearchableDropdown from '../common/SearchableDropdown';
 import ConfirmModal from '../common/ConfirmModal';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -38,6 +39,8 @@ export default function OrdersPage() {
   // Pre-fill seller filter if navigated from SellersPage
   const initSellerId = location.state?.seller_id || '';
   const [filters, setFilters] = useState({ ...EMPTY_FILTERS, seller_id: initSellerId });
+  const [orderDatePreset, setOrderDatePreset] = useState('');
+  const [deliveryDatePreset, setDeliveryDatePreset] = useState('');
   const debounceRef = useRef(null);
 
   const fetchOrders = useCallback(async (f, p = page, ps = pageSize) => {
@@ -53,6 +56,8 @@ export default function OrdersPage() {
 
   const clearFilters = async () => {
     setFilters(EMPTY_FILTERS);
+    setOrderDatePreset('');
+    setDeliveryDatePreset('');
     setPage(1);
     await fetchOrders(EMPTY_FILTERS, 1, pageSize);
   };
@@ -107,11 +112,30 @@ export default function OrdersPage() {
     });
   };
 
+  const [exporting, setExporting] = useState(false);
+  const handleExportCSV = async () => {
+    setExporting(true);
+    try {
+      const allOrders = await getAllOrders(pickTruthy(filters));
+      if (!allOrders || allOrders.length === 0) {
+        toast.error('No orders to export');
+        return;
+      }
+      const today = new Date().toISOString().slice(0, 10);
+      exportOrdersCSV(allOrders, `orders_${today}.csv`);
+      toast.success(`Exported ${allOrders.length} order${allOrders.length === 1 ? '' : 's'}`);
+    } catch {
+      toast.error('Failed to export orders');
+    } finally {
+      setExporting(false);
+    }
+  };
+
   const handleToggleClear = async (order) => {
     try {
       await updateOrder(order._id, { is_cleared: !order.is_cleared });
       setOrders(prev => prev.map(o => o._id === order._id ? { ...o, is_cleared: !o.is_cleared } : o));
-    } catch (err) {
+    } catch {
       toast.error('Failed to update order');
     }
   };
@@ -205,6 +229,15 @@ export default function OrdersPage() {
               <Filter size={14} /> Filters
               {hasActiveFilters && <span style={{ position: 'absolute', top: '4px', right: '4px', width: '7px', height: '7px', background: 'var(--accent)', borderRadius: '50%' }} />}
             </button>
+            <button
+              className="btn btn-secondary btn-sm"
+              style={{ flexShrink: 0 }}
+              onClick={handleExportCSV}
+              disabled={exporting || totalOrders === 0}
+              data-tooltip="Export orders as CSV"
+            >
+              <Download size={14} /> {exporting ? 'Exporting…' : 'Export CSV'}
+            </button>
             <button className="btn btn-primary btn-sm" style={{ flexShrink: 0 }} onClick={() => { setEditOrder(null); setShowModal(true); }}>
               <ShoppingBag size={14} /> Add Order
             </button>
@@ -213,9 +246,9 @@ export default function OrdersPage() {
       </div>
 
       <div className="page-content">
-        {/* Filter panel */}
+        {/* Filter panel — compact grid */}
         {showFilters && (
-          <div className="filter-panel">
+          <div className="filter-panel filter-panel-compact">
             <div className="filter-panel-header">
               <span className="filter-panel-title">
                 <Filter size={14} /> Filters
@@ -223,78 +256,72 @@ export default function OrdersPage() {
               <button className="modal-close" onClick={() => setShowFilters(false)}><XIcon size={16} /></button>
             </div>
 
-            <div className="filter-panel-body">
-              {/* Date ranges */}
-              <div className="filter-section-label">Order Date</div>
-              <div className="filter-date-row">
-                <div className="filter-date-pair">
-                  <label className="form-label" style={{ fontSize: '0.75rem' }}>From</label>
-                  <SingleDatePicker value={filters.order_date_from} onChange={v => setFilters(f => ({ ...f, order_date_from: v }))} placeholder="Start date" />
-                </div>
-                <span className="filter-date-sep">→</span>
-                <div className="filter-date-pair">
-                  <label className="form-label" style={{ fontSize: '0.75rem' }}>To</label>
-                  <SingleDatePicker value={filters.order_date_to} onChange={v => setFilters(f => ({ ...f, order_date_to: v }))} placeholder="End date" />
-                </div>
+            <div className="filter-grid-compact">
+              <div className="filter-cell">
+                <label className="filter-cell-label">Order Date</label>
+                <DateRangeDropdown
+                  dateFrom={filters.order_date_from}
+                  dateTo={filters.order_date_to}
+                  activePreset={orderDatePreset}
+                  onChange={(from, to, preset) => {
+                    setFilters(f => ({ ...f, order_date_from: from, order_date_to: to }));
+                    setOrderDatePreset(preset || '');
+                  }}
+                />
               </div>
-
-              <div className="filter-section-label" style={{ marginTop: '18px' }}>Delivery Date</div>
-              <div className="filter-date-row" style={{ marginBottom: '20px' }}>
-                <div className="filter-date-pair">
-                  <label className="form-label" style={{ fontSize: '0.75rem' }}>From</label>
-                  <SingleDatePicker value={filters.delivery_date_from} onChange={v => setFilters(f => ({ ...f, delivery_date_from: v }))} placeholder="Start date" />
-                </div>
-                <span className="filter-date-sep">→</span>
-                <div className="filter-date-pair">
-                  <label className="form-label" style={{ fontSize: '0.75rem' }}>To</label>
-                  <SingleDatePicker value={filters.delivery_date_to} onChange={v => setFilters(f => ({ ...f, delivery_date_to: v }))} placeholder="End date" />
-                </div>
+              <div className="filter-cell">
+                <label className="filter-cell-label">Delivery Date</label>
+                <DateRangeDropdown
+                  dateFrom={filters.delivery_date_from}
+                  dateTo={filters.delivery_date_to}
+                  activePreset={deliveryDatePreset}
+                  onChange={(from, to, preset) => {
+                    setFilters(f => ({ ...f, delivery_date_from: from, delivery_date_to: to }));
+                    setDeliveryDatePreset(preset || '');
+                  }}
+                />
               </div>
-
-              {/* Dropdowns */}
-              <div className="filter-dropdowns">
-                <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label className="form-label" style={{ fontSize: '0.75rem' }}>Seller</label>
-                  <SearchableDropdown
-                    options={['All Sellers', ...sellerOptions.map(o => o.label)]}
-                    value={filters.seller_id ? (sellerOptions.find(o => o.value === filters.seller_id)?.label || '') : 'All Sellers'}
-                    onChange={val => {
-                      const opt = sellerOptions.find(o => o.label === val);
-                      setFilters(f => ({ ...f, seller_id: opt ? opt.value : '' }));
-                    }}
-                    placeholder="All Sellers"
-                  />
-                </div>
-                <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label className="form-label" style={{ fontSize: '0.75rem' }}>Card</label>
-                  <SearchableDropdown
-                    options={['All Cards', ...cardOptions.map(o => o.label)]}
-                    value={filters.card_id ? (cardOptions.find(o => o.value === filters.card_id)?.label || '') : 'All Cards'}
-                    onChange={val => {
-                      const opt = cardOptions.find(o => o.label === val);
-                      setFilters(f => ({ ...f, card_id: opt ? opt.value : '' }));
-                    }}
-                    placeholder="All Cards"
-                  />
-                </div>
-                <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label className="form-label" style={{ fontSize: '0.75rem' }}>Source</label>
-                  <SearchableDropdown
-                    options={sourceOptions}
-                    value={filters.ecomm_site || 'All'}
-                    onChange={val => setFilters(f => ({ ...f, ecomm_site: val === 'All' ? '' : val }))}
-                    placeholder="All"
-                  />
-                </div>
-                <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label className="form-label" style={{ fontSize: '0.75rem' }}>Status</label>
-                  <SearchableDropdown
-                    options={STATUS_FILTER_OPTIONS}
-                    value={filters.delivery_status || 'All'}
-                    onChange={val => setFilters(f => ({ ...f, delivery_status: val === 'All' ? '' : val }))}
-                    placeholder="All"
-                  />
-                </div>
+              <div className="filter-cell">
+                <label className="filter-cell-label">Seller</label>
+                <SearchableDropdown
+                  options={['All Sellers', ...sellerOptions.map(o => o.label)]}
+                  value={filters.seller_id ? (sellerOptions.find(o => o.value === filters.seller_id)?.label || '') : ''}
+                  onChange={val => {
+                    const opt = sellerOptions.find(o => o.label === val);
+                    setFilters(f => ({ ...f, seller_id: opt ? opt.value : '' }));
+                  }}
+                  placeholder="All Sellers"
+                />
+              </div>
+              <div className="filter-cell">
+                <label className="filter-cell-label">Card</label>
+                <SearchableDropdown
+                  options={['All Cards', ...cardOptions.map(o => o.label)]}
+                  value={filters.card_id ? (cardOptions.find(o => o.value === filters.card_id)?.label || '') : ''}
+                  onChange={val => {
+                    const opt = cardOptions.find(o => o.label === val);
+                    setFilters(f => ({ ...f, card_id: opt ? opt.value : '' }));
+                  }}
+                  placeholder="All Cards"
+                />
+              </div>
+              <div className="filter-cell">
+                <label className="filter-cell-label">Source</label>
+                <SearchableDropdown
+                  options={sourceOptions}
+                  value={filters.ecomm_site || ''}
+                  onChange={val => setFilters(f => ({ ...f, ecomm_site: val === 'All' ? '' : val }))}
+                  placeholder="All Sources"
+                />
+              </div>
+              <div className="filter-cell">
+                <label className="filter-cell-label">Status</label>
+                <SearchableDropdown
+                  options={STATUS_FILTER_OPTIONS}
+                  value={filters.delivery_status || ''}
+                  onChange={val => setFilters(f => ({ ...f, delivery_status: val === 'All' ? '' : val }))}
+                  placeholder="All Statuses"
+                />
               </div>
             </div>
 

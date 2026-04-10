@@ -340,6 +340,64 @@
   background: rgba(0, 0, 0, 0.05);
 }
 
+/* ── Compact filter panel (Orders page) ─────────────────── */
+.filter-panel-compact .filter-panel-header {
+  padding: 10px 14px;
+}
+
+.filter-grid-compact {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px 14px;
+  padding: 12px 14px 14px;
+}
+
+.filter-cell {
+  min-width: 0;
+}
+
+.filter-cell-label {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 4px;
+}
+
+.filter-cell .date-range-dropdown {
+  display: block;
+  width: 100%;
+}
+
+/* Match SearchableDropdown sizing to the date trigger in the filter grid */
+.filter-cell .form-input {
+  height: 38px;
+  min-height: 38px;
+  padding: 7px 12px;
+  font-size: 0.82rem;
+  font-weight: 500;
+}
+
+.filter-cell .form-input::placeholder {
+  font-size: 0.82rem;
+  font-weight: 400;
+}
+
+.filter-cell .custom-dropdown-icon {
+  width: 14px;
+  height: 14px;
+}
+
+@media (max-width: 900px) {
+  .filter-grid-compact { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 520px) {
+  .filter-grid-compact { grid-template-columns: 1fr; }
+}
+
 /* ── Seller Pre-filter Banner ─────────────────────────────── */
 .prefilter-banner {
   display: flex;

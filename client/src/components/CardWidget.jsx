@@ -16,7 +16,7 @@ const BANK_GRADIENTS = [
 
 const bankGradient = (name) => {
   let h = 0;
-  for (const c of name) h = name.charCodeAt(0) + ((h << 5) - h);
+  for (let i = 0; i < name.length; i++) h = name.charCodeAt(i) + ((h << 5) - h);
   return BANK_GRADIENTS[Math.abs(h) % BANK_GRADIENTS.length];
 };
 

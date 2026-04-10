@@ -153,7 +153,7 @@ export default function DashboardPage() {
               <div className="hero-amount">{initialLoad ? '—' : fmtCurrency(grandTotal)}</div>
             </>
           )}
-          <DateRangeDropdown dateFrom={dateFrom} dateTo={dateTo} activePreset={activePreset} onChange={setRange} />
+          <DateRangeDropdown dateFrom={dateFrom} dateTo={dateTo} activePreset={activePreset} onChange={setRange} showRangeBelow />
         </div>
       </div>
 
@@ -291,7 +291,7 @@ export default function DashboardPage() {
       <button className="fab" onClick={() => setShowAddCard(true)}><Plus size={24} /></button>
 
       {showAddCard && <AddCardModal editCard={editCard} onClose={() => { setShowAddCard(false); setEditCard(null); }} onSave={() => { setShowAddCard(false); setEditCard(null); refresh(); toast.success('Card saved!'); }} />}
-      {txCard && <AddTransactionModal card={txCard._id ? txCard : null} cards={allCards} onClose={() => setTxCard(null)} onSave={refresh} />}
+      {txCard && <AddTransactionModal card={txCard._id ? txCard : null} cards={allCards} onClose={() => setTxCard(null)} onSave={() => { setTxCard(null); refresh(); }} />}
       {confirm && (
         <ConfirmModal
           title="Delete Card?"

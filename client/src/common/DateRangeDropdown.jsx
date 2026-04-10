@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { DayPicker } from 'react-day-picker';
-import { format, subMonths, startOfMonth, endOfMonth, startOfQuarter, parseISO, differenceInDays } from 'date-fns';
+import { subMonths, startOfMonth, endOfMonth, startOfQuarter, parseISO, differenceInDays } from 'date-fns';
 import { Calendar as CalendarIcon, ChevronDown } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import 'react-day-picker/style.css';
@@ -29,7 +29,7 @@ const getPresets = () => {
   ];
 };
 
-export default function DateRangeDropdown({ dateFrom, dateTo, activePreset, onChange }) {
+export default function DateRangeDropdown({ dateFrom, dateTo, activePreset, onChange, showRangeBelow = false }) {
   const [open, setOpen] = useState(false);
   const containerRef = useRef(null);
 
@@ -111,23 +111,33 @@ export default function DateRangeDropdown({ dateFrom, dateTo, activePreset, onCh
     setOpen(false);
   };
 
-  const presetLabel = activePreset || 'Custom Range';
-  const dateRangeLabel = dateFrom && dateTo
-    ? `${fmtDisplay(dateFrom)}  →  ${fmtDisplay(dateTo)}`
-    : '';
+  const hasRange = Boolean(dateFrom && dateTo);
+  const rangeText = hasRange ? `${fmtDisplay(dateFrom)} → ${fmtDisplay(dateTo)}` : '';
+  const namedPreset = activePreset && activePreset !== 'Custom Range' ? activePreset : '';
 
   return (
     <div className="date-range-dropdown" ref={containerRef}>
       <button
-        className="date-range-trigger"
+        className={`date-range-trigger ${hasRange ? 'has-value' : ''}`}
         onClick={() => setOpen(!open)}
       >
-        <CalendarIcon size={16} className="date-icon" />
-        <span>{presetLabel}</span>
+        <CalendarIcon size={14} className="date-icon" />
+        <span className="date-trigger-text">
+          {namedPreset ? (
+            <>
+              <span className="date-trigger-preset">{namedPreset}</span>
+              {rangeText && !showRangeBelow && <span className="date-trigger-range">{rangeText}</span>}
+            </>
+          ) : hasRange ? (
+            <span className="date-trigger-preset">{rangeText}</span>
+          ) : (
+            <span className="date-trigger-placeholder">Any date</span>
+          )}
+        </span>
         <ChevronDown size={14} className={`date-chevron ${open ? 'open' : ''}`} />
       </button>
-      {dateRangeLabel && (
-        <div className="date-range-subtitle">{dateRangeLabel}</div>
+      {showRangeBelow && namedPreset && rangeText && (
+        <div className="date-range-subtitle">{rangeText}</div>
       )}
 
       {open && (

@@ -54,7 +54,7 @@ export default function SellerLedgerPage() {
         return { ...item, runningBalance, isCancelled, isPending };
       });
       setItems(ledger);
-    } catch (err) {
+    } catch {
       toast.error('Failed to load ledger');
     } finally {
       setLoading(false);
@@ -72,7 +72,7 @@ export default function SellerLedgerPage() {
           await deleteSellerPayment(item.id);
           toast.success('Payment deleted');
           fetchData();
-        } catch (err) { toast.error('Failed to delete payment'); }
+        } catch { toast.error('Failed to delete payment'); }
       }
     });
   };

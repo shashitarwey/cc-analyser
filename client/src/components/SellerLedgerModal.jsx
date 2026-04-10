@@ -52,7 +52,7 @@ export default function SellerLedgerModal({ seller, onClose, onAddPayment }) {
       });
 
       setItems(ledger); // Oldest first for chat flow
-    } catch (err) {
+    } catch {
       toast.error('Failed to load ledger');
     } finally {
       setLoading(false);
@@ -72,7 +72,7 @@ export default function SellerLedgerModal({ seller, onClose, onAddPayment }) {
           await deleteSellerPayment(payment.id);
           toast.success('Payment deleted');
           fetchLedger();
-        } catch (err) {
+        } catch {
           toast.error('Failed to delete payment');
         }
       }
@@ -109,7 +109,7 @@ export default function SellerLedgerModal({ seller, onClose, onAddPayment }) {
               <div className="empty-sub">No transactions recorded yet.</div>
             </div>
           ) : (
-            items.map((item, idx) => {
+            items.map((item) => {
               const isOrder = item.type === 'ORDER';
               const isPendingOrder = isOrder && item.raw.delivery_status !== 'Yes';
               const alignment = isOrder ? 'flex-start' : 'flex-end';

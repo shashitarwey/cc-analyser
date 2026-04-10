@@ -768,16 +768,18 @@
   align-items: center;
   gap: 8px;
   width: 100%;
+  min-height: 38px;
   background: var(--surface);
   border: 1px solid var(--border);
   color: var(--text);
-  padding: 10px 16px;
+  padding: 7px 12px;
   border-radius: var(--radius-sm);
   font-family: inherit;
-  font-size: 0.88rem;
+  font-size: 0.82rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: border-color 0.15s, background 0.15s;
+  text-align: left;
 }
 
 .date-trigger-text {
@@ -786,21 +788,37 @@
   align-items: flex-start;
   gap: 1px;
   flex: 1;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .date-trigger-preset {
-  font-size: 0.88rem;
+  font-size: 0.82rem;
   font-weight: 600;
   color: var(--text);
-  line-height: 1.2;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .date-trigger-range {
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 400;
   color: var(--text-muted);
   line-height: 1.2;
   letter-spacing: 0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.date-trigger-placeholder {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  font-weight: 400;
 }
 
 .date-range-trigger:hover {
@@ -808,10 +826,14 @@
   border-color: var(--accent);
 }
 
+.date-range-trigger.has-value {
+  border-color: rgba(88, 166, 255, 0.35);
+}
+
 .date-range-subtitle {
   font-size: 0.72rem;
   color: var(--text-muted);
-  margin-top: 4px;
+  margin-top: 6px;
   text-align: center;
   width: 100%;
   letter-spacing: 0.01em;
@@ -909,7 +931,7 @@
   width: 100%;
 }
 
-/* React DayPicker Overrides */
+/* React DayPicker v9 Overrides */
 .rdp-root,
 .rdp {
   --rdp-cell-size: 40px !important;
@@ -920,36 +942,74 @@
   margin: 0 !important;
 }
 
-.rdp-day_selected,
-.rdp-day_selected:focus-visible,
-.rdp-day_selected:hover {
-  background-color: var(--accent) !important;
-  color: #ffffff !important;
-  font-weight: 700;
-}
-
-.rdp-day_range_middle {
-  background-color: rgba(88, 166, 255, 0.15) !important;
-  color: var(--text) !important;
-}
-
-.rdp-button:hover:not(.rdp-day_selected) {
-  background-color: var(--surface2) !important;
-}
-
-.rdp-day,
-.rdp-nav_button {
+/* Base day cell */
+.rdp-day {
   color: var(--text);
 }
 
-.rdp-day:not(.rdp-day_selected):not(.rdp-day_outside) {
-  background-color: transparent !important;
-  color: var(--text) !important;
+.rdp-day_button {
+  border-radius: 50%;
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
 
-.rdp-day_outside {
+.rdp-day_button:hover:not(:disabled) {
+  background-color: var(--surface2) !important;
+}
+
+/* Range middle — soft tinted strip across the whole cell */
+.rdp-day.rdp-range_middle {
+  background-color: rgba(88, 166, 255, 0.18) !important;
+  border-radius: 0;
+}
+
+.rdp-day.rdp-range_middle .rdp-day_button {
+  background: transparent !important;
+  color: var(--text) !important;
+  border-radius: 0 !important;
+  font-weight: 600;
+}
+
+/* Range start — half-tinted cell with filled circle on the right half */
+.rdp-day.rdp-range_start {
+  background: linear-gradient(90deg, transparent 50%, rgba(88, 166, 255, 0.18) 50%) !important;
+}
+
+.rdp-day.rdp-range_start.rdp-range_end {
+  background: transparent !important;
+}
+
+/* Range end — half-tinted cell with filled circle on the left half */
+.rdp-day.rdp-range_end {
+  background: linear-gradient(90deg, rgba(88, 166, 255, 0.18) 50%, transparent 50%) !important;
+}
+
+/* Start/end/selected day button — solid accent circle */
+.rdp-day.rdp-range_start .rdp-day_button,
+.rdp-day.rdp-range_end .rdp-day_button,
+.rdp-day.rdp-selected:not(.rdp-range_middle) .rdp-day_button {
+  background-color: var(--accent) !important;
+  color: #ffffff !important;
+  font-weight: 700;
+  border-radius: 50% !important;
+}
+
+.rdp-day.rdp-range_start .rdp-day_button:hover,
+.rdp-day.rdp-range_end .rdp-day_button:hover,
+.rdp-day.rdp-selected:not(.rdp-range_middle) .rdp-day_button:hover {
+  background-color: var(--accent) !important;
+  filter: brightness(1.1);
+}
+
+/* Today marker when not selected */
+.rdp-day.rdp-today:not(.rdp-selected) .rdp-day_button {
+  color: var(--accent) !important;
+  font-weight: 700;
+  border: 1px solid rgba(88, 166, 255, 0.4);
+}
+
+.rdp-day.rdp-outside {
   color: var(--text-muted) !important;
-  opacity: 0.5;
+  opacity: 0.4;
 }
 
 .rdp-head_cell {
@@ -1819,11 +1879,7 @@
   color: var(--text);
 }
 
-/* ── Range middle: soft blue highlight ─────────────────────── */
-.rdp-root .rdp-day.rdp-range_middle .rdp-day_button {
-  background: transparent;
-  border-radius: 0;
-}
+/* Range middle button styling handled above in DayPicker overrides */
 
 /* ══════════════════════════════════════════════════════════
    DATE-RANGE-DROPDOWN MOBILE LAYOUT

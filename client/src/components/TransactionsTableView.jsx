@@ -74,7 +74,7 @@ export default function TransactionsTableView({ view, onBack, dateFrom, dateTo, 
       setTotalPages(Math.ceil(pageInfo.total_items / pageInfo.page_size) || 1);
       setTotalAmount(res.totalAmount || 0);
       setTotalCount(pageInfo.total_items);
-    } catch (err) {
+    } catch {
       toast.error('Failed to load transactions');
     } finally {
       setLoading(false);

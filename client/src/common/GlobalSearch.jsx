@@ -4,7 +4,7 @@ import { getCards, getAllSellers, getAllOrders } from '../api';
 import { useNavigate } from 'react-router-dom';
 import { fmtCurrency } from '../utils/formatters';
 
-export default function GlobalSearch({ onClose, inline = false, externalQuery = '', onQueryChange }) {
+export default function GlobalSearch({ onClose, inline = false, externalQuery = '' }) {
   const [query, setQuery]     = useState(externalQuery);
   const [cards, setCards]     = useState([]);
   const [sellers, setSellers] = useState([]);

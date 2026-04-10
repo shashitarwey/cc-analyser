@@ -17,7 +17,7 @@ function formatDate(dateStr) {
 }
 
 export default function ProfilePage() {
-  const { user, updateUser, logout } = useAuth();
+  const { user, updateUser } = useAuth();
   const navigate = useNavigate();
 
   // Profile form
