@@ -25,6 +25,7 @@ const orderColumns = [
     { header: 'Card', value: o => cardLabelCSV(o.card_id) },
     { header: 'ID Used', value: o => o.id_used },
     { header: 'Cleared', value: o => o.is_cleared ? 'Yes' : 'No' },
+    { header: 'Remark', value: o => o.remark || '' },
 ];
 
 export const exportOrdersCSV = (orders, filename) => {
