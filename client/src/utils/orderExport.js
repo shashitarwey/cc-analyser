@@ -1,7 +1,10 @@
-import { fmtDisplay, cardLabel, sellerLabel } from './formatters';
+import { fmtDisplay, sellerLabel } from './formatters';
 import { toCSV, downloadCSV } from './csv';
 
 const fmtCSVDate = (iso) => iso ? fmtDisplay(iso.slice(0, 10)) : '';
+
+const cardLabelCSV = (card) =>
+    card ? `${card.bank_name} - ${card.last_four_digit}` : '';
 
 // Column spec shared between OrdersPage and SellerLedgerPage exports.
 // Dates use dd-MM-yyyy so Excel doesn't auto-convert them to date serials
@@ -19,7 +22,7 @@ const orderColumns = [
     { header: 'Delivered Date', value: o => fmtCSVDate(o.delivered_date) },
     { header: 'Seller', value: o => sellerLabel(o.seller_id) },
     { header: 'E-comm Site', value: o => o.ecomm_site },
-    { header: 'Card', value: o => cardLabel(o.card_id) },
+    { header: 'Card', value: o => cardLabelCSV(o.card_id) },
     { header: 'ID Used', value: o => o.id_used },
     { header: 'Cleared', value: o => o.is_cleared ? 'Yes' : 'No' },
 ];
