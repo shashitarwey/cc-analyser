@@ -79,6 +79,18 @@ export const updateSellerPayment = (id, data) => API.put(`/sellers/payment/${id}
 
 export const deleteSellerPayment = (id) => API.delete(`/sellers/payment/${id}`).then(r => r.data);
 
+// ── Khata Customers ──
+export const getCustomers = (params) => API.get('/customers', { params }).then(r => r.data);
+export const getCustomer = (id) => API.get(`/customers/${id}`).then(r => r.data);
+export const addCustomer = (data) => API.post('/customers', data).then(r => r.data);
+export const updateCustomer = (id, d) => API.put(`/customers/${id}`, d).then(r => r.data);
+export const deleteCustomer = (id) => API.delete(`/customers/${id}`).then(r => r.data);
+
+export const getCustomerEntries = (customerId) => API.get(`/customers/${customerId}/entries`).then(r => r.data);
+export const addCustomerEntry = (data) => API.post('/customers/entry', data).then(r => r.data);
+export const updateCustomerEntry = (id, data) => API.put(`/customers/entry/${id}`, data).then(r => r.data);
+export const deleteCustomerEntry = (id) => API.delete(`/customers/entry/${id}`).then(r => r.data);
+
 // ── Activity Log ──
 export const getActivityLogs = (params) => API.get('/activity', { params }).then(r => r.data);
 export const getEntityHistory = (entityId) => API.get(`/activity/entity/${entityId}`).then(r => r.data);

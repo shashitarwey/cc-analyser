@@ -86,8 +86,12 @@ export default function SellerLedgerPage() {
     return acc;
   }, {});
 
-  const totalOrdered = items.filter(i => i.type === 'ORDER' && !i.isCancelled && !i.isPending).reduce((s, i) => s + i.amount, 0);
-  const totalPaid = items.filter(i => i.type === 'PAYMENT').reduce((s, i) => s + i.amount, 0);
+  // Single pass instead of two filter+reduce chains over the same array.
+  const { totalOrdered, totalPaid } = items.reduce((acc, i) => {
+    if (i.type === 'ORDER' && !i.isCancelled && !i.isPending) acc.totalOrdered += i.amount;
+    else if (i.type === 'PAYMENT') acc.totalPaid += i.amount;
+    return acc;
+  }, { totalOrdered: 0, totalPaid: 0 });
 
   return (
     <>
@@ -123,7 +127,7 @@ export default function SellerLedgerPage() {
                 className="btn btn-secondary btn-sm"
                 onClick={() => {
                   const res = downloadLedgerPdf(seller, items);
-                  if (!res.ok) toast.error('Allow pop-ups to download the PDF');
+                  if (!res.ok) toast.error('Failed to generate report');
                 }}
                 disabled={loading || items.length === 0}
               >

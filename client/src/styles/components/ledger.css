@@ -312,6 +312,112 @@
   font-weight: 700;
 }
 
+/* ── Khata entry type toggle (in AddKhataEntryModal) ─────────── */
+.khata-type-toggle {
+  display: flex;
+  gap: 8px;
+}
+
+.khata-type-btn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.khata-type-gave.is-active {
+  background: rgba(248, 113, 113, 0.15);
+  color: #fca5a5;
+  border-color: rgba(248, 113, 113, 0.35);
+}
+
+.khata-type-got.is-active {
+  background: rgba(134, 239, 172, 0.15);
+  color: #86efac;
+  border-color: rgba(134, 239, 172, 0.35);
+}
+
+/* ── Khata action bar (floating pill — You Gave / You Got) ─────
+   Centered within the 720px content column, not spanning the full
+   viewport, so visually it lives "inside" the khata book. */
+.khata-action-bar {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(16px + env(safe-area-inset-bottom));
+  width: calc(100% - 32px);
+  max-width: 688px;
+  z-index: 30;
+}
+
+.khata-action-inner {
+  display: flex;
+  gap: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(8px);
+}
+
+.khata-btn-gave,
+.khata-btn-got {
+  flex: 1 1 0;
+  min-width: 0;
+  justify-content: center;
+  font-weight: 600;
+}
+
+.khata-btn-gave {
+  background: rgba(248, 113, 113, 0.14);
+  color: #fca5a5;
+  border: 1px solid rgba(248, 113, 113, 0.35);
+}
+
+.khata-btn-gave:hover {
+  background: rgba(248, 113, 113, 0.22);
+}
+
+.khata-btn-got {
+  background: rgba(134, 239, 172, 0.14);
+  color: #86efac;
+  border: 1px solid rgba(134, 239, 172, 0.35);
+}
+
+.khata-btn-got:hover {
+  background: rgba(134, 239, 172, 0.22);
+}
+
+@media (max-width: 640px) {
+  .khata-action-bar {
+    bottom: calc(12px + env(safe-area-inset-bottom));
+    width: calc(100% - 24px);
+  }
+
+  .khata-action-inner {
+    padding: 8px;
+    gap: 8px;
+    border-radius: 12px;
+  }
+
+  .khata-btn-gave,
+  .khata-btn-got {
+    padding: 10px 8px;
+    font-size: 0.9rem;
+  }
+}
+
 /* ── Responsive ────────────────────────────────────────────── */
 @media (max-width: 640px) {
   .ledger-hero {

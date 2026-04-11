@@ -10,6 +10,8 @@ const Transaction = require('../models/Transaction');
 const Order = require('../models/Order');
 const Seller = require('../models/Seller');
 const SellerPayment = require('../models/SellerPayment');
+const Customer = require('../models/Customer');
+const CustomerEntry = require('../models/CustomerEntry');
 const ActivityLog = require('../models/ActivityLog');
 const logger = require('./logger');
 
@@ -28,10 +30,12 @@ async function purgeUser(user) {
         logger.info('Deleted transactions', { userId, count: txResult.deletedCount });
     }
 
-    // Delete orders, seller payments, sellers, cards, activity logs
+    // Delete orders, seller payments, sellers, khata entries, customers, cards, activity logs
     const ordResult = await Order.deleteMany({ user_id: userId });
     const spResult = await SellerPayment.deleteMany({ user_id: userId });
     const selResult = await Seller.deleteMany({ user_id: userId });
+    const ceResult = await CustomerEntry.deleteMany({ user_id: userId });
+    const custResult = await Customer.deleteMany({ user_id: userId });
     const cardResult = await Card.deleteMany({ user_id: userId });
     await ActivityLog.deleteMany({ user_id: userId });
 
@@ -40,6 +44,8 @@ async function purgeUser(user) {
         orders: ordResult.deletedCount,
         sellerPayments: spResult.deletedCount,
         sellers: selResult.deletedCount,
+        customerEntries: ceResult.deletedCount,
+        customers: custResult.deletedCount,
         cards: cardResult.deletedCount,
     });
 

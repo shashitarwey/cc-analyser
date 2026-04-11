@@ -2,20 +2,17 @@ import { format } from 'date-fns';
 import { printHtmlInIframe } from './printHtml';
 import { buildStatementHtml, fmtAmt } from './pdfStatement';
 
-export const downloadLedgerPdf = (seller, items) => {
-    // Only delivered orders + all payments. Pending and cancelled orders excluded.
-    const filtered = items.filter(item =>
-        item.type === 'PAYMENT' || (!item.isPending && !item.isCancelled)
-    );
+export const downloadKhataPdf = (customer, entries) => {
+    // Walk entries in chronological order so the running balance snapshots
+    // the state before each month group's first entry.
+    const sorted = [...entries]
+        .map(e => ({ ...e, date: new Date(e.entry_date) }))
+        .sort((a, b) => a.date - b.date);
 
-    const sorted = [...filtered].sort((a, b) => a.date - b.date);
-
-    // Group by calendar month, walking forward so each group's "opening"
-    // snapshots the balance before its first entry.
     const groups = [];
     let runningBalance = 0;
-    let totalDebit = 0;
-    let totalCredit = 0;
+    let totalGave = 0;
+    let totalGot = 0;
     let currentGroup = null;
 
     sorted.forEach(item => {
@@ -33,26 +30,26 @@ export const downloadLedgerPdf = (seller, items) => {
             groups.push(currentGroup);
         }
 
-        const isOrder = item.type === 'ORDER';
-        if (isOrder) {
+        const isGave = item.type === 'gave';
+        if (isGave) {
             runningBalance += item.amount;
-            totalDebit += item.amount;
+            totalGave += item.amount;
         } else {
             runningBalance -= item.amount;
-            totalCredit += item.amount;
+            totalGot += item.amount;
         }
 
         currentGroup.entries.push({
             dateLabel: format(item.date, 'dd MMM'),
-            details: item.description,
-            debit: isOrder ? fmtAmt(item.amount) : '',
-            credit: isOrder ? '' : fmtAmt(item.amount),
+            details: item.notes || (isGave ? 'You Gave' : 'You Got'),
+            debit: isGave ? fmtAmt(item.amount) : '',
+            credit: isGave ? '' : fmtAmt(item.amount),
             balance: fmtAmt(Math.abs(runningBalance)),
             suffix: runningBalance === 0 ? '' : (runningBalance > 0 ? ' Dr' : ' Cr'),
         });
     });
 
-    const netBalance = totalDebit - totalCredit;
+    const netBalance = totalGave - totalGot;
     const today = new Date();
     const firstDate = sorted.length > 0 ? sorted[0].date : today;
     const lastDate = sorted.length > 0 ? sorted[sorted.length - 1].date : today;
@@ -60,28 +57,28 @@ export const downloadLedgerPdf = (seller, items) => {
     const balanceVerb = netBalance > 0 ? 'will give' : netBalance < 0 ? 'will get' : 'is clear';
 
     const html = buildStatementHtml({
-        documentTitle: `${seller.name} - Ledger Statement`,
-        brandSubtitle: 'Ledger Statement',
-        statementTitle: `${seller.name}${seller.city ? ` (${seller.city})` : ''} Statement`,
+        documentTitle: `${customer.name} - Khata Statement`,
+        brandSubtitle: 'Khata Statement',
+        statementTitle: `${customer.name}${customer.phone ? ` (${customer.phone})` : ''} Statement`,
         dateRange: `${format(firstDate, 'dd MMM yyyy')} - ${format(lastDate, 'dd MMM yyyy')}`,
         openingDate: format(firstDate, 'dd MMM yyyy'),
         groups,
         entriesCount: sorted.length,
         summary: {
-            debitLabel: 'Total Debit(-)',
-            creditLabel: 'Total Credit(+)',
-            debit: fmtAmt(totalDebit),
-            credit: fmtAmt(totalCredit),
+            debitLabel: 'You Gave (-)',
+            creditLabel: 'You Got (+)',
+            debit: fmtAmt(totalGave),
+            credit: fmtAmt(totalGot),
             balance: fmtAmt(Math.abs(netBalance)),
             balanceSuffix,
-            balanceLine: `${seller.name} ${balanceVerb}`,
+            balanceLine: `${customer.name} ${balanceVerb}`,
         },
         columns: {
-            debitHeader: 'Debit(-)',
-            creditHeader: 'Credit(+)',
+            debitHeader: 'You Gave (-)',
+            creditHeader: 'You Got (+)',
         },
         generatedAt: format(today, "hh:mm a | dd MMM ''yy"),
-        emptyMsg: 'No delivered orders or payments to show.',
+        emptyMsg: 'No entries to show.',
     });
 
     return printHtmlInIframe(html);

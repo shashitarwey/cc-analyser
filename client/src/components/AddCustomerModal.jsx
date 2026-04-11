@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import { addSeller, updateSeller } from '../api';
+import { addCustomer, updateCustomer } from '../api';
 import { X, Save } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-export default function AddSellerModal({ onClose, onSuccess, editSeller }) {
-  const [form, setForm] = useState({ name: '', city: '', phone: '' });
+export default function AddCustomerModal({ onClose, onSuccess, editCustomer }) {
+  const [form, setForm] = useState({ name: '', phone: '' });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
 
@@ -14,13 +14,17 @@ export default function AddSellerModal({ onClose, onSuccess, editSeller }) {
   };
 
   useEffect(() => {
-    if (editSeller) setForm({ name: editSeller.name || '', city: editSeller.city || '', phone: editSeller.phone || '' });
-  }, [editSeller]);
+    if (editCustomer) {
+      setForm({
+        name: editCustomer.name || '',
+        phone: editCustomer.phone || '',
+      });
+    }
+  }, [editCustomer]);
 
   const validate = () => {
     const e = {};
-    if (!form.name.trim()) e.name = 'Seller name is required';
-    if (!form.city.trim()) e.city = 'City is required';
+    if (!form.name.trim()) e.name = 'Customer name is required';
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -30,17 +34,17 @@ export default function AddSellerModal({ onClose, onSuccess, editSeller }) {
     if (!validate()) return;
     setLoading(true);
     try {
-      if (editSeller) {
-        await updateSeller(editSeller._id, form);
-        toast.success('Seller updated');
+      if (editCustomer) {
+        await updateCustomer(editCustomer._id, form);
+        toast.success('Customer updated');
       } else {
-        await addSeller(form);
-        toast.success('Seller added');
+        await addCustomer(form);
+        toast.success('Customer added');
       }
       onSuccess();
       onClose();
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Failed to save seller');
+      toast.error(err.response?.data?.error || 'Failed to save customer');
     } finally {
       setLoading(false);
     }
@@ -50,33 +54,22 @@ export default function AddSellerModal({ onClose, onSuccess, editSeller }) {
     <div className="modal-backdrop" onClick={e => e.target === e.currentTarget && onClose()}>
       <div className="modal-content" style={{ maxWidth: '440px' }}>
         <div className="modal-header">
-          <h2 className="modal-title">{editSeller ? 'Edit Seller' : 'Add New Seller'}</h2>
+          <h2 className="modal-title">{editCustomer ? 'Edit Customer' : 'Add New Customer'}</h2>
           <button className="modal-close" onClick={onClose}><X size={20} /></button>
         </div>
 
         <div className="modal-body">
-          <form id="seller-form" onSubmit={handleSubmit} noValidate>
+          <form id="customer-form" onSubmit={handleSubmit} noValidate>
             <div className="form-group">
-              <label className="form-label">Seller Name <span style={{ color: 'var(--danger)' }}>*</span></label>
+              <label className="form-label">Name <span style={{ color: 'var(--danger)' }}>*</span></label>
               <input
                 type="text"
                 className={`form-input ${errors.name ? 'error' : ''}`}
-                placeholder="e.g. Rahul Mobile Shop"
+                placeholder="e.g. Ravi Kumar"
                 value={form.name}
                 onChange={e => set('name', e.target.value)}
               />
               {errors.name && <div className="form-error">{errors.name}</div>}
-            </div>
-            <div className="form-group">
-              <label className="form-label">City <span style={{ color: 'var(--danger)' }}>*</span></label>
-              <input
-                type="text"
-                className={`form-input ${errors.city ? 'error' : ''}`}
-                placeholder="e.g. Mumbai"
-                value={form.city}
-                onChange={e => set('city', e.target.value)}
-              />
-              {errors.city && <div className="form-error">{errors.city}</div>}
             </div>
             <div className="form-group">
               <label className="form-label">Phone Number <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>(Optional)</span></label>
@@ -93,8 +86,8 @@ export default function AddSellerModal({ onClose, onSuccess, editSeller }) {
 
         <div className="modal-footer">
           <button type="button" className="btn btn-secondary" onClick={onClose}>Cancel</button>
-          <button type="submit" form="seller-form" className="btn btn-primary" disabled={loading}>
-            <Save size={16} /> {loading ? 'Saving…' : editSeller ? 'Save Changes' : 'Add Seller'}
+          <button type="submit" form="customer-form" className="btn btn-primary" disabled={loading}>
+            <Save size={16} /> {loading ? 'Saving…' : editCustomer ? 'Save Changes' : 'Add Customer'}
           </button>
         </div>
       </div>

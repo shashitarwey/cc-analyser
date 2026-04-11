@@ -42,6 +42,7 @@ app.use('/api/cards', authMiddleware, require('./routes/cards'));
 app.use('/api/transactions', authMiddleware, require('./routes/transactions'));
 app.use('/api/orders', authMiddleware, require('./routes/orders'));
 app.use('/api/sellers', authMiddleware, require('./routes/sellers'));
+app.use('/api/customers', authMiddleware, require('./routes/customers'));
 app.use('/api/summary', authMiddleware, require('./routes/summary'));
 app.use('/api/analytics', authMiddleware, require('./routes/analytics'));
 app.use('/api/activity', authMiddleware, require('./routes/activity'));
