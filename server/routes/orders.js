@@ -135,6 +135,11 @@ router.get('/', async (req, res, next) => {
 router.post('/', createRules, validate, async (req, res, next) => {
     try {
         const data = pickFields(req.body, ORDER_FIELDS);
+        // Strip empty delivered_date / delivery_status so Mongoose uses defaults
+        // (delivered_date stays undefined, delivery_status defaults to 'No').
+        // These are optional at creation and filled in later when delivered.
+        if (!data.delivered_date) delete data.delivered_date;
+        if (!data.delivery_status) delete data.delivery_status;
         data.user_id = req.user.id;
 
         // Verify the card belongs to the current user
@@ -174,6 +179,14 @@ router.post('/', createRules, validate, async (req, res, next) => {
 router.put('/:id', updateRules, validate, async (req, res, next) => {
     try {
         const data = pickFields(req.body, ORDER_FIELDS);
+        // An empty delivered_date means "clear it" (e.g. user reverted delivery
+        // status from Yes back to No). Convert to null so Mongoose clears the
+        // field instead of failing to cast '' to Date. If the field wasn't
+        // sent at all, pickFields omits it and we leave it untouched.
+        if (data.delivered_date === '') data.delivered_date = null;
+        // delivery_status is an enum without a "blank" option — drop empty
+        // values so the existing status is preserved on update.
+        if (data.delivery_status === '') delete data.delivery_status;
 
         // Verify the card belongs to the current user if being changed
         if (data.card_id) {
