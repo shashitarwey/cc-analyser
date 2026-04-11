@@ -1,6 +1,6 @@
 # Suggested Features for CardVault
 
-> Updated: March 2026. Based on full codebase analysis of all models, routes, pages, components, and infrastructure.
+> Updated: April 2026. Based on full codebase analysis of all models, routes, pages, components, and infrastructure.
 
 ---
 
@@ -24,14 +24,14 @@
 
 ## 2. Data Export & Import
 
-> **Nothing exists today. This is the single biggest gap for power users.**
-
-- **CSV Export** — Export cards, transactions, orders, seller ledgers as downloadable CSV. Add `/api/export/:type` endpoint
+- ~~Orders CSV Export (client-side, filtered view, seller ledger view)~~ ✅
+- **CSV Export — Remaining Entities** — Cards, transactions, seller master list, seller payments as downloadable CSV. Add `/api/export/:type` endpoint for server-side exports (current export is client-side only on filtered orders)
 - **PDF Statements** — Generate monthly spending statements per card (mimic bank statements)
 - **Ledger PDF Export** — Download a seller's complete Khata Book as PDF for sharing/records
 - **JSON Full Backup** — One-click full data export as JSON for personal backup
 - **Bank Statement Import** — Parse and import transactions from common bank CSV formats (HDFC, ICICI, SBI, etc.)
 - **Bulk Order Import** — CSV import for orders (critical for resellers onboarding existing data)
+- **Scheduled Exports** — Auto-email monthly CSV/PDF reports to user (leverages Nodemailer)
 
 ---
 
@@ -49,12 +49,17 @@
 
 ## 4. Order Tracking Improvements
 
+- ~~Order Remarks (free-text notes per order)~~ ✅
+- ~~First Column Freeze in Orders table~~ ✅
 - **Custom Variants & E-Comm Sites** — Replace hardcoded enums with user-defined custom values (stored in user preferences or separate collection)
 - **Tracking Number & URL** — Add `tracking_number` and `tracking_url` fields to Order schema for courier tracking links
 - **Order Timeline/History** — Record status transitions (ordered, shipped, delivered, returned) with timestamps as embedded array
 - **Order Tags/Labels** — Custom tags (gift, resale, personal) for flexible categorization
 - **EMI Tracking** — Track EMI plans: amount, tenure, remaining months, card used
-- **Bulk Order Actions** — Multi-select orders for bulk status update or bulk delete
+- **Bulk Order Actions** — Multi-select orders for bulk status update, bulk delete, bulk "mark cleared"
+- **Duplicate Order Detection** — Warn when creating an order with same model+variant+seller+date as existing one
+- **Order Clone / Repeat Order** — One-click duplicate of an existing order (common reseller workflow)
+- **Return/Refund Pipeline** — Track pending refunds separately from cleared orders with expected date
 
 ---
 
@@ -109,10 +114,11 @@
 ## 9. Search & Filters
 
 - ~~Global Search (cards, sellers, orders — keyboard nav, inline + modal modes)~~ ✅
+- ~~Date Filter fixes + DateRangeDropdown~~ ✅
 - **Transaction Search in Global Search** — Currently searches cards/sellers/orders but not individual transactions
 - **Saved Filter Presets** — Save frequently used filter combos (e.g., "This month's Amazon orders on HDFC")
 - **Amount Range Filters** — Filter transactions/orders by min-max amount
-- **Advanced Date Presets** — "Last 7 days", "Last 30 days", "Custom range" for all filter panels
+- **Fuzzy Search** — Typo-tolerant search for sellers/models (e.g., "samsng" → Samsung)
 
 ---
 
@@ -126,7 +132,6 @@
 - ~~Styled File Upload with Preview (payment receipts)~~ ✅
 - ~~Inline Receipt Preview in Ledger~~ ✅
 - **Onboarding Tour** — First-time user walkthrough using `react-joyride`
-- **Keyboard Shortcuts** — Power user shortcuts (N=new, /=search, Esc=close)
 - **Drag-and-Drop Card Reordering** — Let users reorder cards/banks on dashboard
 - **Animated Page Transitions** — Smooth route transitions (tried CSS-only, didn't feel right — consider `framer-motion` or skip)
 - **Empty State Illustrations** — Custom SVG illustrations for empty pages instead of icons
@@ -142,7 +147,36 @@
 
 ---
 
-## 12. Technical & Infrastructure
+## 12. Reseller Business Intelligence
+
+> **New section — features tailored to the reseller business model this app actually serves.**
+
+- **Product Performance Report** — Which model/variant combinations generate the most profit; identify losers to avoid
+- **Cashback Cycle Countdown** — Show days remaining in each card's cashback billing cycle + "₹X more to hit cap" hint
+- **Smart Card Recommendation** — Given an intended order amount, suggest the card that maximizes cashback (considering caps already used)
+- **Price Drop Tracking** — Record order_amount history per model+variant to spot price trends over time
+- **Platform Profit Leaderboard** — Rank e-comm sites by avg profit margin and return rate
+- **Seller Concentration Risk** — Warn when >X% of pending cash flow is tied to a single seller
+- **Cash Flow Forecast** — Project 7/30-day receivables based on seller balances and order delivery status
+- **GST / Tax-Ready Report** — Aggregate yearly profit breakdown formatted for tax filing
+- **Break-Even Calculator** — For a new card's annual fee, show minimum cashback needed and current progress
+- **Pending Clearance View** — Orders with `delivery_status=delivered` but `is_cleared=false` represent money-in-flight to sellers; surface as a dedicated view with aging buckets (0-7, 7-15, 15+ days)
+
+---
+
+## 13. Productivity & Quick Entry
+
+- **Quick-Add Shortcuts** — Floating action button: one-tap "Copy yesterday's order" / "Add cashback transaction"
+- **Order Templates** — Save common order patterns (same model+seller+card) for one-click creation
+- **Voice Input for Orders** — Web Speech API to dictate order details on mobile
+- **OCR Receipt Scanning** — Upload a screenshot/receipt image, auto-extract amount/date/merchant (Tesseract.js or Cloudinary AI)
+- **Paste-to-Parse** — Paste order confirmation text from Amazon/Flipkart email and auto-fill fields
+- **Keyboard Shortcuts** — Power user shortcuts (N=new order, /=search, Esc=close, J/K=row nav)
+- **Recently Used Sellers/Cards** — Surface top-5 recently used as quick chips in Add Order form
+
+---
+
+## 14. Technical & Infrastructure
 
 - ~~Server-Side Pagination (MongoDB $unionWith + $facet)~~ ✅
 - ~~Redis Caching (ioredis, 5-min TTL, graceful degradation)~~ ✅
@@ -163,33 +197,38 @@
 
 | Priority | Feature | Impact | Effort |
 |----------|---------|--------|--------|
-| **P0** | CSV Export (all entities) | Very High | Medium |
 | **P0** | Credit Limit + Utilization on CardWidget | High | Very Low |
+| **P0** | Smart Card Recommendation (cashback-aware) | Very High | Medium |
+| **P0** | Pending Clearance View with aging buckets | Very High | Very Low |
 | **P0** | Transaction Categories + Chart | High | Low |
-| **P1** | Billing Due Date Reminders | High | Medium |
-| **P1** | Notification Center (in-app) | High | Medium |
-| **P1** | Seller Contact Details (UPI, bank) | Medium | Very Low |
-| **P1** | Payment Mode on SellerPayment | Medium | Very Low |
-| **P1** | Monthly Budget Tracking | High | High |
+| **P1** | Billing Due Date Reminders + Notification Center | High | Medium |
+| **P1** | CSV Export — Remaining Entities + server endpoint | High | Medium |
+| **P1** | Seller Contact Details (UPI, bank) + Payment Mode | Medium | Very Low |
+| **P1** | Cash Flow Forecast (7/30-day receivables) | High | Medium |
+| **P1** | Product Performance Report | High | Low |
+| **P1** | Duplicate Order Detection + Order Clone | Medium | Low |
 | **P2** | PDF Statements / Ledger Export | High | Medium |
-| **P2** | Bank Statement Import | High | High |
+| **P2** | Monthly Budget Tracking | High | High |
+| **P2** | Bank Statement Import + Bulk Order Import | High | High |
+| **P2** | OCR / Paste-to-Parse Order Entry | High | High |
 | **P2** | Order Timeline / Status History | Medium | Medium |
-| **P2** | 2FA (TOTP) | Medium | Medium |
-| **P2** | Saved Filter Presets | Medium | Low |
-| **P3** | Tests + CI/CD | High | High |
-| **P3** | API Documentation (Swagger) | Medium | Medium |
+| **P2** | 2FA (TOTP) + Session Management | Medium | Medium |
+| **P2** | Saved Filter Presets + Amount Range Filters | Medium | Low |
+| **P3** | GST / Tax-Ready Report | Medium | Medium |
 | **P3** | Multi-User / Sharing | Medium | Very High |
-| **P3** | Onboarding Tour | Low | Low |
+| **P3** | Onboarding Tour + Keyboard Shortcuts | Low | Low |
 
 ---
 
 ## Recommended Build Order
 
-1. **CSV Export** — Unblocks power users immediately. High ROI.
-2. **Credit Limit on Cards** — Trivial schema addition, big UX win.
-3. **Transaction Categories** — Small schema change, enables analytics.
-4. **Notification Center + Billing Reminders** — Leverages existing `billing_date`/`due_date` data.
-5. **Seller Contact Details + Payment Mode** — Quick schema expansions.
-6. **Monthly Budget Widget** — New feature area, high engagement.
-7. **PDF Export** — Builds on CSV export infra.
-8. ~~**Tests + CI/CD** — Stabilize before adding more features.~~ Done
+1. **Pending Clearance View** — Pure frontend filter on existing data (delivered + uncleared), grouped into aging buckets. Shows exactly how much money is parked with each seller awaiting settlement.
+2. **Credit Limit + Utilization** — Trivial schema addition, big UX win on CardWidget.
+3. **Product Performance Report** — Reuses existing analytics infra; surfaces which models/variants actually make money.
+4. **Smart Card Recommendation** — Unique differentiator for this app; uses data already in DB (cashback caps + current period spend).
+5. **Seller Contact Details + Payment Mode** — Quick schema expansions with reconciliation payoff.
+6. **CSV Export (remaining entities + server endpoint)** — Extend the orders-only client-side export to a proper `/api/export/:type` route.
+7. **Cash Flow Forecast** — Build on seller ledger + order delivery data; high signal for business decisions.
+8. **Notification Center + Billing Reminders** — Leverages existing `billing_date`/`due_date` fields + Nodemailer.
+9. **Duplicate Detection + Order Clone** — Small quality-of-life wins that compound daily.
+10. **PDF Export (statements + ledgers)** — Builds on CSV export infra once stable.

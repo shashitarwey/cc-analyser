@@ -133,13 +133,13 @@
 }
 
 .ledger-card-order {
-  background: rgba(239, 68, 68, 0.05);
-  border: 1px solid rgba(239, 68, 68, 0.22);
+  background: rgba(248, 113, 113, 0.04);
+  border: 1px solid rgba(248, 113, 113, 0.18);
 }
 
 .ledger-card-payment {
-  background: rgba(63, 185, 80, 0.07);
-  border: 1px solid rgba(63, 185, 80, 0.25);
+  background: rgba(134, 239, 172, 0.05);
+  border: 1px solid rgba(134, 239, 172, 0.20);
 }
 
 .ledger-card-cancelled {
@@ -185,11 +185,11 @@
 }
 
 .ledger-card-order .ledger-card-type {
-  color: #f85149;
+  color: #fca5a5;
 }
 
 .ledger-card-payment .ledger-card-type {
-  color: #3fb950;
+  color: #86efac;
 }
 
 .ledger-card-cancelled .ledger-card-type,
@@ -233,11 +233,11 @@
 }
 
 .ledger-card-order .ledger-card-amount {
-  color: #f85149;
+  color: #fca5a5;
 }
 
 .ledger-card-payment .ledger-card-amount {
-  color: #3fb950;
+  color: #86efac;
 }
 
 .ledger-card-cancelled .ledger-card-amount,
@@ -295,11 +295,11 @@
 }
 
 .ledger-card-order .ledger-card-footer {
-  border-top-color: rgba(239, 68, 68, 0.15);
+  border-top-color: rgba(248, 113, 113, 0.12);
 }
 
 .ledger-card-payment .ledger-card-footer {
-  border-top-color: rgba(63, 185, 80, 0.15);
+  border-top-color: rgba(134, 239, 172, 0.12);
 }
 
 .ledger-balance-label {

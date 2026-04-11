@@ -107,6 +107,19 @@
     flex-shrink: 0;
   }
 
+  /* Ledger hero: multiple buttons would squeeze the title. Drop actions to a
+     new full-width row and split buttons evenly so each is easy to tap. */
+  .ledger-hero .page-hero-actions {
+    width: 100%;
+    flex-basis: 100%;
+  }
+
+  .ledger-hero .page-hero-actions .btn {
+    flex: 1 1 0;
+    justify-content: center;
+    min-width: 0;
+  }
+
   .profit-badge {
     font-size: 0.75rem;
     padding: 3px 10px;

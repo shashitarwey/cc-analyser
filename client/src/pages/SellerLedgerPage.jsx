@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getSeller, getAllOrders, getSellerLedger, deleteSellerPayment } from '../api';
-import { ChevronLeft, Wallet, MapPin, TrendingUp, TrendingDown, Trash2, Pencil, BookOpen } from 'lucide-react';
+import { ChevronLeft, Wallet, MapPin, TrendingUp, TrendingDown, Trash2, Pencil, BookOpen, FileDown } from 'lucide-react';
 import { fmtCurrency, fmtDisplay, fmtSignedCurrency, profitColor } from '../utils/formatters';
+import { downloadLedgerPdf } from '../utils/ledgerPdf';
 import toast from 'react-hot-toast';
 import ConfirmModal from '../common/ConfirmModal';
 import AddPaymentModal from '../components/AddPaymentModal';
@@ -118,6 +119,16 @@ export default function SellerLedgerPage() {
 
           {seller && (
             <div className="page-hero-actions">
+              <button
+                className="btn btn-secondary btn-sm"
+                onClick={() => {
+                  const res = downloadLedgerPdf(seller, items);
+                  if (!res.ok) toast.error('Allow pop-ups to download the PDF');
+                }}
+                disabled={loading || items.length === 0}
+              >
+                <FileDown size={14} /> Download Report
+              </button>
               <button className="btn btn-primary btn-sm" onClick={() => setShowPaymentModal(true)}>
                 <Wallet size={14} /> Add Payment
               </button>
@@ -251,7 +262,7 @@ export default function SellerLedgerPage() {
                       {!isCancelled && (
                         <div className="ledger-card-footer">
                           <span className="ledger-balance-label">Balance</span>
-                          <span className="ledger-balance-value" style={{ color: item.runningBalance > 0 ? '#f85149' : item.runningBalance < 0 ? '#3fb950' : 'var(--text)' }}>
+                          <span className="ledger-balance-value" style={{ color: item.runningBalance > 0 ? '#fca5a5' : item.runningBalance < 0 ? '#86efac' : 'var(--text)' }}>
                             {fmtCurrency(Math.abs(item.runningBalance))} {item.runningBalance > 0 ? 'Due' : item.runningBalance < 0 ? 'Advance' : 'Clear'}
                           </span>
                         </div>
