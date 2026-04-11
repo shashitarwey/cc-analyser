@@ -1,4 +1,4 @@
-import { fmtDisplay, sellerLabel } from './formatters';
+import { fmtDisplay } from './formatters';
 import { toCSV, downloadCSV } from './csv';
 
 const fmtCSVDate = (iso) => iso ? fmtDisplay(iso.slice(0, 10)) : '';
@@ -20,7 +20,8 @@ const orderColumns = [
     { header: 'Profit', value: o => (o.return_amount - o.order_amount) + (o.cashback || 0) },
     { header: 'Delivery Status', value: o => o.delivery_status },
     { header: 'Delivered Date', value: o => fmtCSVDate(o.delivered_date) },
-    { header: 'Seller', value: o => sellerLabel(o.seller_id) },
+    { header: 'Seller', value: o => o.seller_id?.name || '' },
+    { header: 'Location', value: o => o.seller_id?.city || '' },
     { header: 'E-comm Site', value: o => o.ecomm_site },
     { header: 'Card', value: o => cardLabelCSV(o.card_id) },
     { header: 'ID Used', value: o => o.id_used },
