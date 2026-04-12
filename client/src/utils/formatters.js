@@ -42,7 +42,7 @@ export const fmtDisplay = (iso) => {
  * @returns {string} e.g. "HDFC Bank ••••1234"
  */
 export const cardLabel = (card) =>
-    card ? `${card.bank_name} ••••${card.last_four_digit}` : '';
+    card ? `${card.bank_name} - ${card.last_four_digit}` : '';
 
 /**
  * Build a display label for a seller object.

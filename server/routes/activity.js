@@ -7,9 +7,10 @@ const { parsePagination, paginatedResponse } = require('../utils/helpers');
 router.get('/', async (req, res, next) => {
     try {
         const { pageNum, limitNum, skip } = parsePagination(req.query);
-        const { entity } = req.query;
+        const { entity, search } = req.query;
         const filter = { user_id: req.user.id };
         if (entity) filter.entity = entity;
+        if (search) filter.description = { $regex: search, $options: 'i' };
 
         const [logs, total] = await Promise.all([
             ActivityLog.find(filter)

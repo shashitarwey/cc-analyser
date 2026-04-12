@@ -1,8 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { getActivityLogs, getEntityHistory } from '../api';
 import Pagination from '../common/Pagination';
 import { PAGE_SIZE } from '../constants';
-import { ChevronLeft, ChevronDown, ChevronUp, Plus, Pencil, Trash2, ShoppingBag, CreditCard, Users, Wallet, ArrowLeftRight, History, X as XIcon, BookOpen } from 'lucide-react';
+import { ChevronLeft, ChevronDown, ChevronUp, Plus, Pencil, Trash2, ShoppingBag, CreditCard, Users, Wallet, ArrowLeftRight, History, X as XIcon, BookOpen, Search } from 'lucide-react';
 import SearchableDropdown from '../common/SearchableDropdown';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -163,16 +163,19 @@ export default function ActivityLogPage() {
   const [pageSize, setPageSize] = useState(PAGE_SIZE);
   const [expandedId, setExpandedId] = useState(null);
   const [entityFilter, setEntityFilter] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
   const [historyPanel, setHistoryPanel] = useState(null); // { entityId, entity, logs, title }
   const [historyLoading, setHistoryLoading] = useState(false);
   const [historyExpanded, setHistoryExpanded] = useState(null);
+  const debounceRef = useRef(null);
   const navigate = useNavigate();
 
-  const fetchLogs = useCallback(async (p = page, ps = pageSize, entity = entityFilter) => {
+  const fetchLogs = useCallback(async (p = page, ps = pageSize, entity = entityFilter, search = searchQuery) => {
     try {
       setLoading(true);
       const params = { page: p, limit: ps };
       if (entity) params.entity = entity;
+      if (search) params.search = search;
       const { items, page: pageInfo } = await getActivityLogs(params);
       setLogs(items);
       setTotalLogs(pageInfo.item_total);
@@ -181,9 +184,16 @@ export default function ActivityLogPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, pageSize, entityFilter]);
+  }, [page, pageSize, entityFilter, searchQuery]);
 
   useEffect(() => { fetchLogs(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleSearch = (value) => {
+    setSearchQuery(value);
+    setPage(1);
+    clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => fetchLogs(1, pageSize, entityFilter, value), 400);
+  };
 
   const handleViewHistory = async (log) => {
     try {
@@ -223,6 +233,22 @@ export default function ActivityLogPage() {
 
       <div className="page-content">
         <div className="al-toolbar">
+          <div className="al-search-wrap">
+            <Search size={14} className="al-search-icon" />
+            <input
+              className="al-search-input"
+              type="text"
+              placeholder="Search by item, buyer, site…"
+              value={searchQuery}
+              onChange={e => handleSearch(e.target.value)}
+              autoComplete="off"
+            />
+            {searchQuery && (
+              <button className="al-search-clear" onClick={() => handleSearch('')}>
+                <XIcon size={14} />
+              </button>
+            )}
+          </div>
           <div className="al-filter-wrap">
             <SearchableDropdown
               options={ENTITY_FILTER_OPTIONS.map(o => o.label)}
@@ -231,7 +257,7 @@ export default function ActivityLogPage() {
                 const key = ENTITY_FILTER_OPTIONS.find(o => o.label === label)?.key || '';
                 setEntityFilter(key);
                 setPage(1);
-                fetchLogs(1, pageSize, key);
+                fetchLogs(1, pageSize, key, searchQuery);
               }}
               placeholder="Filter by type"
             />
@@ -267,8 +293,8 @@ export default function ActivityLogPage() {
               totalPages={totalPages}
               totalItems={totalLogs}
               pageSize={pageSize}
-              onPage={p => { setPage(p); fetchLogs(p, pageSize); }}
-              onPageSize={size => { setPageSize(size); setPage(1); fetchLogs(1, size); }}
+              onPage={p => { setPage(p); fetchLogs(p, pageSize, entityFilter, searchQuery); }}
+              onPageSize={size => { setPageSize(size); setPage(1); fetchLogs(1, size, entityFilter, searchQuery); }}
               label="activities"
             />
           </div>
