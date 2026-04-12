@@ -28,9 +28,9 @@ exports.entryCreateRules = [
 
 exports.entryUpdateRules = [
     param('id').isMongoId().withMessage('Invalid entry id'),
-    body('type').optional().isIn(['gave', 'got']).withMessage('type must be "gave" or "got"'),
-    body('amount').optional().isFloat({ gt: 0 }).withMessage('amount must be positive'),
-    body('entry_date').optional().isISO8601().withMessage('entry_date must be a valid date'),
+    body('type').optional({ values: 'falsy' }).isIn(['gave', 'got']).withMessage('type must be "gave" or "got"'),
+    body('amount').optional({ values: 'falsy' }).isFloat({ gt: 0 }).withMessage('amount must be positive'),
+    body('entry_date').optional({ values: 'falsy' }).isISO8601().withMessage('entry_date must be a valid date'),
     body('notes').optional().isString().isLength({ max: 200 }).withMessage('Remark must be 200 characters or less'),
 ];
 

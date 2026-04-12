@@ -27,8 +27,8 @@ exports.paymentCreateRules = [
 
 exports.paymentUpdateRules = [
     param('id').isMongoId().withMessage('Invalid payment id'),
-    body('amount').optional().isFloat({ gt: 0 }).withMessage('amount must be positive'),
-    body('payment_date').optional().isISO8601().withMessage('payment_date must be a valid date'),
+    body('amount').optional({ values: 'falsy' }).isFloat({ gt: 0 }).withMessage('amount must be positive'),
+    body('payment_date').optional({ values: 'falsy' }).isISO8601().withMessage('payment_date must be a valid date'),
     body('notes').optional().isString(),
 ];
 

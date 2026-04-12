@@ -6,7 +6,7 @@ exports.createRules = [
         .bail()
         .isFloat({ gt: 0 }).withMessage('Amount must be positive'),
     body('description').optional().isString().trim(),
-    body('date').optional().isISO8601().withMessage('date must be a valid ISO8601 date'),
+    body('date').optional({ values: 'falsy' }).isISO8601().withMessage('date must be a valid ISO8601 date'),
 ];
 
 exports.idRule = [param('id').isMongoId().withMessage('Invalid transaction id')];
