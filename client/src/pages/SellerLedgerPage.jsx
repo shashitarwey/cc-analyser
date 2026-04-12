@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getSeller, getAllOrders, getSellerLedger, deleteSellerPayment } from '../api';
 import { ChevronLeft, Wallet, MapPin, TrendingUp, TrendingDown, Trash2, Pencil, BookOpen, FileDown } from 'lucide-react';
@@ -18,6 +18,7 @@ export default function SellerLedgerPage() {
   const [confirm, setConfirm] = useState(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [editPayment, setEditPayment] = useState(null);
+  const bottomRef = useRef(null);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -63,6 +64,13 @@ export default function SellerLedgerPage() {
   }, [id]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
+
+  // Auto-scroll to the most recent entry (bottom) after data loads
+  useEffect(() => {
+    if (!loading && items.length > 0) {
+      bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [loading, items.length]);
 
   const handleDeletePayment = (item) => {
     setConfirm({
@@ -278,6 +286,7 @@ export default function SellerLedgerPage() {
             </div>
           ))
         )}
+        <div ref={bottomRef} />
       </div>
 
       {showPaymentModal && (seller || editPayment) && (

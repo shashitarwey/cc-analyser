@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getCustomer, getCustomerEntries, deleteCustomerEntry } from '../api';
 import { ChevronLeft, Phone, TrendingUp, TrendingDown, Wallet, Trash2, Pencil, BookOpen, ArrowUpRight, ArrowDownLeft, FileDown } from 'lucide-react';
@@ -19,6 +19,7 @@ export default function KhataDetailPage() {
   const [entryType, setEntryType] = useState('gave');
   const [editEntry, setEditEntry] = useState(null);
   const [confirm, setConfirm] = useState(null);
+  const bottomRef = useRef(null);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -37,6 +38,13 @@ export default function KhataDetailPage() {
   }, [id]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
+
+  // Auto-scroll to the most recent entry (bottom) after data loads
+  useEffect(() => {
+    if (!loading && entries.length > 0) {
+      bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [loading, entries.length]);
 
   const openAdd = (type) => {
     setEditEntry(null);
@@ -66,12 +74,11 @@ export default function KhataDetailPage() {
     });
   };
 
-  // Single sort: ascending for running-balance computation. Groups are then
-  // appended in insertion order (also ascending), and we reverse the array
-  // once for latest-first display — no second sort over date keys.
+  // Ascending sort: oldest first for running-balance computation + display.
+  // User sees oldest at top, newest at bottom (scrolled into view on load).
   const sortedAsc = [...entries].sort((a, b) => new Date(a.entry_date) - new Date(b.entry_date));
   let runningBalance = 0;
-  const groupsAsc = [];
+  const dateGroups = [];
   let currentGroup = null;
   for (const e of sortedAsc) {
     if (e.type === 'gave') runningBalance += e.amount;
@@ -79,11 +86,10 @@ export default function KhataDetailPage() {
     const key = e.entry_date.slice(0, 10);
     if (!currentGroup || currentGroup.key !== key) {
       currentGroup = { key, entries: [] };
-      groupsAsc.push(currentGroup);
+      dateGroups.push(currentGroup);
     }
     currentGroup.entries.push({ ...e, runningBalance });
   }
-  const groupsDesc = [...groupsAsc].reverse();
 
   const totalGave = customer?.total_gave || 0;
   const totalGot = customer?.total_got || 0;
@@ -171,7 +177,7 @@ export default function KhataDetailPage() {
             <div className="empty-sub">Tap "You Gave" or "You Got" below to record the first entry.</div>
           </div>
         ) : (
-          groupsDesc.map(group => (
+          dateGroups.map(group => (
             <div key={group.key}>
               <div className="ledger-date-sep">
                 <div className="ledger-date-line" />
@@ -233,6 +239,7 @@ export default function KhataDetailPage() {
             </div>
           ))
         )}
+        <div ref={bottomRef} />
       </div>
 
       {/* Sticky action bar at bottom with You Gave / You Got */}
