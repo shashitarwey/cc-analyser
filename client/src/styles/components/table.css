@@ -35,6 +35,14 @@
   font-weight: 700;
 }
 
+.data-table th:first-child {
+  border-top-left-radius: 14px;
+}
+
+.data-table th:last-child {
+  border-top-right-radius: 14px;
+}
+
 [data-theme="light"] .data-table th {
   background: rgba(0, 0, 0, 0.03);
 }
