@@ -130,7 +130,7 @@ export default function KhataPage() {
                 <span className="stat-card-label">Net Balance</span>
               </div>
               <div className="stat-card-value" style={{ color: profitColor(-totalDue) }}>
-                {fmtCurrency(Math.abs(totalDue))}{totalDue > 0 ? ' Due' : totalDue < 0 ? ' Advance' : ''}
+                {fmtCurrency(Math.abs(totalDue))}
               </div>
             </div>
           </div>
@@ -192,7 +192,7 @@ export default function KhataPage() {
                       <td className="font-medium" style={{ color: '#fca5a5' }}>{fmtCurrency(c.total_gave || 0)}</td>
                       <td className="font-medium" style={{ color: '#86efac' }}>{fmtCurrency(c.total_got || 0)}</td>
                       <td className="font-bold" style={{ color: profitColor(-(c.balance || 0)) }}>
-                        {fmtCurrency(Math.abs(c.balance || 0))}{c.balance > 0 ? ' Due' : c.balance < 0 ? ' Advance' : ''}
+                        {fmtCurrency(Math.abs(c.balance || 0))}
                       </td>
                       <td className="text-right">
                         <ActionMenu

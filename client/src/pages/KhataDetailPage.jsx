@@ -146,7 +146,7 @@ export default function KhataDetailPage() {
               {[
                 { label: 'You Gave',  value: totalGave, color: '#fca5a5', icon: <TrendingDown size={14} /> },
                 { label: 'You Got',   value: totalGot,  color: '#86efac', icon: <TrendingUp size={14} /> },
-                { label: 'Balance',   value: Math.abs(balance), color: profitColor(-balance), icon: <Wallet size={14} />, suffix: balance > 0 ? 'Due' : balance < 0 ? 'Advance' : '' },
+                { label: 'Balance',   value: Math.abs(balance), color: profitColor(-balance), icon: <Wallet size={14} />, suffix: '' },
               ].map((stat, i) => (
                 <div key={i} className="ledger-stat-item">
                   <div className="ledger-stat-label">
@@ -229,7 +229,7 @@ export default function KhataDetailPage() {
                       <div className="ledger-card-footer">
                         <span className="ledger-balance-label">Balance</span>
                         <span className="ledger-balance-value" style={{ color: entry.runningBalance > 0 ? '#fca5a5' : entry.runningBalance < 0 ? '#86efac' : 'var(--text)' }}>
-                          {fmtCurrency(Math.abs(entry.runningBalance))}{entry.runningBalance > 0 ? ' Due' : entry.runningBalance < 0 ? ' Advance' : ''}
+                          {fmtCurrency(Math.abs(entry.runningBalance))}
                         </span>
                       </div>
                     </div>
