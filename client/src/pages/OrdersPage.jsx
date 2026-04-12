@@ -320,8 +320,11 @@ export default function OrdersPage() {
                 <label className="filter-cell-label">Status</label>
                 <SearchableDropdown
                   options={STATUS_FILTER_OPTIONS}
-                  value={filters.delivery_status || ''}
-                  onChange={val => setFilters(f => ({ ...f, delivery_status: val === 'All' ? '' : val }))}
+                  value={{ Yes: 'Delivered', No: 'Pending', Cancelled: 'Cancelled' }[filters.delivery_status] || ''}
+                  onChange={val => {
+                    const dbVal = { Delivered: 'Yes', Pending: 'No', Cancelled: 'Cancelled' }[val] || '';
+                    setFilters(f => ({ ...f, delivery_status: dbVal }));
+                  }}
                   placeholder="All Statuses"
                 />
               </div>
