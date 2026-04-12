@@ -114,7 +114,7 @@ router.get('/', async (req, res, next) => {
         const query = Order.find(filter)
             .populate('card_id', 'bank_name last_four_digit card_network')
             .populate('seller_id', 'name city')
-            .sort({ order_date: -1 });
+            .sort({ order_date: 1 });
 
         if (all === 'true') {
             const orders = await query;
