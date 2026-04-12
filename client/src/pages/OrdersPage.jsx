@@ -284,15 +284,15 @@ export default function OrdersPage() {
                 />
               </div>
               <div className="filter-cell">
-                <label className="filter-cell-label">Seller</label>
+                <label className="filter-cell-label">Buyer</label>
                 <SearchableDropdown
-                  options={['All Sellers', ...sellerOptions.map(o => o.label)]}
+                  options={['All Buyers', ...sellerOptions.map(o => o.label)]}
                   value={filters.seller_id ? (sellerOptions.find(o => o.value === filters.seller_id)?.label || '') : ''}
                   onChange={val => {
                     const opt = sellerOptions.find(o => o.label === val);
                     setFilters(f => ({ ...f, seller_id: opt ? opt.value : '' }));
                   }}
-                  placeholder="All Sellers"
+                  placeholder="All Buyers"
                 />
               </div>
               <div className="filter-cell">
@@ -340,7 +340,7 @@ export default function OrdersPage() {
               <ShoppingBag size={32} />
             </div>
             <div className="empty-title">No orders yet</div>
-            <div className="empty-sub">Start tracking your orders to monitor profits, delivery status, and seller performance.</div>
+            <div className="empty-sub">Start tracking your orders to monitor profits, delivery status, and buyer performance.</div>
             <div className="empty-cta">
               <button className="btn btn-primary" onClick={() => { setEditOrder(null); setShowModal(true); }}>
                 <ShoppingBag size={16} /> Add First Order
@@ -368,7 +368,7 @@ export default function OrdersPage() {
                     <th>Delivery Date</th>
                     <th>Item</th>
                     <th>Source &amp; Account</th>
-                    <th>Seller</th>
+                    <th>Buyer</th>
                     <th>Card</th>
                     <th>Ordered</th>
                     <th>Returned</th>

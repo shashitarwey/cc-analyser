@@ -102,7 +102,7 @@ export default function SellerLedgerPage() {
             <button
               className="btn-back-circle"
               onClick={() => navigate('/sellers')}
-              data-tooltip="Back to Sellers"
+              data-tooltip="Back to Buyers"
             >
               <ChevronLeft size={22} />
             </button>

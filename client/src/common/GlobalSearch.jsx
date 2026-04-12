@@ -165,7 +165,7 @@ export default function GlobalSearch({ onClose, inline = false, externalQuery = 
         {!loading && hasResults && (
           <div className="gs-body">
             {renderGroup('Cards',   <CreditCard size={12} />,  matchedCards,   'card')}
-            {renderGroup('Sellers', <Users size={12} />,       matchedSellers, 'seller')}
+            {renderGroup('Buyers', <Users size={12} />,       matchedSellers, 'seller')}
             {renderGroup('Orders',  <ShoppingBag size={12} />, matchedOrders,  'order')}
           </div>
         )}
@@ -187,7 +187,7 @@ export default function GlobalSearch({ onClose, inline = false, externalQuery = 
           <input
             ref={inputRef}
             className="gs-input"
-            placeholder="Search cards, sellers, orders…"
+            placeholder="Search cards, buyers, orders…"
             value={query}
             onChange={e => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
@@ -211,7 +211,7 @@ export default function GlobalSearch({ onClose, inline = false, externalQuery = 
         {!loading && hasResults && (
           <div className="gs-body">
             {renderGroup('Cards',   <CreditCard size={12} />,  matchedCards,   'card')}
-            {renderGroup('Sellers', <Users size={12} />,       matchedSellers, 'seller')}
+            {renderGroup('Buyers', <Users size={12} />,       matchedSellers, 'seller')}
             {renderGroup('Orders',  <ShoppingBag size={12} />, matchedOrders,  'order')}
           </div>
         )}

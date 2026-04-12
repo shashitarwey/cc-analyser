@@ -207,7 +207,7 @@ export default function OrderAnalyticsPage() {
           {bySeller.length > 0 && (
             <div className="analytics-chart-card">
               <h3 className="analytics-chart-title">
-                <Users size={16} /> Profit by Seller
+                <Users size={16} /> Profit by Buyer
               </h3>
               <ResponsiveContainer width="100%" height={Math.max(250, bySeller.length * 40)}>
                 <BarChart data={bySeller} layout="vertical" margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>

@@ -59,7 +59,7 @@ export default function Navbar() {
             <div className="nav-links hide-on-mobile">
               <Link to="/" className="text-sm font-medium" style={{ textDecoration: 'none', color: 'var(--text)' }}>Dashboard</Link>
               <Link to="/orders" className="text-sm font-medium" style={{ textDecoration: 'none', color: 'var(--text)' }}>Orders</Link>
-              <Link to="/sellers" className="text-sm font-medium" style={{ textDecoration: 'none', color: 'var(--text)' }}>Sellers</Link>
+              <Link to="/sellers" className="text-sm font-medium" style={{ textDecoration: 'none', color: 'var(--text)' }}>Buyers</Link>
               <Link to="/khata" className="text-sm font-medium" style={{ textDecoration: 'none', color: 'var(--text)' }}>Khata</Link>
               <Link to="/analytics" className="text-sm font-medium" style={{ textDecoration: 'none', color: 'var(--text)' }}>Analytics</Link>
               <Link to="/activity" className="text-sm font-medium" style={{ textDecoration: 'none', color: 'var(--text)' }}>Activity</Link>
@@ -136,7 +136,7 @@ export default function Navbar() {
                   <ShoppingBag size={18} /> Orders
                 </Link>
                 <Link to="/sellers" className={`mobile-menu-link${location.pathname.startsWith('/sellers') ? ' active' : ''}`}>
-                  <Users size={18} /> Sellers
+                  <Users size={18} /> Buyers
               </Link>
               <Link to="/khata" className={`mobile-menu-link${location.pathname.startsWith('/khata') ? ' active' : ''}`}>
                   <BookOpen size={18} /> Khata Book

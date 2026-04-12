@@ -50,14 +50,14 @@ export default function AddSellerModal({ onClose, onSuccess, editSeller }) {
     <div className="modal-backdrop" onClick={e => e.target === e.currentTarget && onClose()}>
       <div className="modal-content" style={{ maxWidth: '440px' }}>
         <div className="modal-header">
-          <h2 className="modal-title">{editSeller ? 'Edit Seller' : 'Add New Seller'}</h2>
+          <h2 className="modal-title">{editSeller ? 'Edit Buyer' : 'Add New Buyer'}</h2>
           <button className="modal-close" onClick={onClose}><X size={20} /></button>
         </div>
 
         <div className="modal-body">
           <form id="seller-form" onSubmit={handleSubmit} noValidate>
             <div className="form-group">
-              <label className="form-label">Seller Name <span style={{ color: 'var(--danger)' }}>*</span></label>
+              <label className="form-label">Buyer Name <span style={{ color: 'var(--danger)' }}>*</span></label>
               <input
                 type="text"
                 className={`form-input ${errors.name ? 'error' : ''}`}
@@ -94,7 +94,7 @@ export default function AddSellerModal({ onClose, onSuccess, editSeller }) {
         <div className="modal-footer">
           <button type="button" className="btn btn-secondary" onClick={onClose}>Cancel</button>
           <button type="submit" form="seller-form" className="btn btn-primary" disabled={loading}>
-            <Save size={16} /> {loading ? 'Saving…' : editSeller ? 'Save Changes' : 'Add Seller'}
+            <Save size={16} /> {loading ? 'Saving…' : editSeller ? 'Save Changes' : 'Add Buyer'}
           </button>
         </div>
       </div>

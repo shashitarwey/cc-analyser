@@ -2,17 +2,19 @@ import { useState, useEffect, useCallback } from 'react';
 import { getActivityLogs, getEntityHistory } from '../api';
 import Pagination from '../common/Pagination';
 import { PAGE_SIZE } from '../constants';
-import { ChevronLeft, ChevronDown, ChevronUp, Plus, Pencil, Trash2, ShoppingBag, CreditCard, Users, Wallet, ArrowLeftRight, History, X as XIcon } from 'lucide-react';
+import { ChevronLeft, ChevronDown, ChevronUp, Plus, Pencil, Trash2, ShoppingBag, CreditCard, Users, Wallet, ArrowLeftRight, History, X as XIcon, BookOpen } from 'lucide-react';
 import SearchableDropdown from '../common/SearchableDropdown';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
 const ENTITY_CONFIG = {
   order:          { icon: ShoppingBag,   label: 'Order',          color: '#58a6ff' },
-  seller:         { icon: Users,         label: 'Seller',         color: '#d2a8ff' },
-  seller_payment: { icon: Wallet,        label: 'Seller Payment', color: '#3fb950' },
+  seller:         { icon: Users,         label: 'Buyer',          color: '#d2a8ff' },
+  seller_payment: { icon: Wallet,        label: 'Buyer Payment',  color: '#3fb950' },
   transaction:    { icon: ArrowLeftRight, label: 'Transaction',    color: '#f0883e' },
   card:           { icon: CreditCard,    label: 'Card',           color: '#f85149' },
+  customer:       { icon: BookOpen,      label: 'Khata Customer', color: '#f9e2af' },
+  customer_entry: { icon: BookOpen,      label: 'Khata Entry',    color: '#a6e3a1' },
 };
 
 const ACTION_CONFIG = {
@@ -24,10 +26,12 @@ const ACTION_CONFIG = {
 const ENTITY_FILTER_OPTIONS = [
   { key: '', label: 'All Activities' },
   { key: 'order', label: 'Orders' },
-  { key: 'seller', label: 'Sellers' },
+  { key: 'seller', label: 'Buyers' },
   { key: 'seller_payment', label: 'Payments' },
   { key: 'transaction', label: 'Transactions' },
   { key: 'card', label: 'Cards' },
+  { key: 'customer', label: 'Khata Customers' },
+  { key: 'customer_entry', label: 'Khata Entries' },
 ];
 
 const HIDDEN_KEYS = new Set(['_id', 'user_id', '__v', 'created_at', 'updated_at', 'createdAt', 'updatedAt']);
@@ -36,7 +40,7 @@ const KEY_LABELS = {
   model_ordered: 'Model', order_amount: 'Order Amt', return_amount: 'Return Amt',
   order_date: 'Order Date', delivered_date: 'Delivery Date', delivery_status: 'Status',
   ecomm_site: 'Source', id_used: 'Account', is_cleared: 'Cleared',
-  card_id: 'Card', seller_id: 'Seller', cashback: 'Cashback', variant: 'Variant',
+  card_id: 'Card', seller_id: 'Buyer', cashback: 'Cashback', variant: 'Variant',
   quantity: 'Qty', bank_name: 'Bank', card_network: 'Network',
   last_four_digit: 'Last 4', name_on_card: 'Name on Card',
   cashback_enabled: 'Cashback', cashback_percent: 'CB %', cashback_limit: 'CB Limit',
@@ -44,6 +48,7 @@ const KEY_LABELS = {
   name: 'Name', city: 'City', phone: 'Phone',
   amount: 'Amount', payment_date: 'Date', notes: 'Notes', receipt_url: 'Receipt',
   description: 'Description', date: 'Date',
+  customer_id: 'Customer', type: 'Type', entry_date: 'Entry Date',
 };
 
 function formatValue(key, val) {
@@ -241,7 +246,7 @@ export default function ActivityLogPage() {
         ) : totalLogs === 0 ? (
           <div className="empty-state-card">
             <div className="empty-title">No activity yet</div>
-            <div className="empty-sub">Actions like adding orders, editing sellers, or deleting transactions will appear here.</div>
+            <div className="empty-sub">Actions like adding orders, editing buyers, or deleting transactions will appear here.</div>
           </div>
         ) : (
           <div className="table-card" style={{ padding: 0 }}>

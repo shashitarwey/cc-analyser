@@ -41,7 +41,7 @@ export default function SellersPage() {
 
   const handleDelete = (seller) => {
     setConfirm({
-      message: `Delete seller "${seller.name}"? This will only work if there are no existing orders assigned to them.`,
+      message: `Delete buyer "${seller.name}"? This will only work if there are no existing orders assigned to them.`,
       onConfirm: async () => {
         setConfirm(null);
         try {
@@ -84,16 +84,16 @@ export default function SellersPage() {
               <ChevronLeft size={22} />
             </button>
             <div className="page-hero-title-group">
-              <h1 className="page-hero-title">Sellers Tracking</h1>
+              <h1 className="page-hero-title">Buyers Tracking</h1>
               {!loading && totalSellers > 0 && (
-                <span className="page-hero-subtitle">{totalSellers} seller{totalSellers !== 1 ? 's' : ''} registered</span>
+                <span className="page-hero-subtitle">{totalSellers} buyer{totalSellers !== 1 ? 's' : ''} registered</span>
               )}
             </div>
           </div>
 
           <div className="page-hero-actions">
             <button className="btn btn-primary" onClick={() => setShowAddModal(true)}>
-              <Plus size={16} /> Add Seller
+              <Plus size={16} /> Add Buyer
             </button>
           </div>
         </div>
@@ -155,11 +155,11 @@ export default function SellersPage() {
             <div className="empty-icon empty-icon-sellers">
               <Users size={32} />
             </div>
-            <div className="empty-title">No sellers added yet</div>
-            <div className="empty-sub">Add your first seller to start tracking their orders, payments, and profits.</div>
+            <div className="empty-title">No buyers added yet</div>
+            <div className="empty-sub">Add your first buyer to start tracking their orders, payments, and profits.</div>
             <div className="empty-cta">
               <button className="btn btn-primary" onClick={() => setShowAddModal(true)}>
-                <Plus size={16} /> Add First Seller
+                <Plus size={16} /> Add First Buyer
               </button>
             </div>
           </div>
@@ -169,7 +169,7 @@ export default function SellersPage() {
               <table className="data-table">
                 <thead>
                   <tr>
-                    <th>Seller Name</th>
+                    <th>Buyer Name</th>
                     <th>Location</th>
                     <th>Phone</th>
                     <th>Expected (from Orders)</th>
@@ -219,8 +219,8 @@ export default function SellersPage() {
                           items={[
                             { label: 'Add Payment', icon: <Wallet size={15} />,   color: 'var(--success)', onClick: () => setPaymentSeller(seller) },
                             { label: 'View Ledger', icon: <BookText size={15} />,  color: 'var(--info)',    onClick: () => navigate(`/sellers/${seller._id}/ledger`) },
-                            { label: 'Edit Seller', icon: <Pencil size={15} />,    color: 'var(--text)',    onClick: () => handleEdit(seller) },
-                            { label: 'Delete Seller', icon: <Trash2 size={15} />,  color: 'var(--danger)',  className: 'border-top', onClick: () => handleDelete(seller) },
+                            { label: 'Edit Buyer', icon: <Pencil size={15} />,    color: 'var(--text)',    onClick: () => handleEdit(seller) },
+                            { label: 'Delete Buyer', icon: <Trash2 size={15} />,  color: 'var(--danger)',  className: 'border-top', onClick: () => handleDelete(seller) },
                           ]}
                         />
                       </td>
@@ -237,7 +237,7 @@ export default function SellersPage() {
               pageSize={pageSize}
               onPage={p => { setPage(p); fetchSellers(p, pageSize); }}
               onPageSize={size => { setPageSize(size); setPage(1); fetchSellers(1, size); }}
-              label="sellers"
+              label="buyers"
             />
           </div>
         )}
@@ -253,7 +253,7 @@ export default function SellersPage() {
 
       {confirm && (
         <ConfirmModal
-          title="Delete Seller"
+          title="Delete Buyer"
           message={confirm.message}
           onConfirm={confirm.onConfirm}
           onCancel={() => setConfirm(null)}

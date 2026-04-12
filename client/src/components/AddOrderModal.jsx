@@ -196,7 +196,7 @@ export default function AddOrderModal({ onClose, onSuccess, editOrder, cards, se
             </div>
 
             <div className="form-group z-7">
-              <label className="form-label">Seller <span style={{ color: 'var(--danger)' }}>*</span></label>
+              <label className="form-label">Buyer <span style={{ color: 'var(--danger)' }}>*</span></label>
               <SearchableDropdown
                 options={sellers?.map(s => sellerLabel(s)) || []}
                 value={form.seller_id ? sellerLabel(sellers?.find(s => s._id === form.seller_id)) : ''}
@@ -206,7 +206,7 @@ export default function AddOrderModal({ onClose, onSuccess, editOrder, cards, se
                   if (errors.seller_id) setErrors(e => ({ ...e, seller_id: '' }));
                 }}
                 disabled={!!editOrder}
-                placeholder="Select a seller"
+                placeholder="Select a buyer"
                 error={errors.seller_id}
               />
             </div>
