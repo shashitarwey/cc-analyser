@@ -57,6 +57,9 @@ export const getAllOrders = (params) => API.get('/orders', { params: { ...params
 export const addOrder = (data) => API.post('/orders', data).then(r => r.data);
 export const updateOrder = (id, d) => API.put(`/orders/${id}`, d).then(r => r.data);
 export const deleteOrder = (id) => API.delete(`/orders/${id}`).then(r => r.data);
+export const bulkUpdateStatus = (ids, delivery_status, delivered_date) => API.post('/orders/bulk/status', { ids, delivery_status, delivered_date }).then(r => r.data);
+export const bulkMarkCleared = (ids, is_cleared) => API.post('/orders/bulk/clear', { ids, is_cleared }).then(r => r.data);
+export const bulkDeleteOrders = (ids) => API.post('/orders/bulk/delete', { ids }).then(r => r.data);
 
 // ── Sellers ──
 export const getSellers = (params) => API.get('/sellers', { params }).then(r => r.data);  // returns { sellers, total, page, limit }

@@ -29,3 +29,21 @@ const baseRules = (optional = false) => {
 exports.createRules = baseRules(false);
 exports.updateRules = [param('id').isMongoId().withMessage('Invalid order id'), ...baseRules(true)];
 exports.idRule = [param('id').isMongoId().withMessage('Invalid order id')];
+
+exports.bulkStatusRules = [
+    body('ids').isArray({ min: 1 }).withMessage('ids must be a non-empty array'),
+    body('ids.*').isMongoId().withMessage('Each id must be a valid MongoId'),
+    body('delivery_status').isIn(DELIVERY).withMessage(`delivery_status must be one of ${DELIVERY.join(', ')}`),
+    body('delivered_date').optional({ values: 'falsy' }).isISO8601().withMessage('delivered_date must be a valid date'),
+];
+
+exports.bulkClearRules = [
+    body('ids').isArray({ min: 1 }).withMessage('ids must be a non-empty array'),
+    body('ids.*').isMongoId().withMessage('Each id must be a valid MongoId'),
+    body('is_cleared').isBoolean().withMessage('is_cleared must be boolean'),
+];
+
+exports.bulkDeleteRules = [
+    body('ids').isArray({ min: 1 }).withMessage('ids must be a non-empty array'),
+    body('ids.*').isMongoId().withMessage('Each id must be a valid MongoId'),
+];

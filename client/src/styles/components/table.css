@@ -96,6 +96,143 @@
   background: #ebeef3;
 }
 
+/* ── Bulk action bar ──────────────────────────────────────────── */
+.bulk-bar {
+  position: fixed;
+  bottom: calc(16px + env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 40;
+  max-width: fit-content;
+}
+
+.bulk-bar-inner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 8px 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+}
+
+.bulk-bar-count {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--accent);
+  white-space: nowrap;
+  padding: 0 4px;
+}
+
+.bulk-bar-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.bulk-bar-sep {
+  width: 1px;
+  height: 20px;
+  background: var(--border);
+  flex-shrink: 0;
+}
+
+.bulk-btn-delivered {
+  background: rgba(63, 185, 80, 0.14);
+  color: #86efac;
+  border: 1px solid rgba(63, 185, 80, 0.3);
+}
+
+.bulk-btn-pending {
+  background: rgba(88, 166, 255, 0.12);
+  color: var(--accent);
+  border: 1px solid rgba(88, 166, 255, 0.25);
+}
+
+.bulk-btn-cancelled {
+  background: rgba(248, 113, 113, 0.1);
+  color: #fca5a5;
+  border: 1px solid rgba(248, 113, 113, 0.25);
+}
+
+.bulk-btn-clear {
+  background: rgba(63, 185, 80, 0.12);
+  color: #86efac;
+  border: 1px solid rgba(63, 185, 80, 0.25);
+}
+
+.bulk-btn-unclear {
+  background: rgba(156, 163, 175, 0.12);
+  color: var(--text-muted);
+  border: 1px solid rgba(156, 163, 175, 0.25);
+}
+
+.bulk-btn-delete {
+  background: rgba(248, 81, 73, 0.12);
+  color: #f85149;
+  border: 1px solid rgba(248, 81, 73, 0.25);
+}
+
+.bulk-bar-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.bulk-bar-close:hover {
+  color: var(--text);
+}
+
+@media (max-width: 640px) {
+  .bulk-bar {
+    left: 12px;
+    right: 12px;
+    transform: none;
+    max-width: none;
+    bottom: calc(12px + env(safe-area-inset-bottom));
+  }
+
+  .bulk-bar-inner {
+    gap: 6px;
+    padding: 8px 10px;
+  }
+
+  .bulk-bar-count {
+    font-size: 0.72rem;
+    padding: 0 2px;
+  }
+
+  .bulk-bar-actions {
+    flex: 1;
+    gap: 5px;
+  }
+
+  .bulk-bar-actions .btn {
+    flex: 1 1 0;
+    min-width: 0;
+    font-size: 0.7rem;
+    padding: 7px 6px;
+    white-space: nowrap;
+    justify-content: center;
+  }
+
+  .bulk-bar-sep {
+    display: none;
+  }
+
+  .bulk-bar-close {
+    padding: 2px;
+  }
+}
+
 .tx-card-pill {
   display: inline-block;
   padding: 3px 10px;

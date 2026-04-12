@@ -51,7 +51,7 @@
 
 - ~~Order Remarks (free-text notes per order)~~ ✅
 - ~~First Column Freeze in Orders table~~ ✅
-- **Custom Variants & E-Comm Sites** — Replace hardcoded enums with user-defined custom values (stored in user preferences or separate collection)
+- ~~Custom Variants & E-Comm Sites~~ — Skipped (hardcoded lists work fine for current use case)
 - **Tracking Number & URL** — Add `tracking_number` and `tracking_url` fields to Order schema for courier tracking links
 - **Order Timeline/History** — Record status transitions (ordered, shipped, delivered, returned) with timestamps as embedded array
 - **Order Tags/Labels** — Custom tags (gift, resale, personal) for flexible categorization

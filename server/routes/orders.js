@@ -7,7 +7,7 @@ const { pickFields, parsePagination, paginatedResponse } = require('../utils/hel
 const { invalidateSummaryCache } = require('../utils/cache');
 const { logActivity } = require('../utils/activityLogger');
 const validate = require('../middleware/validate');
-const { createRules, updateRules, idRule } = require('../validators/orders.validator');
+const { createRules, updateRules, idRule, bulkStatusRules, bulkClearRules, bulkDeleteRules } = require('../validators/orders.validator');
 
 /**
  * @swagger
@@ -252,6 +252,58 @@ router.delete('/:id', idRule, validate, async (req, res, next) => {
 
         logActivity(req.user.id, 'deleted', 'order', deletedOrder._id, `Deleted order: ${deletedOrder.model_ordered} | ${deletedOrder.ecomm_site} | ₹${deletedOrder.order_amount} | ${delDate}`, snap);
         res.json({ success: true });
+    } catch (err) { next(err); }
+});
+
+// ── Bulk Actions ────────────────────────────────────────────────────────────
+
+// POST bulk status update
+router.post('/bulk/status', bulkStatusRules, validate, async (req, res, next) => {
+    try {
+        const { ids, delivery_status, delivered_date } = req.body;
+        const update = { delivery_status };
+        if (delivery_status === 'Yes' && delivered_date) {
+            update.delivered_date = delivered_date;
+        } else if (delivery_status !== 'Yes') {
+            update.delivered_date = null;
+        }
+        const result = await Order.updateMany(
+            { _id: { $in: ids }, user_id: req.user.id },
+            update
+        );
+        invalidateSummaryCache(req);
+        logActivity(req.user.id, 'updated', 'order', null,
+            `Bulk status update: ${result.modifiedCount} order(s) → ${delivery_status}`, { ids, delivery_status });
+        res.json({ success: true, modified: result.modifiedCount });
+    } catch (err) { next(err); }
+});
+
+// POST bulk mark cleared / uncleared
+router.post('/bulk/clear', bulkClearRules, validate, async (req, res, next) => {
+    try {
+        const { ids, is_cleared } = req.body;
+        const result = await Order.updateMany(
+            { _id: { $in: ids }, user_id: req.user.id },
+            { is_cleared }
+        );
+        invalidateSummaryCache(req);
+        logActivity(req.user.id, 'updated', 'order', null,
+            `Bulk ${is_cleared ? 'cleared' : 'uncleared'}: ${result.modifiedCount} order(s)`, { ids, is_cleared });
+        res.json({ success: true, modified: result.modifiedCount });
+    } catch (err) { next(err); }
+});
+
+// POST bulk delete
+router.post('/bulk/delete', bulkDeleteRules, validate, async (req, res, next) => {
+    try {
+        const { ids } = req.body;
+        const result = await Order.deleteMany(
+            { _id: { $in: ids }, user_id: req.user.id }
+        );
+        invalidateSummaryCache(req);
+        logActivity(req.user.id, 'deleted', 'order', null,
+            `Bulk deleted: ${result.deletedCount} order(s)`, { ids });
+        res.json({ success: true, deleted: result.deletedCount });
     } catch (err) { next(err); }
 });
 

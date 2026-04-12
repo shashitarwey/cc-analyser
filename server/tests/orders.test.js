@@ -104,4 +104,98 @@ describe('Orders Routes', () => {
       expect(res.status).toBe(200);
     });
   });
+
+  // ── Bulk actions ─────────────────────────────────────────────────────────
+  describe('POST /api/orders/bulk/status', () => {
+    it('should bulk update delivery status', async () => {
+      const o1 = await request(app).post('/api/orders').set(authHeader(token))
+        .send(makeOrder({ card_id: cardId, seller_id: sellerId, model_ordered: 'A' }));
+      const o2 = await request(app).post('/api/orders').set(authHeader(token))
+        .send(makeOrder({ card_id: cardId, seller_id: sellerId, model_ordered: 'B' }));
+
+      const res = await request(app)
+        .post('/api/orders/bulk/status')
+        .set(authHeader(token))
+        .send({ ids: [o1.body._id, o2.body._id], delivery_status: 'Yes', delivered_date: '2026-04-10' });
+      expect(res.status).toBe(200);
+      expect(res.body.modified).toBe(2);
+
+      const check = await request(app).get('/api/orders?all=true').set(authHeader(token));
+      expect(check.body.every(o => o.delivery_status === 'Yes')).toBe(true);
+    });
+
+    it('should reject empty ids array', async () => {
+      const res = await request(app)
+        .post('/api/orders/bulk/status')
+        .set(authHeader(token))
+        .send({ ids: [], delivery_status: 'Yes' });
+      expect(res.status).toBe(400);
+    });
+
+    it('should not update another users orders', async () => {
+      const o = await request(app).post('/api/orders').set(authHeader(token))
+        .send(makeOrder({ card_id: cardId, seller_id: sellerId }));
+
+      const other = await createTestUser({ email: 'other@test.com' });
+      const res = await request(app)
+        .post('/api/orders/bulk/status')
+        .set(authHeader(other.token))
+        .send({ ids: [o.body._id], delivery_status: 'Yes' });
+      expect(res.body.modified).toBe(0);
+    });
+  });
+
+  describe('POST /api/orders/bulk/clear', () => {
+    it('should bulk mark orders as cleared', async () => {
+      const o1 = await request(app).post('/api/orders').set(authHeader(token))
+        .send(makeOrder({ card_id: cardId, seller_id: sellerId }));
+      const o2 = await request(app).post('/api/orders').set(authHeader(token))
+        .send(makeOrder({ card_id: cardId, seller_id: sellerId }));
+
+      const res = await request(app)
+        .post('/api/orders/bulk/clear')
+        .set(authHeader(token))
+        .send({ ids: [o1.body._id, o2.body._id], is_cleared: true });
+      expect(res.status).toBe(200);
+      expect(res.body.modified).toBe(2);
+
+      const check = await request(app).get('/api/orders?all=true').set(authHeader(token));
+      expect(check.body.every(o => o.is_cleared === true)).toBe(true);
+    });
+  });
+
+  describe('POST /api/orders/bulk/delete', () => {
+    it('should bulk delete orders', async () => {
+      const o1 = await request(app).post('/api/orders').set(authHeader(token))
+        .send(makeOrder({ card_id: cardId, seller_id: sellerId }));
+      const o2 = await request(app).post('/api/orders').set(authHeader(token))
+        .send(makeOrder({ card_id: cardId, seller_id: sellerId }));
+
+      const res = await request(app)
+        .post('/api/orders/bulk/delete')
+        .set(authHeader(token))
+        .send({ ids: [o1.body._id, o2.body._id] });
+      expect(res.status).toBe(200);
+      expect(res.body.deleted).toBe(2);
+
+      const check = await request(app).get('/api/orders').set(authHeader(token));
+      expect(check.body.items).toHaveLength(0);
+    });
+
+    it('should not delete another users orders', async () => {
+      const o = await request(app).post('/api/orders').set(authHeader(token))
+        .send(makeOrder({ card_id: cardId, seller_id: sellerId }));
+
+      const other = await createTestUser({ email: 'other@test.com' });
+      const res = await request(app)
+        .post('/api/orders/bulk/delete')
+        .set(authHeader(other.token))
+        .send({ ids: [o.body._id] });
+      expect(res.body.deleted).toBe(0);
+
+      // Original order still exists
+      const check = await request(app).get('/api/orders').set(authHeader(token));
+      expect(check.body.items).toHaveLength(1);
+    });
+  });
 });

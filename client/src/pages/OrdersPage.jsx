@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { getOrders, getAllOrders, deleteOrder, updateOrder, getCards, getAllSellers } from '../api';
+import { getOrders, getAllOrders, deleteOrder, updateOrder, getCards, getAllSellers, bulkUpdateStatus, bulkMarkCleared } from '../api';
 import AddOrderModal from '../components/AddOrderModal';
 import OrderRemarkModal from '../components/OrderRemarkModal';
 import ActionMenu from '../common/ActionMenu';
 import Pagination from '../common/Pagination';
-import { ShoppingBag, MapPin, Pencil, Trash2, Filter, Search, X as XIcon, ChevronLeft, Download, MessageSquare } from 'lucide-react';
+import { ShoppingBag, MapPin, Pencil, Trash2, Filter, Search, X as XIcon, ChevronLeft, Download, MessageSquare, CheckSquare, Square, Truck, CheckCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { ECOMM_SITES, PAGE_SIZE, STATUS_FILTER_OPTIONS } from '../constants';
 import { fmtCurrency, fmtSignedCurrency, cardLabel, sellerLabel, pickTruthy } from '../utils/formatters';
@@ -37,6 +37,7 @@ export default function OrdersPage() {
   const [pageSize, setPageSize] = useState(PAGE_SIZE);
   const [confirm, setConfirm] = useState(null);
   const [remarkOrder, setRemarkOrder] = useState(null);
+  const [selected, setSelected] = useState(new Set());
 
   // Pre-fill seller filter if navigated from SellersPage
   const initSellerId = location.state?.seller_id || '';
@@ -98,6 +99,8 @@ export default function OrdersPage() {
 
   const handleDelete = (id) => {
     setConfirm({
+      title: 'Delete Order',
+      confirmLabel: 'Delete',
       message: 'Delete this order? This action cannot be undone.',
       onConfirm: async () => {
         setConfirm(null);
@@ -141,6 +144,62 @@ export default function OrdersPage() {
       toast.error('Failed to update order');
     }
   };
+
+  // ── Bulk selection helpers ───────────────────────────────────────
+  const toggleSelect = (id) => {
+    setSelected(prev => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selected.size === orders.length) {
+      setSelected(new Set());
+    } else {
+      setSelected(new Set(orders.map(o => o._id)));
+    }
+  };
+
+  const clearSelection = () => setSelected(new Set());
+
+  const handleBulkStatus = (status) => {
+    const label = status === 'Yes' ? 'Delivered' : status === 'No' ? 'Pending' : 'Cancelled';
+    setConfirm({
+      title: 'Update Status',
+      confirmLabel: label,
+      message: `Mark ${selected.size} order(s) as "${label}"?`,
+      onConfirm: async () => {
+        setConfirm(null);
+        try {
+          const delivered_date = status === 'Yes' ? new Date().toISOString().slice(0, 10) : '';
+          await bulkUpdateStatus([...selected], status, delivered_date);
+          toast.success(`${selected.size} order(s) marked as ${label}`);
+          clearSelection();
+          fetchOrders(filters, page, pageSize);
+        } catch { toast.error('Bulk status update failed'); }
+      }
+    });
+  };
+
+  const handleBulkClear = (cleared) => {
+    setConfirm({
+      title: cleared ? 'Mark Cleared' : 'Mark Uncleared',
+      confirmLabel: cleared ? 'Clear' : 'Unclear',
+      message: `Mark ${selected.size} order(s) as ${cleared ? 'cleared' : 'uncleared'}?`,
+      onConfirm: async () => {
+        setConfirm(null);
+        try {
+          await bulkMarkCleared([...selected], cleared);
+          toast.success(`${selected.size} order(s) ${cleared ? 'cleared' : 'uncleared'}`);
+          clearSelection();
+          fetchOrders(filters, page, pageSize);
+        } catch { toast.error('Bulk clear update failed'); }
+      }
+    });
+  };
+
 
   if (loading) {
     return (
@@ -366,6 +425,11 @@ export default function OrdersPage() {
               <table className="data-table table-freeze-first">
                 <thead>
                   <tr>
+                    <th style={{ width: '36px', textAlign: 'center', cursor: 'pointer' }} onClick={toggleSelectAll}>
+                      {selected.size === orders.length && orders.length > 0
+                        ? <CheckSquare size={16} style={{ color: 'var(--accent)' }} />
+                        : <Square size={16} style={{ color: 'var(--text-muted)' }} />}
+                    </th>
                     <th>#</th>
                     <th>Order Date</th>
                     <th>Delivery Date</th>
@@ -397,6 +461,11 @@ export default function OrdersPage() {
                         style={isCancelled ? { opacity: 0.5 } : {}}
                         onClick={() => setRemarkOrder(order)}
                       >
+                        <td style={{ textAlign: 'center', width: '36px' }} onClick={e => { e.stopPropagation(); toggleSelect(order._id); }}>
+                          {selected.has(order._id)
+                            ? <CheckSquare size={16} style={{ color: 'var(--accent)', cursor: 'pointer' }} />
+                            : <Square size={16} style={{ color: 'var(--text-muted)', cursor: 'pointer' }} />}
+                        </td>
                         <td style={{ whiteSpace: 'nowrap', color: 'var(--text-muted)' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                             <span>{(page - 1) * pageSize + index + 1}</span>
@@ -473,13 +542,37 @@ export default function OrdersPage() {
               </table>
             </div>
 
+            {/* Floating bulk action bar */}
+            {selected.size > 0 && (
+              <div className="bulk-bar">
+                <div className="bulk-bar-inner">
+                  <span className="bulk-bar-count">{selected.size} selected</span>
+                  <div className="bulk-bar-actions">
+                    <button className="btn btn-sm bulk-btn-delivered" onClick={() => handleBulkStatus('Yes')}>
+                      <Truck size={14} /> Delivered
+                    </button>
+                    <button className="btn btn-sm bulk-btn-cancelled" onClick={() => handleBulkStatus('Cancelled')}>
+                      Cancelled
+                    </button>
+                    <span className="bulk-bar-sep" />
+                    <button className="btn btn-sm bulk-btn-clear" onClick={() => handleBulkClear(true)}>
+                      <CheckCircle size={14} /> Mark Cleared
+                    </button>
+                  </div>
+                  <button className="bulk-bar-close" onClick={clearSelection}>
+                    <XIcon size={14} />
+                  </button>
+                </div>
+              </div>
+            )}
+
             <Pagination
               page={page}
               totalPages={totalPages}
               totalItems={totalOrders}
               pageSize={pageSize}
-              onPage={p => { setPage(p); fetchOrders(filters, p, pageSize); }}
-              onPageSize={size => { setPageSize(size); setPage(1); fetchOrders(filters, 1, size); }}
+              onPage={p => { setPage(p); clearSelection(); fetchOrders(filters, p, pageSize); }}
+              onPageSize={size => { setPageSize(size); setPage(1); clearSelection(); fetchOrders(filters, 1, size); }}
               label="orders"
             />
           </div>
@@ -508,8 +601,9 @@ export default function OrdersPage() {
 
       {confirm && (
         <ConfirmModal
-          title="Delete Order"
+          title={confirm.title || 'Confirm'}
           message={confirm.message}
+          confirmLabel={confirm.confirmLabel || 'Confirm'}
           onConfirm={confirm.onConfirm}
           onCancel={() => setConfirm(null)}
         />
