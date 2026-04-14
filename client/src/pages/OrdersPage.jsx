@@ -440,7 +440,7 @@ export default function OrdersPage() {
                     <th>Ordered</th>
                     <th>Returned</th>
                     <th>Cashback</th>
-                    <th>Profit</th>
+                    <th>Profit (%)</th>
                     <th>Status</th>
                     <th>Clear</th>
                     <th className="text-right col-action">Actions</th>
@@ -510,7 +510,9 @@ export default function OrdersPage() {
                         <td className="font-medium" style={{ color: 'var(--accent)' }}>{fmtCurrency(order.return_amount)}</td>
                         <td className="font-medium" style={{ color: 'var(--success)' }}>{fmtCurrency(order.cashback)}</td>
                         <td className="font-medium" style={{ color: isCancelled ? 'var(--text-muted)' : profit >= 0 ? 'var(--success)' : 'var(--danger)' }}>
-                          {isCancelled ? '—' : fmtSignedCurrency(profit)}
+                          {isCancelled
+                            ? '—'
+                            : `${fmtSignedCurrency(profit)} (${order.order_amount > 0 ? ((profit / order.order_amount) * 100).toFixed(2) : '0.00'}%)`}
                         </td>
                         <td>
                           <span className={`badge ${isDelivered ? 'badge-success' : isCancelled ? 'badge-danger' : 'badge-surface'}`}>

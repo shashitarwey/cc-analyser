@@ -269,6 +269,17 @@
   padding: 1px 5px;
 }
 
+.ledger-card-delivered {
+  display: inline-block;
+  margin-bottom: 8px;
+  font-size: 0.7rem;
+  color: #86efac;
+  background: rgba(134, 239, 172, 0.08);
+  border: 1px solid rgba(134, 239, 172, 0.2);
+  border-radius: 4px;
+  padding: 2px 6px;
+}
+
 /* Inline receipt image (always visible inside the card) */
 .ledger-receipt-inline {
   margin: 4px 0 8px;

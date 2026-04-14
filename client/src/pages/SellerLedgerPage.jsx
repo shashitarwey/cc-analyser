@@ -263,6 +263,13 @@ export default function SellerLedgerPage() {
                         )}
                       </div>
 
+                      {/* Delivered date for delivered orders */}
+                      {isOrder && !isPending && !isCancelled && item.raw.delivered_date && (
+                        <div className="ledger-card-delivered">
+                          Delivered on {fmtDisplay(item.raw.delivered_date.slice(0, 10))}
+                        </div>
+                      )}
+
                       {/* Receipt shown inline by default */}
                       {!isOrder && item.raw.receipt_url && (
                         <div className="ledger-receipt-inline">
