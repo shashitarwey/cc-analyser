@@ -2003,3 +2003,168 @@
     padding: 8px;
   }
 }
+
+/* ════════════════════════════════════════════════════════════════
+   LANDSCAPE PHONES — height ≤ 500px
+   Phones in landscape have very little vertical space (e.g. iPhone
+   14 landscape = 390px tall). Compact the space-hoggers: page hero,
+   stats cards, ledger timeline padding, and floating action bars.
+   ════════════════════════════════════════════════════════════════ */
+@media (max-height: 500px) {
+  /* Page hero — biggest offender, can eat 100px+ of vertical space */
+  .page-hero {
+    padding: 10px 16px 10px;
+    margin-bottom: 10px;
+  }
+
+  .page-hero-title {
+    font-size: 1.1rem;
+  }
+
+  .page-hero-subtitle {
+    font-size: 0.72rem;
+  }
+
+  .page-hero-inner {
+    gap: 6px;
+  }
+
+  .ledger-hero {
+    padding: 8px 12px 10px;
+  }
+
+  /* Stats row — tighten vertical padding */
+  .stats-row {
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+
+  .stat-card {
+    padding: 8px 12px;
+  }
+
+  .stat-card-value {
+    font-size: 0.95rem;
+  }
+
+  .ledger-stat-item {
+    padding: 8px 12px;
+  }
+
+  .ledger-stat-value {
+    font-size: 0.9rem;
+  }
+
+  /* Ledger timeline — reduce top/bottom padding */
+  .ledger-timeline {
+    padding: 12px 12px 100px;
+  }
+
+  .ledger-date-sep {
+    margin: 12px 0 8px;
+  }
+
+  /* Dashboard hero bar */
+  .hero-bar {
+    padding: 10px 16px 10px;
+  }
+
+  .hero-amount {
+    font-size: 1.1rem;
+    margin-bottom: 8px;
+  }
+
+  /* Modal content — prevent tall modals from overflowing a short viewport */
+  .modal-content {
+    max-height: calc(100vh - 20px);
+  }
+
+  .modal-overlay,
+  .modal-backdrop {
+    padding: 10px;
+    align-items: flex-start;
+  }
+
+  .modal-header {
+    padding: 10px 16px;
+  }
+
+  .modal-body {
+    padding: 12px 16px;
+  }
+
+  .modal-footer {
+    padding: 10px 16px;
+  }
+
+  /* Floating bottom bars — smaller so they don't overlap content */
+  .khata-action-bar {
+    bottom: calc(8px + env(safe-area-inset-bottom));
+  }
+
+  .khata-action-inner {
+    padding: 6px 8px;
+  }
+
+  .khata-btn-gave,
+  .khata-btn-got {
+    padding: 7px 10px;
+    font-size: 0.82rem;
+  }
+
+  .bulk-bar {
+    bottom: calc(8px + env(safe-area-inset-bottom));
+  }
+
+  .bulk-bar-inner {
+    padding: 6px 10px;
+  }
+
+  /* Data tables — portrait uses 14px row padding which only fits 5 rows
+     in a 390px-tall landscape viewport. Tighten cells + pagination. */
+  .data-table th {
+    padding: 8px 10px;
+    font-size: 0.62rem;
+  }
+
+  .data-table td {
+    padding: 6px 10px;
+    font-size: 0.72rem;
+  }
+
+  /* Shimmer rows load faster visually when shorter */
+  .shimmer-table-row {
+    height: 28px;
+  }
+
+  /* Pagination bar — 16px top/bottom padding is too much */
+  .table-paginator-wrap {
+    padding: 6px 12px;
+  }
+
+  .table-paginator-wrap .btn-sm {
+    padding: 4px 8px;
+    font-size: 0.72rem;
+  }
+
+  /* Empty state inside tables takes 80px+ vertical padding by default */
+  .empty-state,
+  .empty-state-card {
+    padding: 20px 16px 24px;
+  }
+
+  .empty-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    margin-bottom: 4px;
+  }
+
+  .empty-title {
+    font-size: 0.95rem;
+  }
+
+  .empty-sub {
+    font-size: 0.78rem;
+  }
+}
