@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ChevronLeft, TrendingUp, Users, ShoppingBag, IndianRupee, BarChart3 } from 'lucide-react';
+import { ChevronLeft, TrendingUp, Users, ShoppingBag, IndianRupee, BarChart3, Percent } from 'lucide-react';
 import { getProfitAnalytics } from '../api';
 import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
@@ -128,7 +128,7 @@ export default function OrderAnalyticsPage() {
 
       <div className="page-content">
         {/* Summary Cards */}
-        <div className="stats-row stats-row-4">
+        <div className="stats-row">
           <div className="stat-card">
             <div className="stat-card-header">
               <div className="stat-card-icon" style={{ background: 'rgba(88,166,255,0.12)', color: '#58a6ff' }}>
@@ -170,10 +170,38 @@ export default function OrderAnalyticsPage() {
               {fmtCurrency(totals.profit)}
             </div>
           </div>
+
+          <div className="stat-card">
+            <div className="stat-card-header">
+              <div className="stat-card-icon" style={{ background: 'rgba(188,140,255,0.12)', color: '#bc8cff' }}>
+                <Percent size={16} />
+              </div>
+              <span className="stat-card-label">Profit Margin</span>
+            </div>
+            <div className="stat-card-value" style={{ color: totals.profit >= 0 ? 'var(--success)' : 'var(--danger)' }}>
+              {totals.order_amount > 0
+                ? `${((totals.profit / totals.order_amount) * 100).toFixed(2)}%`
+                : '0.00%'}
+            </div>
+          </div>
+
+          <div className="stat-card">
+            <div className="stat-card-header">
+              <div className="stat-card-icon" style={{ background: 'rgba(227,179,65,0.12)', color: '#e3b341' }}>
+                <TrendingUp size={16} />
+              </div>
+              <span className="stat-card-label">Avg Profit / Order</span>
+            </div>
+            <div className="stat-card-value" style={{ color: totals.profit >= 0 ? 'var(--success)' : 'var(--danger)' }}>
+              {totals.order_count > 0
+                ? fmtCurrency(totals.profit / totals.order_count)
+                : '₹0'}
+            </div>
+          </div>
         </div>
 
-        {/* Monthly Profit Trend */}
-        {monthly.length > 1 && (
+        {/* Monthly area graph — order amount, return amount, profit per month */}
+        {monthly.length > 0 && (
           <div className="analytics-chart-card">
             <h3 className="analytics-chart-title">Monthly Profit Trend</h3>
             <ResponsiveContainer width="100%" height={300}>
