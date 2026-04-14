@@ -70,29 +70,46 @@
   background: rgba(88, 166, 255, 0.04);
 }
 
-/* ── Freeze first column on horizontal scroll ────────────── */
+/* ── Freeze first two columns on horizontal scroll ─────────
+   1st column: 36px-wide checkbox (left: 0)
+   2nd column: row counter (left: 36px) */
 .table-freeze-first th:first-child,
-.table-freeze-first td:first-child {
+.table-freeze-first td:first-child,
+.table-freeze-first th:nth-child(2),
+.table-freeze-first td:nth-child(2) {
   position: sticky;
-  left: 0;
   z-index: 2;
   background: var(--surface);
 }
 
-.table-freeze-first th:first-child {
+.table-freeze-first th:first-child,
+.table-freeze-first td:first-child {
+  left: 0;
+}
+
+.table-freeze-first th:nth-child(2),
+.table-freeze-first td:nth-child(2) {
+  left: 36px;
+}
+
+.table-freeze-first th:first-child,
+.table-freeze-first th:nth-child(2) {
   z-index: 3;
   background: #15191f;
 }
 
-[data-theme="light"] .table-freeze-first th:first-child {
+[data-theme="light"] .table-freeze-first th:first-child,
+[data-theme="light"] .table-freeze-first th:nth-child(2) {
   background: #f0f1f3;
 }
 
-.table-freeze-first tbody tr:hover td:first-child {
+.table-freeze-first tbody tr:hover td:first-child,
+.table-freeze-first tbody tr:hover td:nth-child(2) {
   background: #1a1f27;
 }
 
-[data-theme="light"] .table-freeze-first tbody tr:hover td:first-child {
+[data-theme="light"] .table-freeze-first tbody tr:hover td:first-child,
+[data-theme="light"] .table-freeze-first tbody tr:hover td:nth-child(2) {
   background: #ebeef3;
 }
 

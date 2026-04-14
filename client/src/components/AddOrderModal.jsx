@@ -129,7 +129,6 @@ export default function AddOrderModal({ onClose, onSuccess, editOrder, cards, se
                   options={ECOMM_SITES}
                   value={form.ecomm_site}
                   onChange={v => set('ecomm_site', v)}
-                  disabled={!!editOrder}
                   placeholder="Select Site"
                   error={errors.ecomm_site}
                 />
@@ -156,7 +155,6 @@ export default function AddOrderModal({ onClose, onSuccess, editOrder, cards, se
                   options={variantOptions}
                   value={form.variant}
                   onChange={v => set('variant', v)}
-                  disabled={!!editOrder}
                   placeholder="Select Variant"
                 />
               </div>
@@ -167,7 +165,6 @@ export default function AddOrderModal({ onClose, onSuccess, editOrder, cards, se
                   type="text"
                   className={`form-input ${errors.id_used ? 'error' : ''}`}
                   placeholder="Email or Phone"
-                  disabled={!!editOrder}
                   value={form.id_used}
                   onChange={e => set('id_used', e.target.value)}
                 />
