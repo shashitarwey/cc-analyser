@@ -6,7 +6,7 @@ import ActionMenu from '../common/ActionMenu';
 import Pagination from '../common/Pagination';
 import { ShoppingBag, MapPin, Pencil, Trash2, Filter, Search, X as XIcon, ChevronLeft, Download, MessageSquare, CheckSquare, Square, Truck, CheckCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { ECOMM_SITES, PAGE_SIZE, STATUS_FILTER_OPTIONS } from '../constants';
+import { ECOMM_SITES, STATUS_FILTER_OPTIONS } from '../constants';
 import { fmtCurrency, fmtSignedCurrency, cardLabel, sellerLabel, pickTruthy } from '../utils/formatters';
 import { exportOrdersCSV } from '../utils/orderExport';
 import DateRangeDropdown from '../common/DateRangeDropdown';
@@ -34,7 +34,7 @@ export default function OrdersPage() {
   const [showFilters, setShowFilters] = useState(false);
   const [openMenu, setOpenMenu] = useState(null);
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(PAGE_SIZE);
+  const [pageSize, setPageSize] = useState(50);
   const [confirm, setConfirm] = useState(null);
   const [remarkOrder, setRemarkOrder] = useState(null);
   const [selected, setSelected] = useState(new Set());
