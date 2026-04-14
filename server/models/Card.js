@@ -33,6 +33,9 @@ const cardSchema = new mongoose.Schema(
         cashback_period: { type: String, enum: ['monthly', 'quarterly', 'half-yearly', 'yearly'], default: 'monthly' },
         cashback_reset_day: { type: Number, min: 1, max: 31, default: 1 }, // Day of month when cashback cycle resets
         cashback_cycle_start_month: { type: Number, min: 1, max: 12, default: 1 }, // Month when first cycle begins (1=Jan, 12=Dec)
+        // Restrict cashback to specific e-comm sites (e.g. "Amazon ICICI" → ['Amazon']).
+        // Empty array means cashback applies to all sites.
+        cashback_sites: { type: [String], default: [] },
         // Billing cycle reminder fields
         billing_date: { type: Number, min: 1, max: 31, default: null }, // Day statement is generated
         due_date:     { type: Number, min: 1, max: 31, default: null }, // Day payment is due

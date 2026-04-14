@@ -68,6 +68,7 @@ const { createRules, updateRules, idRule } = require('../validators/cards.valida
 const CARD_FIELDS = [
     'bank_name', 'card_network', 'last_four_digit', 'name_on_card',
     'cashback_enabled', 'cashback_percent', 'cashback_limit', 'cashback_period', 'cashback_reset_day', 'cashback_cycle_start_month',
+    'cashback_sites',
     'billing_date', 'due_date'
 ];
 

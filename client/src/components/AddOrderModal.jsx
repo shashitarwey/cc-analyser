@@ -56,6 +56,16 @@ export default function AddOrderModal({ onClose, onSuccess, editOrder, cards, se
   const selectedCard = cards?.find(c => c._id === form.card_id);
   const isCashbackEnabled = selectedCard?.cashback_enabled || false;
 
+  // Compute cashback honoring the card's cashback_sites restriction.
+  // Empty/missing sites array → applies everywhere. Otherwise the current
+  // ecomm_site must be in the list for cashback to apply.
+  const computeCashback = (card, ecommSite, orderAmount) => {
+    if (!card?.cashback_enabled) return 0;
+    const sites = Array.isArray(card.cashback_sites) ? card.cashback_sites : [];
+    if (sites.length > 0 && !sites.includes(ecommSite)) return 0;
+    return Math.round((Number(orderAmount) || 0) * (card.cashback_percent / 100));
+  };
+
   const validate = () => {
     const e = {};
     if (!form.model_ordered.trim()) e.model_ordered = 'Item name is required';
@@ -98,10 +108,7 @@ export default function AddOrderModal({ onClose, onSuccess, editOrder, cards, se
     const uReturn = field === 'unit_return_amount' ? Number(value) : Number(form.unit_return_amount);
     const oAmt = uOrder * q;
     const rAmt = uReturn * q;
-    let cb = Number(form.cashback);
-    if (isCashbackEnabled && selectedCard) {
-      cb = Math.round(oAmt * (selectedCard.cashback_percent / 100));
-    }
+    const cb = computeCashback(selectedCard, form.ecomm_site, oAmt);
     const update = { [field]: value, order_amount: oAmt, return_amount: rAmt, cashback: cb };
     if (field === 'quantity') update.quantity = value === '' ? '' : Math.max(1, Number(value) || 1);
     setForm(f => ({ ...f, ...update }));
@@ -128,7 +135,11 @@ export default function AddOrderModal({ onClose, onSuccess, editOrder, cards, se
                 <SearchableDropdown
                   options={ECOMM_SITES}
                   value={form.ecomm_site}
-                  onChange={v => set('ecomm_site', v)}
+                  onChange={v => {
+                    const cb = computeCashback(selectedCard, v, form.order_amount);
+                    setForm(f => ({ ...f, ecomm_site: v, cashback: cb }));
+                    if (errors.ecomm_site) setErrors(e => ({ ...e, ecomm_site: '' }));
+                  }}
                   placeholder="Select Site"
                   error={errors.ecomm_site}
                 />
@@ -180,9 +191,7 @@ export default function AddOrderModal({ onClose, onSuccess, editOrder, cards, se
                 onChange={val => {
                   const card = cards?.find(c => cardLabel(c) === val);
                   const newId = card ? card._id : '';
-                  let cb = form.cashback;
-                  if (card?.cashback_enabled) cb = Math.round((Number(form.order_amount) || 0) * (card.cashback_percent / 100));
-                  else cb = 0;
+                  const cb = computeCashback(card, form.ecomm_site, form.order_amount);
                   setForm(f => ({ ...f, card_id: newId, cashback: cb }));
                   if (errors.card_id) setErrors(e => ({ ...e, card_id: '' }));
                 }}

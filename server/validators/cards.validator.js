@@ -16,6 +16,8 @@ const createRules = [
     body('cashback_cycle_start_month').optional({ values: 'falsy' }).isInt({ min: 1, max: 12 }).withMessage('cashback_cycle_start_month must be 1-12'),
     body('billing_date').optional({ values: 'falsy' }).isInt({ min: 1, max: 31 }).withMessage('billing_date must be 1-31'),
     body('due_date').optional({ values: 'falsy' }).isInt({ min: 1, max: 31 }).withMessage('due_date must be 1-31'),
+    body('cashback_sites').optional().isArray().withMessage('cashback_sites must be an array'),
+    body('cashback_sites.*').optional().isString().trim(),
 ];
 
 const updateRules = [
@@ -32,6 +34,8 @@ const updateRules = [
     body('cashback_cycle_start_month').optional({ values: 'falsy' }).isInt({ min: 1, max: 12 }).withMessage('cashback_cycle_start_month must be 1-12'),
     body('billing_date').optional({ values: 'falsy' }).isInt({ min: 1, max: 31 }).withMessage('billing_date must be 1-31'),
     body('due_date').optional({ values: 'falsy' }).isInt({ min: 1, max: 31 }).withMessage('due_date must be 1-31'),
+    body('cashback_sites').optional().isArray().withMessage('cashback_sites must be an array'),
+    body('cashback_sites.*').optional().isString().trim(),
 ];
 
 const idRule = [param('id').isMongoId().withMessage('Invalid card id')];

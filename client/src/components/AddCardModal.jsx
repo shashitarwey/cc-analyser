@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { createCard, updateCard } from '../api';
-import { BANK_NAMES, CARD_NETWORKS, CASHBACK_PERIODS, MONTHS } from '../constants';
+import { BANK_NAMES, CARD_NETWORKS, CASHBACK_PERIODS, MONTHS, ECOMM_SITES } from '../constants';
 import SearchableDropdown from '../common/SearchableDropdown';
 
 const EMPTY = {
   bank_name: '', card_network: 'Visa', last_four_digit: '', name_on_card: '',
   cashback_enabled: false, cashback_percent: 0, cashback_limit: 0, cashback_period: 'monthly', cashback_reset_day: 1, cashback_cycle_start_month: 1,
+  cashback_sites: [],
   billing_date: '', due_date: '',
 };
 
@@ -27,6 +28,7 @@ export default function AddCardModal({ editCard, onClose, onSave }) {
       cashback_period:           editCard.cashback_period           || 'monthly',
       cashback_reset_day:        editCard.cashback_reset_day        || 1,
       cashback_cycle_start_month: editCard.cashback_cycle_start_month || 1,
+      cashback_sites:   Array.isArray(editCard.cashback_sites) ? editCard.cashback_sites : [],
       billing_date:     editCard.billing_date     || '',
       due_date:         editCard.due_date          || '',
     } : EMPTY);
@@ -189,6 +191,36 @@ export default function AddCardModal({ editCard, onClose, onSave }) {
                     <div className="form-hint">Month when the first cycle of the year begins</div>
                   </div>
                 )}
+
+                <div className="form-group">
+                  <label className="form-label">
+                    Cashback Sites <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>(Optional)</span>
+                  </label>
+                  <div className="cashback-sites-picker">
+                    {ECOMM_SITES.filter(s => s !== 'Other').map(site => {
+                      const active = form.cashback_sites.includes(site);
+                      return (
+                        <button
+                          type="button"
+                          key={site}
+                          className={`cashback-site-chip ${active ? 'is-active' : ''}`}
+                          onClick={() => {
+                            set('cashback_sites', active
+                              ? form.cashback_sites.filter(s => s !== site)
+                              : [...form.cashback_sites, site]);
+                          }}
+                        >
+                          {site}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div className="form-hint">
+                    {form.cashback_sites.length === 0
+                      ? 'Cashback applies on all sites'
+                      : `Cashback only on: ${form.cashback_sites.join(', ')}`}
+                  </div>
+                </div>
               </>
             )}
 
