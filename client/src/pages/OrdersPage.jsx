@@ -224,10 +224,18 @@ export default function OrdersPage() {
     );
   }
 
-  const totalProfit = orders.reduce((sum, o) => {
-    if (o.delivery_status === 'Cancelled') return sum;
-    return sum + (o.return_amount - o.order_amount + o.cashback);
-  }, 0);
+  // Aggregate profit and total order spend across non-cancelled rows.
+  // Weighted margin = sum(profit) / sum(order_amount) × 100, which is the
+  // actual average margin (not the unweighted mean of per-row percentages).
+  const { totalProfit, totalOrderAmount } = orders.reduce((acc, o) => {
+    if (o.delivery_status === 'Cancelled') return acc;
+    acc.totalProfit += (o.return_amount - o.order_amount + o.cashback);
+    acc.totalOrderAmount += o.order_amount;
+    return acc;
+  }, { totalProfit: 0, totalOrderAmount: 0 });
+  const avgProfitPercent = totalOrderAmount > 0
+    ? ((totalProfit / totalOrderAmount) * 100).toFixed(2)
+    : '0.00';
 
   const sellerOptions = sellers.map(s => ({ label: sellerLabel(s), value: s._id }));
   const cardOptions   = cards.map(c => ({ label: cardLabel(c), value: c._id }));
@@ -256,7 +264,7 @@ export default function OrdersPage() {
                 <h1 className="page-hero-title">Order Tracker</h1>
                 {totalOrders > 0 && (
                   <span className={`profit-badge ${totalProfit >= 0 ? 'profit-badge-positive' : 'profit-badge-negative'}`}>
-                    Profit: {fmtSignedCurrency(totalProfit)}
+                    Profit: {fmtSignedCurrency(totalProfit)} ({avgProfitPercent}%)
                   </span>
                 )}
               </div>
