@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Customer = require('../models/Customer');
 const CustomerEntry = require('../models/CustomerEntry');
-const { toObjectId, parsePagination, paginatedResponse } = require('../utils/helpers');
+const { toObjectId, parsePagination, paginatedResponse, sortByDateThenCreatedAt } = require('../utils/helpers');
 const { logActivity } = require('../utils/activityLogger');
 const validate = require('../middleware/validate');
 const {
@@ -207,7 +207,7 @@ router.get('/:customerId/entries-feed', customerIdRule, validate, async (req, re
             user_id: req.user.id
         }).lean();
 
-        entries.sort((a, b) => new Date(a.entry_date) - new Date(b.entry_date));
+        sortByDateThenCreatedAt(entries, x => x.entry_date, x => x.created_at);
 
         let running = 0;
         for (const e of entries) {

@@ -122,4 +122,29 @@ function paginatedResponse(items, total, current, size) {
     };
 }
 
-module.exports = { pickFields, toObjectId, buildDateRange, getCashbackCycleStart, parsePagination, paginatedResponse };
+/**
+ * Sort an array chronologically by a primary date, with `created_at` as a
+ * deterministic tiebreaker when two items share the same primary date.
+ *
+ * Used by ledger-feed endpoints: entries sorted ascending here will — after a
+ * subsequent `.reverse()` for newest-first display — place the most recently
+ * created same-day entry at the top of its group. Without the tiebreaker,
+ * same-date items fall back to Mongo's natural return order (non-deterministic).
+ *
+ * Mutates and returns the array.
+ *
+ * @param {Array} arr - array to sort
+ * @param {(item: any) => any} getDate - extracts the primary sort date
+ * @param {(item: any) => any} getCreatedAt - extracts created_at tiebreaker
+ * @returns {Array} the sorted array (same reference)
+ */
+function sortByDateThenCreatedAt(arr, getDate, getCreatedAt) {
+    arr.sort((a, b) => {
+        const dateDiff = new Date(getDate(a)) - new Date(getDate(b));
+        if (dateDiff !== 0) return dateDiff;
+        return new Date(getCreatedAt(a) || 0) - new Date(getCreatedAt(b) || 0);
+    });
+    return arr;
+}
+
+module.exports = { pickFields, toObjectId, buildDateRange, getCashbackCycleStart, parsePagination, paginatedResponse, sortByDateThenCreatedAt };

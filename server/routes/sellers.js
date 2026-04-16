@@ -5,7 +5,7 @@ const Seller = require('../models/Seller');
 const Order = require('../models/Order');
 const SellerPayment = require('../models/SellerPayment');
 const { uploadToCloudinary } = require('../utils/cloudinary');
-const { toObjectId, parsePagination, paginatedResponse } = require('../utils/helpers');
+const { toObjectId, parsePagination, paginatedResponse, sortByDateThenCreatedAt } = require('../utils/helpers');
 const { logActivity } = require('../utils/activityLogger');
 const validate = require('../middleware/validate');
 const {
@@ -347,7 +347,7 @@ router.get('/:sellerId/ledger-feed', sellerIdRule, validate, async (req, res, ne
             })),
         ];
 
-        merged.sort((a, b) => new Date(a.date) - new Date(b.date));
+        sortByDateThenCreatedAt(merged, x => x.date, x => x.raw?.created_at);
 
         let running = 0;
         for (const item of merged) {
