@@ -175,20 +175,24 @@ const STATEMENT_STYLES = `
     }
 `;
 
-const buildBodyRows = (groups, emptyMsg) => {
+const buildBodyRows = (groups, emptyMsg, showDeliveryDate) => {
+    const colspanTotal = showDeliveryDate ? 6 : 5;
+    const colspanOpening = showDeliveryDate ? 4 : 3;
+
     if (groups.length === 0) {
-        return `<tr><td colspan="5" class="empty-msg">${escapeHtml(emptyMsg)}</td></tr>`;
+        return `<tr><td colspan="${colspanTotal}" class="empty-msg">${escapeHtml(emptyMsg)}</td></tr>`;
     }
     return groups.map(group => {
         const monthHeader = `
             <tr class="month-row">
                 <td colspan="2">${escapeHtml(group.monthLabel)}</td>
-                <td colspan="3" class="opening">(Opening Balance: ${group.opening})</td>
+                <td colspan="${colspanOpening}" class="opening">(Opening Balance: ${group.opening})</td>
             </tr>`;
         const entryRows = group.entries.map(e => `
             <tr>
                 <td>${e.dateLabel}</td>
                 <td>${escapeHtml(e.details)}</td>
+                ${showDeliveryDate ? `<td>${escapeHtml(e.deliveredDate || '')}</td>` : ''}
                 <td class="amt debit-cell">${e.debit}</td>
                 <td class="amt credit-cell">${e.credit}</td>
                 <td class="amt balance-red">${e.balance}<span class="dr-suffix">${e.suffix}</span></td>
@@ -228,10 +232,11 @@ export const buildStatementHtml = ({
     generatedAt,
     emptyMsg,
 }) => {
-    const bodyRows = buildBodyRows(groups, emptyMsg);
+    const showDeliveryDate = !!columns.deliveryHeader;
+    const bodyRows = buildBodyRows(groups, emptyMsg, showDeliveryDate);
     const grandTotalRow = groups.length === 0 ? '' : `
         <tr class="grand-total">
-            <td colspan="2">Grand Total</td>
+            <td colspan="${showDeliveryDate ? 3 : 2}">Grand Total</td>
             <td class="amt">${summary.debit}</td>
             <td class="amt">${summary.credit}</td>
             <td class="amt balance-red">${summary.balance}<span class="dr-suffix">${summary.balanceSuffix}</span></td>
@@ -279,11 +284,12 @@ export const buildStatementHtml = ({
     <table>
         <thead>
             <tr>
-                <th style="width: 13%;">Date</th>
+                <th style="width: 12%;">Date</th>
                 <th>Details</th>
-                <th class="amt" style="width: 17%;">${escapeHtml(columns.debitHeader)}</th>
-                <th class="amt" style="width: 17%;">${escapeHtml(columns.creditHeader)}</th>
-                <th class="amt" style="width: 19%;">Balance</th>
+                ${showDeliveryDate ? `<th style="width: 12%; white-space: nowrap;">${escapeHtml(columns.deliveryHeader)}</th>` : ''}
+                <th class="amt" style="width: 15%;">${escapeHtml(columns.debitHeader)}</th>
+                <th class="amt" style="width: 15%;">${escapeHtml(columns.creditHeader)}</th>
+                <th class="amt" style="width: 17%;">Balance</th>
             </tr>
         </thead>
         <tbody>

@@ -42,9 +42,16 @@ export const downloadLedgerPdf = (seller, items) => {
             totalCredit += item.amount;
         }
 
+        // Delivery date only makes sense for orders. Pull it from the raw
+        // document — only delivered orders are included by the filter above.
+        const deliveredDate = isOrder && item.raw?.delivered_date
+            ? format(new Date(item.raw.delivered_date), 'dd MMM')
+            : '';
+
         currentGroup.entries.push({
             dateLabel: format(item.date, 'dd MMM'),
             details: item.description,
+            deliveredDate,
             debit: isOrder ? fmtAmt(item.amount) : '',
             credit: isOrder ? '' : fmtAmt(item.amount),
             balance: fmtAmt(Math.abs(runningBalance)),
@@ -79,6 +86,7 @@ export const downloadLedgerPdf = (seller, items) => {
         columns: {
             debitHeader: 'Debit(-)',
             creditHeader: 'Credit(+)',
+            deliveryHeader: 'Delivery Date',
         },
         generatedAt: format(today, "hh:mm a | dd MMM ''yy"),
         emptyMsg: 'No delivered orders or payments to show.',
