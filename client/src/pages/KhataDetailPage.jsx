@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getCustomer, getCustomerEntries, deleteCustomerEntry } from '../api';
+import { getCustomer, getCustomerEntries, getCustomerEntriesFeed, deleteCustomerEntry } from '../api';
 import { ChevronLeft, Phone, TrendingUp, TrendingDown, Wallet, Trash2, Pencil, BookOpen, ArrowUpRight, ArrowDownLeft, FileDown } from 'lucide-react';
 import { fmtCurrency, fmtDisplay, profitColor } from '../utils/formatters';
 import { downloadKhataPdf } from '../utils/khataPdf';
@@ -19,17 +19,25 @@ export default function KhataDetailPage() {
   const [entryType, setEntryType] = useState('gave');
   const [editEntry, setEditEntry] = useState(null);
   const [confirm, setConfirm] = useState(null);
-  const bottomRef = useRef(null);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [pdfLoading, setPdfLoading] = useState(false);
+  const sentinelRef = useRef(null);
+  const PAGE_LIMIT = 20;
 
-  const fetchData = useCallback(async () => {
+  const loadInitial = useCallback(async () => {
     setLoading(true);
+    setEntries([]);
+    setPage(1);
     try {
-      const [cust, ents] = await Promise.all([
+      const [cust, feedRes] = await Promise.all([
         getCustomer(id),
-        getCustomerEntries(id),
+        getCustomerEntriesFeed(id, { page: 1, limit: PAGE_LIMIT }),
       ]);
       setCustomer(cust);
-      setEntries(ents);
+      setEntries(feedRes.items);
+      setHasMore(feedRes.page.has_next);
     } catch {
       toast.error('Failed to load khata');
     } finally {
@@ -37,14 +45,34 @@ export default function KhataDetailPage() {
     }
   }, [id]);
 
-  useEffect(() => { fetchData(); }, [fetchData]);
-
-  // Auto-scroll to the most recent entry (bottom) after data loads
-  useEffect(() => {
-    if (!loading && entries.length > 0) {
-      bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  const loadMore = useCallback(async () => {
+    if (loadingMore || !hasMore) return;
+    const nextPage = page + 1;
+    setLoadingMore(true);
+    try {
+      const feedRes = await getCustomerEntriesFeed(id, { page: nextPage, limit: PAGE_LIMIT });
+      setEntries(prev => [...prev, ...feedRes.items]);
+      setHasMore(feedRes.page.has_next);
+      setPage(nextPage);
+    } catch {
+      toast.error('Failed to load more entries');
+    } finally {
+      setLoadingMore(false);
     }
-  }, [loading, entries.length]);
+  }, [id, page, hasMore, loadingMore]);
+
+  useEffect(() => { loadInitial(); }, [loadInitial]);
+
+  useEffect(() => {
+    if (!hasMore || loading) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) loadMore(); },
+      { rootMargin: '200px' }
+    );
+    const node = sentinelRef.current;
+    if (node) observer.observe(node);
+    return () => observer.disconnect();
+  }, [hasMore, loading, loadMore]);
 
   const openAdd = (type) => {
     setEditEntry(null);
@@ -66,7 +94,8 @@ export default function KhataDetailPage() {
         try {
           await deleteCustomerEntry(entry._id);
           toast.success('Entry deleted');
-          fetchData();
+          // Running balances shift — refresh from page 1
+          loadInitial();
         } catch {
           toast.error('Failed to delete entry');
         }
@@ -74,21 +103,32 @@ export default function KhataDetailPage() {
     });
   };
 
-  // Ascending sort: oldest first for running-balance computation + display.
-  // User sees oldest at top, newest at bottom (scrolled into view on load).
-  const sortedAsc = [...entries].sort((a, b) => new Date(a.entry_date) - new Date(b.entry_date));
-  let runningBalance = 0;
+  // PDF needs ALL entries. Fetch fresh via the non-paginated endpoint.
+  const handleDownloadPdf = async () => {
+    if (pdfLoading) return;
+    setPdfLoading(true);
+    try {
+      const all = await getCustomerEntries(id);
+      const res = downloadKhataPdf(customer, all);
+      if (!res.ok) toast.error('Failed to generate report');
+    } catch {
+      toast.error('Failed to generate report');
+    } finally {
+      setPdfLoading(false);
+    }
+  };
+
+  // Entries come from the server newest-first with `runningBalance` attached.
+  // Group them by date preserving insertion order (newest date first).
   const dateGroups = [];
   let currentGroup = null;
-  for (const e of sortedAsc) {
-    if (e.type === 'gave') runningBalance += e.amount;
-    else runningBalance -= e.amount;
+  for (const e of entries) {
     const key = e.entry_date.slice(0, 10);
     if (!currentGroup || currentGroup.key !== key) {
       currentGroup = { key, entries: [] };
       dateGroups.push(currentGroup);
     }
-    currentGroup.entries.push({ ...e, runningBalance });
+    currentGroup.entries.push(e);
   }
 
   const totalGave = customer?.total_gave || 0;
@@ -125,13 +165,10 @@ export default function KhataDetailPage() {
             <div className="page-hero-actions">
               <button
                 className="btn btn-secondary btn-sm"
-                onClick={() => {
-                  const res = downloadKhataPdf(customer, entries);
-                  if (!res.ok) toast.error('Failed to generate report');
-                }}
-                disabled={loading || entries.length === 0}
+                onClick={handleDownloadPdf}
+                disabled={loading || pdfLoading || entries.length === 0}
               >
-                <FileDown size={14} /> Download Report
+                <FileDown size={14} /> {pdfLoading ? 'Preparing…' : 'Download Report'}
               </button>
             </div>
           )}
@@ -239,7 +276,19 @@ export default function KhataDetailPage() {
             </div>
           ))
         )}
-        <div ref={bottomRef} />
+
+        {/* Infinite scroll sentinel + loading state */}
+        {!loading && entries.length > 0 && (
+          <>
+            {loadingMore && (
+              <div className="ledger-loading-more">Loading more…</div>
+            )}
+            {hasMore && <div ref={sentinelRef} style={{ height: 1 }} />}
+            {!hasMore && entries.length > 20 && (
+              <div className="ledger-end-marker">— End of khata —</div>
+            )}
+          </>
+        )}
       </div>
 
       {/* Sticky action bar at bottom with You Gave / You Got */}
@@ -268,7 +317,7 @@ export default function KhataDetailPage() {
           editEntry={editEntry}
           defaultType={entryType}
           onClose={() => { setShowEntryModal(false); setEditEntry(null); }}
-          onSuccess={() => { setShowEntryModal(false); setEditEntry(null); fetchData(); }}
+          onSuccess={() => { setShowEntryModal(false); setEditEntry(null); loadInitial(); }}
         />
       )}
 

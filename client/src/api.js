@@ -71,6 +71,7 @@ export const deleteSeller = (id) => API.delete(`/sellers/${id}`).then(r => r.dat
 
 // ── Seller Payments ──
 export const getSellerLedger = (sellerId) => API.get(`/sellers/${sellerId}/payment`).then(r => r.data);
+export const getLedgerFeed = (sellerId, params) => API.get(`/sellers/${sellerId}/ledger-feed`, { params }).then(r => r.data);
 
 export const addSellerPayment = (data) => API.post('/sellers/payment', data, {
     headers: { 'Content-Type': 'multipart/form-data' },
@@ -90,6 +91,7 @@ export const updateCustomer = (id, d) => API.put(`/customers/${id}`, d).then(r =
 export const deleteCustomer = (id) => API.delete(`/customers/${id}`).then(r => r.data);
 
 export const getCustomerEntries = (customerId) => API.get(`/customers/${customerId}/entries`).then(r => r.data);
+export const getCustomerEntriesFeed = (customerId, params) => API.get(`/customers/${customerId}/entries-feed`, { params }).then(r => r.data);
 export const addCustomerEntry = (data) => API.post('/customers/entry', data).then(r => r.data);
 export const updateCustomerEntry = (id, data) => API.put(`/customers/entry/${id}`, data).then(r => r.data);
 export const deleteCustomerEntry = (id) => API.delete(`/customers/entry/${id}`).then(r => r.data);

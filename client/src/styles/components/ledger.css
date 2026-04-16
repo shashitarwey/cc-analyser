@@ -84,6 +84,21 @@
   margin: 60px auto;
 }
 
+.ledger-loading-more {
+  text-align: center;
+  padding: 20px 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.ledger-end-marker {
+  text-align: center;
+  padding: 24px 0 12px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+}
+
 /* ── Date separator ────────────────────────────────────────── */
 .ledger-date-sep {
   display: flex;

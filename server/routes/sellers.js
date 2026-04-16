@@ -314,6 +314,62 @@ router.get('/:sellerId/payment', sellerIdRule, validate, async (req, res, next) 
     } catch (err) { next(err); }
 });
 
+// Paginated merged ledger feed: orders + payments with running balance
+// attached, sorted newest-first. Running balance must be computed across
+// the full history (chronological) so the server fetches all entries once,
+// then slices for pagination. For realistic ledger sizes (<10k entries)
+// this is fine and avoids complex cursor-based balance tracking.
+router.get('/:sellerId/ledger-feed', sellerIdRule, validate, async (req, res, next) => {
+    try {
+        const { pageNum, limitNum, skip } = parsePagination(req.query);
+
+        const [orders, payments] = await Promise.all([
+            Order.find({ seller_id: req.params.sellerId, user_id: req.user.id }).lean(),
+            SellerPayment.find({ seller_id: req.params.sellerId, user_id: req.user.id }).lean(),
+        ]);
+
+        const merged = [
+            ...orders.map(o => ({
+                id: o._id,
+                type: 'ORDER',
+                date: o.order_date,
+                description: `${o.model_ordered}${o.quantity > 1 ? ` ×${o.quantity}` : ''}`,
+                amount: o.return_amount,
+                raw: o,
+            })),
+            ...payments.map(p => ({
+                id: p._id,
+                type: 'PAYMENT',
+                date: p.payment_date,
+                description: p.notes || 'Payment Received',
+                amount: p.amount,
+                raw: p,
+            })),
+        ];
+
+        merged.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+        let running = 0;
+        for (const item of merged) {
+            const isCancelled = item.type === 'ORDER' && item.raw.delivery_status === 'Cancelled';
+            const isPending = item.type === 'ORDER' && item.raw.delivery_status !== 'Yes';
+            item.isCancelled = isCancelled;
+            item.isPending = isPending;
+            if (!isCancelled) {
+                if (item.type === 'ORDER' && !isPending) running += item.amount;
+                if (item.type === 'PAYMENT') running -= item.amount;
+            }
+            item.runningBalance = running;
+        }
+
+        merged.reverse();
+        const total = merged.length;
+        const slice = merged.slice(skip, skip + limitNum);
+
+        res.json(paginatedResponse(slice, total, pageNum, limitNum));
+    } catch (err) { next(err); }
+});
+
 // Add a payment
 router.post('/payment', upload.single('receipt'), paymentCreateRules, validate, async (req, res, next) => {
     try {

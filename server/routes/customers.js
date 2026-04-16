@@ -194,6 +194,36 @@ router.get('/:customerId/entries', customerIdRule, validate, async (req, res, ne
     } catch (err) { next(err); }
 });
 
+// Paginated entries feed with running balance attached. Like seller ledger-feed:
+// running balance must be computed from the full chronological history, so the
+// server fetches all entries once, walks forward to compute per-entry balance,
+// then returns the requested slice newest-first. Client appends for infinite scroll.
+router.get('/:customerId/entries-feed', customerIdRule, validate, async (req, res, next) => {
+    try {
+        const { pageNum, limitNum, skip } = parsePagination(req.query);
+
+        const entries = await CustomerEntry.find({
+            customer_id: req.params.customerId,
+            user_id: req.user.id
+        }).lean();
+
+        entries.sort((a, b) => new Date(a.entry_date) - new Date(b.entry_date));
+
+        let running = 0;
+        for (const e of entries) {
+            if (e.type === 'gave') running += e.amount;
+            else running -= e.amount;
+            e.runningBalance = running;
+        }
+
+        entries.reverse();
+        const total = entries.length;
+        const slice = entries.slice(skip, skip + limitNum);
+
+        res.json(paginatedResponse(slice, total, pageNum, limitNum));
+    } catch (err) { next(err); }
+});
+
 // Create an entry
 router.post('/entry', entryCreateRules, validate, async (req, res, next) => {
     try {

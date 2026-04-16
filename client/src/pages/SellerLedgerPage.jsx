@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getSeller, getAllOrders, getSellerLedger, deleteSellerPayment } from '../api';
+import { getSeller, getAllOrders, getSellerLedger, getLedgerFeed, deleteSellerPayment } from '../api';
 import { ChevronLeft, Wallet, MapPin, TrendingUp, TrendingDown, Trash2, Pencil, BookOpen, FileDown } from 'lucide-react';
 import { fmtCurrency, fmtDisplay, fmtSignedCurrency, profitColor } from '../utils/formatters';
 import { downloadLedgerPdf } from '../utils/ledgerPdf';
@@ -18,44 +18,30 @@ export default function SellerLedgerPage() {
   const [confirm, setConfirm] = useState(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [editPayment, setEditPayment] = useState(null);
-  const bottomRef = useRef(null);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [pdfLoading, setPdfLoading] = useState(false);
+  const sentinelRef = useRef(null);
+  const PAGE_LIMIT = 20;
 
-  const fetchData = useCallback(async () => {
+  // Normalize a server-returned ledger item. Server sends date as ISO string
+  // (via .lean() + JSON serialization); downstream grouping expects Date.
+  const normalize = (arr) => arr.map(it => ({ ...it, date: new Date(it.date) }));
+
+  // Fetch seller summary once + first page of ledger.
+  const loadInitial = useCallback(async () => {
     setLoading(true);
+    setItems([]);
+    setPage(1);
     try {
-      const [sellerData, resOrders, resPayments] = await Promise.all([
+      const [sellerData, feedRes] = await Promise.all([
         getSeller(id),
-        getAllOrders({ seller_id: id }),
-        getSellerLedger(id)
+        getLedgerFeed(id, { page: 1, limit: PAGE_LIMIT }),
       ]);
       setSeller(sellerData);
-
-      const allOrders = resOrders;
-      const mappedOrders = allOrders.map(o => ({
-        id: o._id, type: 'ORDER',
-        date: new Date(o.order_date),
-        description: `${o.model_ordered}${o.quantity > 1 ? ` ×${o.quantity}` : ''}`,
-        amount: o.return_amount, raw: o
-      }));
-      const mappedPayments = resPayments.map(p => ({
-        id: p._id, type: 'PAYMENT',
-        date: new Date(p.payment_date),
-        description: p.notes || 'Payment Received',
-        amount: p.amount, raw: p
-      }));
-
-      const merged = [...mappedOrders, ...mappedPayments].sort((a, b) => a.date - b.date);
-      let runningBalance = 0;
-      const ledger = merged.map(item => {
-        const isCancelled = item.type === 'ORDER' && item.raw.delivery_status === 'Cancelled';
-        const isPending = item.type === 'ORDER' && item.raw.delivery_status !== 'Yes';
-        if (!isCancelled) {
-          if (item.type === 'ORDER' && !isPending) runningBalance += item.amount;
-          if (item.type === 'PAYMENT') runningBalance -= item.amount;
-        }
-        return { ...item, runningBalance, isCancelled, isPending };
-      });
-      setItems(ledger);
+      setItems(normalize(feedRes.items));
+      setHasMore(feedRes.page.has_next);
     } catch {
       toast.error('Failed to load ledger');
     } finally {
@@ -63,14 +49,37 @@ export default function SellerLedgerPage() {
     }
   }, [id]);
 
-  useEffect(() => { fetchData(); }, [fetchData]);
-
-  // Auto-scroll to the most recent entry (bottom) after data loads
-  useEffect(() => {
-    if (!loading && items.length > 0) {
-      bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  // Append the next page to existing items.
+  const loadMore = useCallback(async () => {
+    if (loadingMore || !hasMore) return;
+    const nextPage = page + 1;
+    setLoadingMore(true);
+    try {
+      const feedRes = await getLedgerFeed(id, { page: nextPage, limit: PAGE_LIMIT });
+      setItems(prev => [...prev, ...normalize(feedRes.items)]);
+      setHasMore(feedRes.page.has_next);
+      setPage(nextPage);
+    } catch {
+      toast.error('Failed to load more entries');
+    } finally {
+      setLoadingMore(false);
     }
-  }, [loading, items.length]);
+  }, [id, page, hasMore, loadingMore]);
+
+  useEffect(() => { loadInitial(); }, [loadInitial]);
+
+  // IntersectionObserver drives infinite scroll — triggers loadMore when
+  // the sentinel <div> below the list scrolls into view.
+  useEffect(() => {
+    if (!hasMore || loading) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) loadMore(); },
+      { rootMargin: '200px' }
+    );
+    const node = sentinelRef.current;
+    if (node) observer.observe(node);
+    return () => observer.disconnect();
+  }, [hasMore, loading, loadMore]);
 
   const handleDeletePayment = (item) => {
     setConfirm({
@@ -80,13 +89,57 @@ export default function SellerLedgerPage() {
         try {
           await deleteSellerPayment(item.id);
           toast.success('Payment deleted');
-          fetchData();
+          // Running balances shift — refresh from page 1
+          loadInitial();
         } catch { toast.error('Failed to delete payment'); }
       }
     });
   };
 
-  // Group items by date key
+  // PDF needs ALL items, not just what's currently paginated on screen.
+  // Fetch fresh orders + payments and rebuild the merged list like before.
+  const handleDownloadPdf = async () => {
+    if (pdfLoading) return;
+    setPdfLoading(true);
+    try {
+      const [orders, payments] = await Promise.all([
+        getAllOrders({ seller_id: id }),
+        getSellerLedger(id),
+      ]);
+      const mappedOrders = orders.map(o => ({
+        id: o._id, type: 'ORDER',
+        date: new Date(o.order_date),
+        description: `${o.model_ordered}${o.quantity > 1 ? ` ×${o.quantity}` : ''}`,
+        amount: o.return_amount, raw: o,
+      }));
+      const mappedPayments = payments.map(p => ({
+        id: p._id, type: 'PAYMENT',
+        date: new Date(p.payment_date),
+        description: p.notes || 'Payment Received',
+        amount: p.amount, raw: p,
+      }));
+      const merged = [...mappedOrders, ...mappedPayments].sort((a, b) => a.date - b.date);
+      let running = 0;
+      const allItems = merged.map(it => {
+        const isCancelled = it.type === 'ORDER' && it.raw.delivery_status === 'Cancelled';
+        const isPending = it.type === 'ORDER' && it.raw.delivery_status !== 'Yes';
+        if (!isCancelled) {
+          if (it.type === 'ORDER' && !isPending) running += it.amount;
+          if (it.type === 'PAYMENT') running -= it.amount;
+        }
+        return { ...it, runningBalance: running, isCancelled, isPending };
+      });
+      const res = downloadLedgerPdf(seller, allItems);
+      if (!res.ok) toast.error('Failed to generate report');
+    } catch {
+      toast.error('Failed to generate report');
+    } finally {
+      setPdfLoading(false);
+    }
+  };
+
+  // Group items by date key. Entries are already newest-first from the server
+  // and appended page-by-page, so the grouped keys naturally stay newest-first.
   const grouped = items.reduce((acc, item) => {
     const key = item.date.toISOString().slice(0, 10);
     if (!acc[key]) acc[key] = [];
@@ -94,12 +147,9 @@ export default function SellerLedgerPage() {
     return acc;
   }, {});
 
-  // Single pass instead of two filter+reduce chains over the same array.
-  const { totalOrdered, totalPaid } = items.reduce((acc, i) => {
-    if (i.type === 'ORDER' && !i.isCancelled && !i.isPending) acc.totalOrdered += i.amount;
-    else if (i.type === 'PAYMENT') acc.totalPaid += i.amount;
-    return acc;
-  }, { totalOrdered: 0, totalPaid: 0 });
+  // Totals come from the seller aggregate (full history), not paginated items.
+  const totalOrdered = seller?.total_amount_get || 0;
+  const totalPaid = seller?.total_received || 0;
 
   return (
     <>
@@ -133,13 +183,10 @@ export default function SellerLedgerPage() {
             <div className="page-hero-actions">
               <button
                 className="btn btn-secondary btn-sm"
-                onClick={() => {
-                  const res = downloadLedgerPdf(seller, items);
-                  if (!res.ok) toast.error('Failed to generate report');
-                }}
-                disabled={loading || items.length === 0}
+                onClick={handleDownloadPdf}
+                disabled={loading || pdfLoading || items.length === 0}
               >
-                <FileDown size={14} /> Download Report
+                <FileDown size={14} /> {pdfLoading ? 'Preparing…' : 'Download Report'}
               </button>
               <button className="btn btn-primary btn-sm" onClick={() => setShowPaymentModal(true)}>
                 <Wallet size={14} /> Add Payment
@@ -293,7 +340,19 @@ export default function SellerLedgerPage() {
             </div>
           ))
         )}
-        <div ref={bottomRef} />
+
+        {/* Infinite scroll sentinel + loading state */}
+        {!loading && items.length > 0 && (
+          <>
+            {loadingMore && (
+              <div className="ledger-loading-more">Loading more…</div>
+            )}
+            {hasMore && <div ref={sentinelRef} style={{ height: 1 }} />}
+            {!hasMore && items.length > 20 && (
+              <div className="ledger-end-marker">— End of ledger —</div>
+            )}
+          </>
+        )}
       </div>
 
       {showPaymentModal && (seller || editPayment) && (
@@ -301,7 +360,7 @@ export default function SellerLedgerPage() {
           seller={seller}
           editPayment={editPayment || null}
           onClose={() => { setShowPaymentModal(false); setEditPayment(null); }}
-          onSuccess={() => { setShowPaymentModal(false); setEditPayment(null); fetchData(); }}
+          onSuccess={() => { setShowPaymentModal(false); setEditPayment(null); loadInitial(); }}
         />
       )}
       {confirm && (
