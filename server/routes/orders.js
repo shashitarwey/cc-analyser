@@ -259,7 +259,31 @@ router.delete('/:id', idRule, validate, async (req, res, next) => {
 
 // ── Bulk Actions ────────────────────────────────────────────────────────────
 
-// POST bulk status update
+// Resolve card and seller name maps for a set of orders. Used by bulk
+// handlers to attach human-readable labels to each per-order activity log
+// snapshot (matches the pattern used by the single-order PUT/DELETE).
+async function buildLabelMaps(userId, orders) {
+    const cardIds = [...new Set(orders.map(o => o.card_id?.toString()).filter(Boolean))];
+    const sellerIds = [...new Set(orders.map(o => o.seller_id?.toString()).filter(Boolean))];
+    const [cards, sellers] = await Promise.all([
+        Card.find({ _id: { $in: cardIds }, user_id: userId }, 'bank_name last_four_digit').lean(),
+        Seller.find({ _id: { $in: sellerIds }, user_id: userId }, 'name city').lean(),
+    ]);
+    const cardMap = Object.fromEntries(cards.map(c => [c._id.toString(), `${c.bank_name} •••• ${c.last_four_digit}`]));
+    const sellerMap = Object.fromEntries(sellers.map(s => [s._id.toString(), `${s.name}, ${s.city}`]));
+    return { cardMap, sellerMap };
+}
+
+function logOrderUpdate(userId, order, cardMap, sellerMap, changedFields) {
+    const snap = order.toObject ? order.toObject() : { ...order };
+    if (snap.card_id) snap.card_id = cardMap[snap.card_id.toString()] || snap.card_id;
+    if (snap.seller_id) snap.seller_id = sellerMap[snap.seller_id.toString()] || snap.seller_id;
+    const oDate = new Date(order.order_date).toLocaleDateString('en-GB');
+    const desc = `Updated order: ${order.model_ordered} | ${order.ecomm_site} | ₹${order.order_amount} | ${oDate}`;
+    logActivity(userId, 'updated', 'order', order._id, desc, snap, changedFields);
+}
+
+// POST bulk status update — logs one activity entry per affected order.
 router.post('/bulk/status', bulkStatusRules, validate, async (req, res, next) => {
     try {
         const { ids, delivery_status, delivered_date } = req.body;
@@ -269,43 +293,61 @@ router.post('/bulk/status', bulkStatusRules, validate, async (req, res, next) =>
         } else if (delivery_status !== 'Yes') {
             update.delivered_date = null;
         }
-        const result = await Order.updateMany(
+        await Order.updateMany(
             { _id: { $in: ids }, user_id: req.user.id },
             update
         );
         invalidateSummaryCache(req);
-        logActivity(req.user.id, 'updated', 'order', null,
-            `Bulk status update: ${result.modifiedCount} order(s) → ${delivery_status}`, { ids, delivery_status });
-        res.json({ success: true, modified: result.modifiedCount });
+
+        // Re-fetch updated docs so each activity log has the post-update snapshot
+        const updated = await Order.find({ _id: { $in: ids }, user_id: req.user.id });
+        const { cardMap, sellerMap } = await buildLabelMaps(req.user.id, updated);
+        const changedFields = Object.keys(update);
+        for (const o of updated) logOrderUpdate(req.user.id, o, cardMap, sellerMap, changedFields);
+
+        res.json({ success: true, modified: updated.length });
     } catch (err) { next(err); }
 });
 
-// POST bulk mark cleared / uncleared
+// POST bulk mark cleared / uncleared — logs one activity entry per order.
 router.post('/bulk/clear', bulkClearRules, validate, async (req, res, next) => {
     try {
         const { ids, is_cleared } = req.body;
-        const result = await Order.updateMany(
+        await Order.updateMany(
             { _id: { $in: ids }, user_id: req.user.id },
             { is_cleared }
         );
         invalidateSummaryCache(req);
-        logActivity(req.user.id, 'updated', 'order', null,
-            `Bulk ${is_cleared ? 'cleared' : 'uncleared'}: ${result.modifiedCount} order(s)`, { ids, is_cleared });
-        res.json({ success: true, modified: result.modifiedCount });
+
+        const updated = await Order.find({ _id: { $in: ids }, user_id: req.user.id });
+        const { cardMap, sellerMap } = await buildLabelMaps(req.user.id, updated);
+        for (const o of updated) logOrderUpdate(req.user.id, o, cardMap, sellerMap, ['is_cleared']);
+
+        res.json({ success: true, modified: updated.length });
     } catch (err) { next(err); }
 });
 
-// POST bulk delete
+// POST bulk delete — logs one activity entry per deleted order.
 router.post('/bulk/delete', bulkDeleteRules, validate, async (req, res, next) => {
     try {
         const { ids } = req.body;
-        const result = await Order.deleteMany(
-            { _id: { $in: ids }, user_id: req.user.id }
-        );
+        // Fetch BEFORE deleting so we have the snapshots for activity logs.
+        const toDelete = await Order.find({ _id: { $in: ids }, user_id: req.user.id });
+        const { cardMap, sellerMap } = await buildLabelMaps(req.user.id, toDelete);
+
+        await Order.deleteMany({ _id: { $in: ids }, user_id: req.user.id });
         invalidateSummaryCache(req);
-        logActivity(req.user.id, 'deleted', 'order', null,
-            `Bulk deleted: ${result.deletedCount} order(s)`, { ids });
-        res.json({ success: true, deleted: result.deletedCount });
+
+        for (const o of toDelete) {
+            const snap = o.toObject();
+            if (snap.card_id) snap.card_id = cardMap[snap.card_id.toString()] || snap.card_id;
+            if (snap.seller_id) snap.seller_id = sellerMap[snap.seller_id.toString()] || snap.seller_id;
+            const oDate = new Date(o.order_date).toLocaleDateString('en-GB');
+            const desc = `Deleted order: ${o.model_ordered} | ${o.ecomm_site} | ₹${o.order_amount} | ${oDate}`;
+            logActivity(req.user.id, 'deleted', 'order', o._id, desc, snap);
+        }
+
+        res.json({ success: true, deleted: toDelete.length });
     } catch (err) { next(err); }
 });
 

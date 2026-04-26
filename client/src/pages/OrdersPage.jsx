@@ -4,7 +4,7 @@ import AddOrderModal from '../components/AddOrderModal';
 import OrderRemarkModal from '../components/OrderRemarkModal';
 import ActionMenu from '../common/ActionMenu';
 import Pagination from '../common/Pagination';
-import { ShoppingBag, MapPin, Pencil, Trash2, Filter, Search, X as XIcon, ChevronLeft, Download, MessageSquare, CheckSquare, Square, Truck, CheckCircle } from 'lucide-react';
+import { ShoppingBag, MapPin, Pencil, Trash2, Filter, Search, X as XIcon, ChevronLeft, Download, MessageSquare, CheckSquare, Square, Truck, CheckCircle, History } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { ECOMM_SITES, STATUS_FILTER_OPTIONS } from '../constants';
 import { fmtCurrency, fmtSignedCurrency, cardLabel, sellerLabel, pickTruthy } from '../utils/formatters';
@@ -541,6 +541,7 @@ export default function OrdersPage() {
                             items={[
                               { label: hasRemark ? 'Edit Remark' : 'Add Remark', icon: <MessageSquare size={14} />, onClick: () => setRemarkOrder(order) },
                               { label: 'Edit Order', icon: <Pencil size={14} />, onClick: () => { setEditOrder(order); setShowModal(true); } },
+                              { label: 'View Activity', icon: <History size={14} />, onClick: () => navigate(`/activity?entityId=${order._id}&entity=order`), color: 'var(--info)' },
                               { label: 'Delete',     icon: <Trash2 size={14} />, onClick: () => handleDelete(order._id), color: 'var(--danger)', className: 'border-top' },
                             ]}
                           />

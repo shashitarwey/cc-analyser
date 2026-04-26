@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getSellers, deleteSeller } from '../api';
-import { Plus, Trash2, Pencil, BookText, Wallet, MapPin, TrendingUp, TrendingDown, ChevronLeft, Phone, Users } from 'lucide-react';
+import { Plus, Trash2, Pencil, BookText, Wallet, MapPin, TrendingUp, TrendingDown, ChevronLeft, Phone, Users, History } from 'lucide-react';
 import { fmtCurrency, fmtSignedCurrency, profitColor } from '../utils/formatters';
 import { PAGE_SIZE } from '../constants';
 import toast from 'react-hot-toast';
@@ -220,6 +220,7 @@ export default function SellersPage() {
                             { label: 'Add Payment', icon: <Wallet size={15} />,   color: 'var(--success)', onClick: () => setPaymentSeller(seller) },
                             { label: 'View Ledger', icon: <BookText size={15} />,  color: 'var(--info)',    onClick: () => navigate(`/sellers/${seller._id}/ledger`) },
                             { label: 'Edit Buyer', icon: <Pencil size={15} />,    color: 'var(--text)',    onClick: () => handleEdit(seller) },
+                            { label: 'View Activity', icon: <History size={15} />, color: 'var(--info)', onClick: () => navigate(`/activity?entityId=${seller._id}&entity=seller`) },
                             { label: 'Delete Buyer', icon: <Trash2 size={15} />,  color: 'var(--danger)',  className: 'border-top', onClick: () => handleDelete(seller) },
                           ]}
                         />

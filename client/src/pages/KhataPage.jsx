@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getCustomers, deleteCustomer } from '../api';
-import { Plus, Trash2, Pencil, BookText, Wallet, TrendingDown, TrendingUp, ChevronLeft, Phone, Users } from 'lucide-react';
+import { Plus, Trash2, Pencil, BookText, Wallet, TrendingDown, TrendingUp, ChevronLeft, Phone, Users, History } from 'lucide-react';
 import { fmtCurrency, profitColor } from '../utils/formatters';
 import { PAGE_SIZE } from '../constants';
 import toast from 'react-hot-toast';
@@ -202,6 +202,7 @@ export default function KhataPage() {
                           items={[
                             { label: 'View Khata', icon: <BookText size={15} />, color: 'var(--info)', onClick: () => navigate(`/khata/${c._id}`) },
                             { label: 'Edit', icon: <Pencil size={15} />, color: 'var(--text)', onClick: () => handleEdit(c) },
+                            { label: 'View Activity', icon: <History size={15} />, color: 'var(--info)', onClick: () => navigate(`/activity?entityId=${c._id}&entity=customer`) },
                             { label: 'Delete', icon: <Trash2 size={15} />, color: 'var(--danger)', className: 'border-top', onClick: () => handleDelete(c) },
                           ]}
                         />

@@ -4,7 +4,7 @@ import Pagination from '../common/Pagination';
 import { PAGE_SIZE } from '../constants';
 import { ChevronLeft, ChevronDown, ChevronUp, Plus, Pencil, Trash2, ShoppingBag, CreditCard, Users, Wallet, ArrowLeftRight, History, X as XIcon, BookOpen, Search } from 'lucide-react';
 import SearchableDropdown from '../common/SearchableDropdown';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
 const ENTITY_CONFIG = {
@@ -169,6 +169,7 @@ export default function ActivityLogPage() {
   const [historyExpanded, setHistoryExpanded] = useState(null);
   const debounceRef = useRef(null);
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const fetchLogs = useCallback(async (p = page, ps = pageSize, entity = entityFilter, search = searchQuery) => {
     try {
@@ -195,13 +196,13 @@ export default function ActivityLogPage() {
     debounceRef.current = setTimeout(() => fetchLogs(1, pageSize, entityFilter, value), 400);
   };
 
-  const handleViewHistory = async (log) => {
+  const openEntityHistory = useCallback(async (entityId, entityType) => {
     try {
       setHistoryLoading(true);
       setHistoryExpanded(null);
-      const entity = ENTITY_CONFIG[log.entity] || {};
-      setHistoryPanel({ entityId: log.entity_id, entity: log.entity, logs: [], title: `${entity.label} History` });
-      const historyLogs = await getEntityHistory(log.entity_id);
+      const entityCfg = ENTITY_CONFIG[entityType] || {};
+      setHistoryPanel({ entityId, entity: entityType, logs: [], title: `${entityCfg.label || 'Entity'} History` });
+      const historyLogs = await getEntityHistory(entityId);
       setHistoryPanel(prev => ({ ...prev, logs: historyLogs }));
     } catch {
       toast.error('Failed to load history');
@@ -209,7 +210,24 @@ export default function ActivityLogPage() {
     } finally {
       setHistoryLoading(false);
     }
-  };
+  }, []);
+
+  const handleViewHistory = (log) => openEntityHistory(log.entity_id, log.entity);
+
+  // Auto-open history panel when navigated here with ?entityId=&entity= params
+  // (e.g., from an entity's "View Activity" action menu item). Clears the URL
+  // params after opening so a manual refresh later doesn't re-trigger.
+  useEffect(() => {
+    const entityId = searchParams.get('entityId');
+    const entity = searchParams.get('entity');
+    if (entityId && entity) {
+      openEntityHistory(entityId, entity);
+      const next = new URLSearchParams(searchParams);
+      next.delete('entityId');
+      next.delete('entity');
+      setSearchParams(next, { replace: true });
+    }
+  }, [searchParams, setSearchParams, openEntityHistory]);
 
   const totalPages = Math.ceil(totalLogs / pageSize);
 
