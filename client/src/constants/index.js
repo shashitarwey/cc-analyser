@@ -91,6 +91,7 @@ export const ECOMM_SITES = [
     'Flipkart',
     'Myntra',
     'Ajio',
+    'JioMart',
     'Samsung Store',
     'Oneplus Store',
     'Realme Store',
