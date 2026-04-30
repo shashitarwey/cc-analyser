@@ -87,7 +87,7 @@ router.get('/', async (req, res, next) => {
             order_date_from, order_date_to,
             delivery_date_from, delivery_date_to,
             seller_id, card_id, delivery_status,
-            model_ordered, ecomm_site,
+            model_ordered, ecomm_site, is_cleared,
             all
         } = req.query;
 
@@ -110,6 +110,8 @@ router.get('/', async (req, res, next) => {
         if (delivery_status) filter.delivery_status = delivery_status;
         if (model_ordered) filter.model_ordered = { $regex: model_ordered, $options: 'i' };
         if (ecomm_site) filter.ecomm_site = ecomm_site;
+        if (is_cleared === 'true') filter.is_cleared = true;
+        else if (is_cleared === 'false') filter.is_cleared = false;
 
         const query = Order.find(filter)
             .populate('card_id', 'bank_name last_four_digit card_network')

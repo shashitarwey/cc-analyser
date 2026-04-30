@@ -18,7 +18,7 @@ const EMPTY_FILTERS = {
   order_date_from: '', order_date_to: '',
   delivery_date_from: '', delivery_date_to: '',
   seller_id: '', card_id: '', delivery_status: '',
-  model_ordered: '', ecomm_site: ''
+  model_ordered: '', ecomm_site: '', is_cleared: ''
 };
 
 export default function OrdersPage() {
@@ -393,6 +393,18 @@ export default function OrdersPage() {
                     setFilters(f => ({ ...f, delivery_status: dbVal }));
                   }}
                   placeholder="All Statuses"
+                />
+              </div>
+              <div className="filter-cell">
+                <label className="filter-cell-label">Cleared</label>
+                <SearchableDropdown
+                  options={['All', 'Cleared', 'Uncleared']}
+                  value={{ true: 'Cleared', false: 'Uncleared' }[filters.is_cleared] || ''}
+                  onChange={val => {
+                    const dbVal = val === 'Cleared' ? 'true' : val === 'Uncleared' ? 'false' : '';
+                    setFilters(f => ({ ...f, is_cleared: dbVal }));
+                  }}
+                  placeholder="All"
                 />
               </div>
             </div>
