@@ -7,11 +7,9 @@ import { fmtCurrency, cardLabel } from '../utils/formatters';
 export default function OrderRemarkModal({ order, onClose, onSaved }) {
   const [remark, setRemark] = useState(order?.remark || '');
   const [saving, setSaving] = useState(false);
-  const [editing, setEditing] = useState(!order?.remark);
 
   useEffect(() => {
     setRemark(order?.remark || '');
-    setEditing(!order?.remark);
   }, [order]);
 
   const handleSave = async () => {
@@ -64,45 +62,27 @@ export default function OrderRemarkModal({ order, onClose, onSaved }) {
             </div>
           </div>
 
-          {editing ? (
-            <div className="form-group" style={{ marginTop: '16px', marginBottom: 0 }}>
-              <label className="form-label">Remark</label>
-              <textarea
-                className="form-input form-textarea"
-                rows={4}
-                placeholder="Add notes, reminders, or context about this order…"
-                value={remark}
-                onChange={e => setRemark(e.target.value.slice(0, 200))}
-                autoFocus
-                maxLength={200}
-              />
-              <div className="form-help" style={{ textAlign: 'right', marginTop: '4px' }}>
-                {remark.length}/200
-              </div>
+          <div className="form-group" style={{ marginTop: '16px', marginBottom: 0 }}>
+            <label className="form-label">Remark</label>
+            <textarea
+              className="form-input form-textarea"
+              rows={4}
+              placeholder="Add notes, reminders, or context about this order…"
+              value={remark}
+              onChange={e => setRemark(e.target.value.slice(0, 200))}
+              maxLength={200}
+            />
+            <div className="form-help" style={{ textAlign: 'right', marginTop: '4px' }}>
+              {remark.length}/200
             </div>
-          ) : (
-            <div className="remark-view" style={{ marginTop: '16px' }}>
-              {order.remark.split('\n').map((line, i) => (
-                <p key={i} className="remark-view-line">{line || '\u00A0'}</p>
-              ))}
-            </div>
-          )}
+          </div>
         </div>
 
         <div className="modal-footer">
-          {editing ? (
-            <>
-              <button type="button" className="btn btn-secondary" onClick={onClose} disabled={saving}>Cancel</button>
-              <button type="button" className="btn btn-primary" onClick={handleSave} disabled={saving}>
-                {saving ? 'Saving…' : 'Save Remark'}
-              </button>
-            </>
-          ) : (
-            <>
-              <button type="button" className="btn btn-secondary" onClick={onClose}>Close</button>
-              <button type="button" className="btn btn-primary" onClick={() => setEditing(true)}>Edit Remark</button>
-            </>
-          )}
+          <button type="button" className="btn btn-secondary" onClick={onClose} disabled={saving}>Cancel</button>
+          <button type="button" className="btn btn-primary" onClick={handleSave} disabled={saving}>
+            {saving ? 'Saving…' : 'Save Remark'}
+          </button>
         </div>
       </div>
     </div>

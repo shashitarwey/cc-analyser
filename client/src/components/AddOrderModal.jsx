@@ -151,7 +151,6 @@ export default function AddOrderModal({ onClose, onSuccess, editOrder, cards, se
                   type="text"
                   className={`form-input ${errors.model_ordered ? 'error' : ''}`}
                   placeholder="e.g. iPhone 15"
-                  disabled={!!editOrder}
                   value={form.model_ordered}
                   onChange={e => set('model_ordered', e.target.value)}
                 />

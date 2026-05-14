@@ -39,6 +39,9 @@ export default function OrdersPage() {
   const [confirm, setConfirm] = useState(null);
   const [remarkOrder, setRemarkOrder] = useState(null);
   const [selected, setSelected] = useState(new Set());
+  const [editingItemId, setEditingItemId] = useState(null);
+  const [editingItemValue, setEditingItemValue] = useState('');
+  const [savingItem, setSavingItem] = useState(false);
 
   // Pre-fill seller filter if navigated from SellersPage
   const initSellerId = location.state?.seller_id || '';
@@ -145,6 +148,36 @@ export default function OrdersPage() {
       setOrders(prev => prev.map(o => o._id === order._id ? { ...o, is_cleared: !o.is_cleared } : o));
     } catch {
       toast.error('Failed to update order');
+    }
+  };
+
+  // Inline edit for model_ordered. Triggered by the pencil next to the item
+  // name; Enter/blur commits, Escape cancels. Stops row-click propagation so
+  // the remark modal doesn't open while the user is editing.
+  const startEditItem = (order) => {
+    setEditingItemId(order._id);
+    setEditingItemValue(order.model_ordered);
+  };
+  const cancelEditItem = () => {
+    setEditingItemId(null);
+    setEditingItemValue('');
+  };
+  const saveItemName = async (order) => {
+    const newName = editingItemValue.trim();
+    if (!newName || newName === order.model_ordered) {
+      cancelEditItem();
+      return;
+    }
+    setSavingItem(true);
+    try {
+      const updated = await updateOrder(order._id, { model_ordered: newName });
+      setOrders(prev => prev.map(o => o._id === order._id ? { ...o, model_ordered: updated.model_ordered } : o));
+      toast.success('Item name updated');
+      cancelEditItem();
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Failed to update item name');
+    } finally {
+      setSavingItem(false);
     }
   };
 
@@ -504,13 +537,39 @@ export default function OrdersPage() {
                         <td style={{ whiteSpace: 'nowrap' }}>
                           <div style={{ color: 'var(--text-muted)' }}>{order.delivered_date ? new Date(order.delivered_date).toLocaleDateString('en-GB') : '—'}</div>
                         </td>
-                        <td style={{ maxWidth: '160px' }}>
-                          <div className="font-medium" title={order.model_ordered} style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '150px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                              {order.model_ordered.length > 20 ? order.model_ordered.slice(0, 20) + '…' : order.model_ordered}
-                            </span>
-                            {order.quantity > 1 && <span style={{ flexShrink: 0, color: 'var(--accent)', fontSize: '0.72rem', fontWeight: 'bold', padding: '2px 5px', background: 'rgba(88,166,255,0.1)', borderRadius: '4px' }}>×{order.quantity}</span>}
-                          </div>
+                        <td style={{ maxWidth: '160px' }} onClick={editingItemId === order._id ? e => e.stopPropagation() : undefined}>
+                          {editingItemId === order._id ? (
+                            <input
+                              type="text"
+                              value={editingItemValue}
+                              autoFocus
+                              disabled={savingItem}
+                              onClick={e => e.stopPropagation()}
+                              onChange={e => setEditingItemValue(e.target.value)}
+                              onKeyDown={e => {
+                                if (e.key === 'Enter') { e.preventDefault(); saveItemName(order); }
+                                else if (e.key === 'Escape') { e.preventDefault(); cancelEditItem(); }
+                              }}
+                              onBlur={() => saveItemName(order)}
+                              style={{ width: '100%', padding: '4px 6px', fontSize: 'inherit', fontFamily: 'inherit', border: '1px solid var(--accent)', borderRadius: '4px', background: 'var(--surface)', color: 'var(--text)', outline: 'none' }}
+                            />
+                          ) : (
+                            <div className="font-medium" title={order.model_ordered} style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '150px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                {order.model_ordered.length > 20 ? order.model_ordered.slice(0, 20) + '…' : order.model_ordered}
+                              </span>
+                              {order.quantity > 1 && <span style={{ flexShrink: 0, color: 'var(--accent)', fontSize: '0.72rem', fontWeight: 'bold', padding: '2px 5px', background: 'rgba(88,166,255,0.1)', borderRadius: '4px' }}>×{order.quantity}</span>}
+                              <button
+                                type="button"
+                                className="item-edit-btn"
+                                onClick={e => { e.stopPropagation(); startEditItem(order); }}
+                                data-tooltip="Edit item name"
+                                style={{ flexShrink: 0, background: 'none', border: 'none', padding: '2px', cursor: 'pointer', color: 'var(--text-muted)', display: 'inline-flex', alignItems: 'center', borderRadius: '3px' }}
+                              >
+                                <Pencil size={11} />
+                              </button>
+                            </div>
+                          )}
                           <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '2px' }}>{order.variant !== 'NA' ? order.variant : ''}</div>
                         </td>
                         <td>
