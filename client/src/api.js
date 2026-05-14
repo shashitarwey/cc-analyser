@@ -37,6 +37,9 @@ export const resetPassword = (token, data) => API.post(`/auth/reset-password/${t
 // ── Analytics ──
 export const getProfitAnalytics = (params) => API.get('/analytics/profit', { params }).then(r => r.data);
 
+// ── AI Assistant ──
+export const askAI = (question, history) => API.post('/ai/ask', { question, history }).then(r => r.data);
+
 // ── Cards ──
 export const getCards = () => API.get('/cards').then(r => r.data);
 export const createCard = (data) => API.post('/cards', data).then(r => r.data);

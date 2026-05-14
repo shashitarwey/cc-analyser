@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback } from 'react';
-import { ChevronLeft, TrendingUp, Users, ShoppingBag, IndianRupee, BarChart3, Percent, CalendarDays } from 'lucide-react';
-import { getProfitAnalytics } from '../api';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { ChevronLeft, TrendingUp, Users, ShoppingBag, IndianRupee, BarChart3, Percent, CalendarDays, Sparkles, Send, RotateCcw, User } from 'lucide-react';
+import { getProfitAnalytics, askAI } from '../api';
 import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -31,6 +31,13 @@ const CustomTooltip = ({ active, payload, label }) => {
   );
 };
 
+const SUGGESTED_QUESTIONS = [
+  'Which buyer owes me the most right now?',
+  'Top 5 most profitable items this FY',
+  'Compare profit between Amazon and Flipkart',
+  'Which card earned the most cashback?',
+];
+
 export default function OrderAnalyticsPage() {
   const navigate = useNavigate();
   const [data, setData] = useState(null);
@@ -38,6 +45,38 @@ export default function OrderAnalyticsPage() {
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [datePreset, setDatePreset] = useState('');
+
+  // AI chat — multi-turn so follow-ups like "and what about last month?" work.
+  // History is session-only (resets on page reload / Reset button).
+  const [aiInput, setAiInput] = useState('');
+  const [aiBusy, setAiBusy] = useState(false);
+  const [aiMessages, setAiMessages] = useState([]); // [{ role: 'user'|'model', content }]
+  const chatEndRef = useRef(null);
+
+  const handleAsk = async (question) => {
+    const q = (question ?? aiInput).trim();
+    if (!q || aiBusy) return;
+    setAiInput('');
+    const next = [...aiMessages, { role: 'user', content: q }];
+    setAiMessages(next);
+    setAiBusy(true);
+    try {
+      const { answer } = await askAI(q, aiMessages);
+      setAiMessages([...next, { role: 'model', content: answer }]);
+    } catch (err) {
+      const msg = err.response?.data?.error || 'Failed to get a response from the AI assistant';
+      setAiMessages([...next, { role: 'model', content: msg, error: true }]);
+      toast.error(msg);
+    } finally {
+      setAiBusy(false);
+      setTimeout(() => chatEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' }), 50);
+    }
+  };
+
+  const resetChat = () => {
+    setAiMessages([]);
+    setAiInput('');
+  };
 
   const fetchAnalytics = useCallback(async (from, to) => {
     try {
@@ -150,6 +189,78 @@ export default function OrderAnalyticsPage() {
       </div>
 
       <div className="page-content">
+        {/* AI Assistant — multi-turn chat answered against the user's real data
+            on the server. History is session-only. */}
+        <div className="ai-panel">
+          <div className="ai-panel-header">
+            <div className="ai-panel-title">
+              <Sparkles size={16} />
+              <span>Ask your data</span>
+              <span className="ai-panel-subtitle">Powered by Gemini · answers from your live orders, sellers & cards</span>
+            </div>
+            {aiMessages.length > 0 && (
+              <button className="btn btn-ghost btn-sm" onClick={resetChat} disabled={aiBusy}>
+                <RotateCcw size={13} /> Reset
+              </button>
+            )}
+          </div>
+
+          {aiMessages.length === 0 && (
+            <div className="ai-suggestions">
+              {SUGGESTED_QUESTIONS.map(q => (
+                <button
+                  key={q}
+                  className="ai-suggestion-chip"
+                  onClick={() => handleAsk(q)}
+                  disabled={aiBusy}
+                >
+                  {q}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {aiMessages.length > 0 && (
+            <div className="ai-messages">
+              {aiMessages.map((m, i) => (
+                <div key={i} className={`ai-msg ai-msg-${m.role}${m.error ? ' ai-msg-error' : ''}`}>
+                  <div className="ai-msg-avatar">
+                    {m.role === 'user' ? <User size={14} /> : <Sparkles size={14} />}
+                  </div>
+                  <div className="ai-msg-content">{m.content}</div>
+                </div>
+              ))}
+              {aiBusy && (
+                <div className="ai-msg ai-msg-model">
+                  <div className="ai-msg-avatar"><Sparkles size={14} /></div>
+                  <div className="ai-msg-content ai-msg-thinking">
+                    <span className="ai-dot" /><span className="ai-dot" /><span className="ai-dot" />
+                  </div>
+                </div>
+              )}
+              <div ref={chatEndRef} />
+            </div>
+          )}
+
+          <form
+            className="ai-input-row"
+            onSubmit={e => { e.preventDefault(); handleAsk(); }}
+          >
+            <input
+              type="text"
+              className="ai-input"
+              placeholder="Ask anything about your orders, sellers, cashback…"
+              value={aiInput}
+              onChange={e => setAiInput(e.target.value)}
+              disabled={aiBusy}
+              maxLength={1000}
+            />
+            <button type="submit" className="btn btn-primary btn-sm" disabled={aiBusy || !aiInput.trim()}>
+              <Send size={14} /> {aiBusy ? 'Thinking…' : 'Ask'}
+            </button>
+          </form>
+        </div>
+
         {noData ? (
           <div className="empty-state-card">
             <div className="empty-icon empty-icon-orders">
