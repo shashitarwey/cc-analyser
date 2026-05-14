@@ -129,12 +129,22 @@ router.get('/', async (req, res, next) => {
 
         // Typed match for the profit-summary aggregation. Mongoose auto-casts
         // find() filters via the schema, but $match in aggregate() does not —
-        // so user_id / dates / ref ids must be cast explicitly here.
+        // so user_id / dates / ref ids must be cast explicitly here, otherwise
+        // a date or buyer filter would silently match nothing and the totals
+        // would render as ₹0 even when rows are visible.
         // Profit excludes Cancelled orders to mirror the frontend's badge calc;
         // if the user filtered to Cancelled-only, the summary is trivially zero.
         const summaryMatch = { user_id: toObjectId(req.user.id) };
-        if (filter.order_date) summaryMatch.order_date = filter.order_date;
-        if (filter.delivered_date) summaryMatch.delivered_date = filter.delivered_date;
+        if (order_date_from || order_date_to) {
+            summaryMatch.order_date = {};
+            if (order_date_from) summaryMatch.order_date.$gte = new Date(`${order_date_from}T00:00:00.000Z`);
+            if (order_date_to) summaryMatch.order_date.$lte = new Date(`${order_date_to}T23:59:59.999Z`);
+        }
+        if (delivery_date_from || delivery_date_to) {
+            summaryMatch.delivered_date = {};
+            if (delivery_date_from) summaryMatch.delivered_date.$gte = new Date(`${delivery_date_from}T00:00:00.000Z`);
+            if (delivery_date_to) summaryMatch.delivered_date.$lte = new Date(`${delivery_date_to}T23:59:59.999Z`);
+        }
         if (seller_id) summaryMatch.seller_id = toObjectId(seller_id);
         if (card_id) summaryMatch.card_id = toObjectId(card_id);
         if (model_ordered) summaryMatch.model_ordered = filter.model_ordered;
