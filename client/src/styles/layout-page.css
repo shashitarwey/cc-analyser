@@ -17,6 +17,20 @@
   box-sizing: border-box;
 }
 
+/* When the hero contains a date-range dropdown (e.g. Analytics page), the
+   popover that opens below the trigger needs to escape the hero — overriding
+   the default overflow:hidden which clips it. */
+.page-hero:has(.date-range-dropdown) {
+  overflow: visible;
+}
+
+/* Right-align the popover when the trigger sits in the hero's right-side
+   actions, otherwise the calendar would extend past the viewport. */
+.page-hero .date-range-popover {
+  left: auto;
+  right: 0;
+}
+
 .page-hero::before {
   content: '';
   position: absolute;

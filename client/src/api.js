@@ -35,7 +35,7 @@ export const forgotPassword = (data) => API.post('/auth/forgot-password', data).
 export const resetPassword = (token, data) => API.post(`/auth/reset-password/${token}`, data).then(r => r.data);
 
 // ── Analytics ──
-export const getProfitAnalytics = () => API.get('/analytics/profit').then(r => r.data);
+export const getProfitAnalytics = (params) => API.get('/analytics/profit', { params }).then(r => r.data);
 
 // ── Cards ──
 export const getCards = () => API.get('/cards').then(r => r.data);
