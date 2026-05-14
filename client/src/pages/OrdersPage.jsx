@@ -26,6 +26,7 @@ export default function OrdersPage() {
   const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
   const [totalOrders, setTotalOrders] = useState(0);
+  const [summary, setSummary] = useState({ total_profit: 0, total_order_amount: 0 });
   const [cards, setCards] = useState([]);
   const [sellers, setSellers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -49,9 +50,10 @@ export default function OrdersPage() {
   const fetchOrders = useCallback(async (f, p = page, ps = pageSize) => {
     try {
       const params = { ...pickTruthy(f || filters), page: p, limit: ps };
-      const { items, page: pageInfo } = await getOrders(params);
+      const { items, page: pageInfo, summary: s } = await getOrders(params);
       setOrders(items);
       setTotalOrders(pageInfo.item_total);
+      setSummary(s || { total_profit: 0, total_order_amount: 0 });
     } catch (err) { console.error('Failed to load orders', err);
       toast.error('Failed to load orders');
     }
@@ -82,6 +84,7 @@ export default function OrdersPage() {
       ]);
       setOrders(ordersRes.items);
       setTotalOrders(ordersRes.page.item_total);
+      setSummary(ordersRes.summary || { total_profit: 0, total_order_amount: 0 });
       setCards(fetchedCards);
       setSellers(fetchedSellers);
     } catch (err) { console.error('Failed to load orders', err);
@@ -224,15 +227,12 @@ export default function OrdersPage() {
     );
   }
 
-  // Aggregate profit and total order spend across non-cancelled rows.
-  // Weighted margin = sum(profit) / sum(order_amount) × 100, which is the
-  // actual average margin (not the unweighted mean of per-row percentages).
-  const { totalProfit, totalOrderAmount } = orders.reduce((acc, o) => {
-    if (o.delivery_status === 'Cancelled') return acc;
-    acc.totalProfit += (o.return_amount - o.order_amount + o.cashback);
-    acc.totalOrderAmount += o.order_amount;
-    return acc;
-  }, { totalProfit: 0, totalOrderAmount: 0 });
+  // Profit totals come from the server so the badge reflects every matching
+  // order (across all pages), not just the current page. Weighted margin =
+  // sum(profit) / sum(order_amount) × 100 — the actual average margin, not
+  // the unweighted mean of per-row percentages.
+  const totalProfit = summary.total_profit;
+  const totalOrderAmount = summary.total_order_amount;
   const avgProfitPercent = totalOrderAmount > 0
     ? ((totalProfit / totalOrderAmount) * 100).toFixed(2)
     : '0.00';

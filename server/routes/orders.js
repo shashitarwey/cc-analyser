@@ -3,7 +3,7 @@ const router = express.Router();
 const Order = require('../models/Order');
 const Card = require('../models/Card');
 const Seller = require('../models/Seller');
-const { pickFields, parsePagination, paginatedResponse } = require('../utils/helpers');
+const { pickFields, parsePagination, paginatedResponse, toObjectId } = require('../utils/helpers');
 const { invalidateSummaryCache } = require('../utils/cache');
 const { logActivity } = require('../utils/activityLogger');
 const validate = require('../middleware/validate');
@@ -126,12 +126,44 @@ router.get('/', async (req, res, next) => {
         }
 
         const { pageNum, limitNum, skip } = parsePagination(req.query);
-        const [orders, total] = await Promise.all([
+
+        // Typed match for the profit-summary aggregation. Mongoose auto-casts
+        // find() filters via the schema, but $match in aggregate() does not —
+        // so user_id / dates / ref ids must be cast explicitly here.
+        // Profit excludes Cancelled orders to mirror the frontend's badge calc;
+        // if the user filtered to Cancelled-only, the summary is trivially zero.
+        const summaryMatch = { user_id: toObjectId(req.user.id) };
+        if (filter.order_date) summaryMatch.order_date = filter.order_date;
+        if (filter.delivered_date) summaryMatch.delivered_date = filter.delivered_date;
+        if (seller_id) summaryMatch.seller_id = toObjectId(seller_id);
+        if (card_id) summaryMatch.card_id = toObjectId(card_id);
+        if (model_ordered) summaryMatch.model_ordered = filter.model_ordered;
+        if (ecomm_site) summaryMatch.ecomm_site = ecomm_site;
+        if (filter.is_cleared !== undefined) summaryMatch.is_cleared = filter.is_cleared;
+        summaryMatch.delivery_status = delivery_status || { $ne: 'Cancelled' };
+
+        const summaryPromise = delivery_status === 'Cancelled'
+            ? Promise.resolve([])
+            : Order.aggregate([
+                { $match: summaryMatch },
+                { $group: {
+                    _id: null,
+                    total_profit: { $sum: { $add: [{ $subtract: ['$return_amount', '$order_amount'] }, '$cashback'] } },
+                    total_order_amount: { $sum: '$order_amount' }
+                }}
+            ]);
+
+        const [orders, total, totals] = await Promise.all([
             query.skip(skip).limit(limitNum),
-            Order.countDocuments(filter)
+            Order.countDocuments(filter),
+            summaryPromise
         ]);
 
-        res.json(paginatedResponse(orders, total, pageNum, limitNum));
+        const summary = totals[0]
+            ? { total_profit: totals[0].total_profit, total_order_amount: totals[0].total_order_amount }
+            : { total_profit: 0, total_order_amount: 0 };
+
+        res.json({ ...paginatedResponse(orders, total, pageNum, limitNum), summary });
     } catch (err) { next(err); }
 });
 
