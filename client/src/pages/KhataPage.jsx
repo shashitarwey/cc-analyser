@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from 'react';
 import { getCustomers, deleteCustomer } from '../api';
 import { Plus, Trash2, Pencil, BookText, Wallet, TrendingDown, TrendingUp, ChevronLeft, Phone, Users, History } from 'lucide-react';
 import { fmtCurrency, profitColor } from '../utils/formatters';
-import { PAGE_SIZE } from '../constants';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import AddCustomerModal from '../components/AddCustomerModal';
@@ -19,7 +18,7 @@ export default function KhataPage() {
   const [openDropdown, setOpenDropdown] = useState(null);
   const [confirm, setConfirm] = useState(null);
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(PAGE_SIZE);
+  const [pageSize, setPageSize] = useState(50);
   const navigate = useNavigate();
 
   const fetchCustomers = useCallback(async (p = page, ps = pageSize) => {
