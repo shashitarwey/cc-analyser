@@ -7,6 +7,7 @@ import { downloadLedgerPdf } from '../utils/ledgerPdf';
 import toast from 'react-hot-toast';
 import ConfirmModal from '../common/ConfirmModal';
 import AddPaymentModal from '../components/AddPaymentModal';
+import ReportRangeModal from '../components/ReportRangeModal';
 
 export default function SellerLedgerPage() {
   const { id } = useParams();
@@ -22,6 +23,7 @@ export default function SellerLedgerPage() {
   const [hasMore, setHasMore] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [pdfLoading, setPdfLoading] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
   const sentinelRef = useRef(null);
   const PAGE_LIMIT = 20;
 
@@ -96,9 +98,10 @@ export default function SellerLedgerPage() {
     });
   };
 
-  // PDF needs ALL items, not just what's currently paginated on screen.
-  // Fetch fresh orders + payments and rebuild the merged list like before.
-  const handleDownloadPdf = async () => {
+  // PDF needs ALL items, not just what's currently paginated on screen — and
+  // the full history even when a date range is picked, since entries before
+  // the range roll up into the report's opening balance.
+  const handleDownloadPdf = async (range) => {
     if (pdfLoading) return;
     setPdfLoading(true);
     try {
@@ -129,8 +132,9 @@ export default function SellerLedgerPage() {
         }
         return { ...it, runningBalance: running, isCancelled, isPending };
       });
-      const res = downloadLedgerPdf(seller, allItems);
+      const res = downloadLedgerPdf(seller, allItems, range);
       if (!res.ok) toast.error('Failed to generate report');
+      else setShowReportModal(false);
     } catch {
       toast.error('Failed to generate report');
     } finally {
@@ -183,7 +187,7 @@ export default function SellerLedgerPage() {
             <div className="page-hero-actions">
               <button
                 className="btn btn-secondary btn-sm"
-                onClick={handleDownloadPdf}
+                onClick={() => setShowReportModal(true)}
                 disabled={loading || pdfLoading || items.length === 0}
               >
                 <FileDown size={14} /> {pdfLoading ? 'Preparing…' : 'Download Report'}
@@ -355,6 +359,15 @@ export default function SellerLedgerPage() {
         )}
       </div>
 
+      {showReportModal && seller && (
+        <ReportRangeModal
+          title="Download Ledger Report"
+          subtitle={`Statement for ${seller.name}. Pick a period, or download the full history.`}
+          loading={pdfLoading}
+          onClose={() => setShowReportModal(false)}
+          onGenerate={handleDownloadPdf}
+        />
+      )}
       {showPaymentModal && (seller || editPayment) && (
         <AddPaymentModal
           seller={seller}

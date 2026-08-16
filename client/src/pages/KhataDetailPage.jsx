@@ -7,6 +7,7 @@ import { downloadKhataPdf } from '../utils/khataPdf';
 import toast from 'react-hot-toast';
 import ConfirmModal from '../common/ConfirmModal';
 import AddKhataEntryModal from '../components/AddKhataEntryModal';
+import ReportRangeModal from '../components/ReportRangeModal';
 
 export default function KhataDetailPage() {
   const { id } = useParams();
@@ -23,6 +24,7 @@ export default function KhataDetailPage() {
   const [hasMore, setHasMore] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [pdfLoading, setPdfLoading] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
   const sentinelRef = useRef(null);
   const PAGE_LIMIT = 20;
 
@@ -103,14 +105,16 @@ export default function KhataDetailPage() {
     });
   };
 
-  // PDF needs ALL entries. Fetch fresh via the non-paginated endpoint.
-  const handleDownloadPdf = async () => {
+  // PDF needs ALL entries even when a date range is picked — entries before
+  // the range roll up into the report's opening balance.
+  const handleDownloadPdf = async (range) => {
     if (pdfLoading) return;
     setPdfLoading(true);
     try {
       const all = await getCustomerEntries(id);
-      const res = downloadKhataPdf(customer, all);
+      const res = downloadKhataPdf(customer, all, range);
       if (!res.ok) toast.error('Failed to generate report');
+      else setShowReportModal(false);
     } catch {
       toast.error('Failed to generate report');
     } finally {
@@ -165,7 +169,7 @@ export default function KhataDetailPage() {
             <div className="page-hero-actions">
               <button
                 className="btn btn-secondary btn-sm"
-                onClick={handleDownloadPdf}
+                onClick={() => setShowReportModal(true)}
                 disabled={loading || pdfLoading || entries.length === 0}
               >
                 <FileDown size={14} /> {pdfLoading ? 'Preparing…' : 'Download Report'}
@@ -309,6 +313,16 @@ export default function KhataDetailPage() {
             </button>
           </div>
         </div>
+      )}
+
+      {showReportModal && customer && (
+        <ReportRangeModal
+          title="Download Khata Report"
+          subtitle={`Statement for ${customer.name}. Pick a period, or download the full history.`}
+          loading={pdfLoading}
+          onClose={() => setShowReportModal(false)}
+          onGenerate={handleDownloadPdf}
+        />
       )}
 
       {showEntryModal && customer && (

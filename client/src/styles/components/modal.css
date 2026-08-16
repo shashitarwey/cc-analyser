@@ -637,3 +637,55 @@ div[style*="overflow"]>form>.form-group:first-child {
   }
 }
 
+
+/* ── Report date-range modal (ReportRangeModal) ── */
+.report-preset-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.report-preset-pill {
+  padding: 7px 13px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.report-preset-pill:hover {
+  background: rgba(139, 148, 158, 0.15);
+  color: var(--text);
+}
+
+.report-preset-pill.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.report-range-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 18px;
+  padding: 11px 13px;
+  border-radius: 8px;
+  background: rgba(139, 148, 158, 0.1);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.report-range-note svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}

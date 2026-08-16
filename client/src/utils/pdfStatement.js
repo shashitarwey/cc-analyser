@@ -13,6 +13,38 @@ export const escapeHtml = (str) =>
         '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
     }[c]));
 
+/**
+ * Split a signed balance into its printable magnitude + Dr/Cr suffix.
+ * Positive = Dr (they owe), negative = Cr (advance).
+ * @param {number} n
+ * @returns {{ text: string, suffix: string }}
+ */
+export const balanceParts = (n) => ({
+    text: fmtAmt(Math.abs(n)),
+    suffix: n === 0 ? '' : (n > 0 ? ' Dr' : ' Cr'),
+});
+
+/**
+ * Split chronologically-sorted entries into the ones carried forward (before
+ * `from`) and the ones inside the selected window. Entries after `to` are
+ * dropped. Both bounds are inclusive and optional.
+ *
+ * @param {Array}  sorted   - entries sorted ascending, each with a `date` Date
+ * @param {?Date}  from     - start of window (null = no lower bound)
+ * @param {?Date}  to       - end of window (null = no upper bound)
+ * @returns {{ before: Array, within: Array }}
+ */
+export const splitByRange = (sorted, from, to) => {
+    const before = [];
+    const within = [];
+    for (const item of sorted) {
+        if (from && item.date < from) { before.push(item); continue; }
+        if (to && item.date > to) break;
+        within.push(item);
+    }
+    return { before, within };
+};
+
 const STATEMENT_STYLES = `
     @page {
         size: A4;
@@ -133,6 +165,10 @@ const STATEMENT_STYLES = `
         font-size: 11px;
         text-align: right;
     }
+    .opening-row td {
+        background: #eef2ff;
+        border-bottom: 1px solid #d5dcf5;
+    }
     tbody td {
         padding: 11px 10px;
         border-bottom: 1px solid #ececec;
@@ -175,14 +211,23 @@ const STATEMENT_STYLES = `
     }
 `;
 
-const buildBodyRows = (groups, emptyMsg, showDeliveryDate) => {
+const buildBodyRows = (groups, emptyMsg, showDeliveryDate, openingRow) => {
     const colspanTotal = showDeliveryDate ? 6 : 5;
     const colspanOpening = showDeliveryDate ? 4 : 3;
 
+    // Carry-forward row shown above the first month when a date filter is on,
+    // so the first in-range balance is traceable back to something.
+    const openingRowHtml = openingRow ? `
+        <tr class="month-row opening-row">
+            <td colspan="${colspanTotal - 1}">Opening Balance (as on ${escapeHtml(openingRow.date)})</td>
+            <td class="amt balance-red">${openingRow.balance}<span class="dr-suffix">${openingRow.suffix}</span></td>
+        </tr>` : '';
+
     if (groups.length === 0) {
-        return `<tr><td colspan="${colspanTotal}" class="empty-msg">${escapeHtml(emptyMsg)}</td></tr>`;
+        return openingRowHtml +
+            `<tr><td colspan="${colspanTotal}" class="empty-msg">${escapeHtml(emptyMsg)}</td></tr>`;
     }
-    return groups.map(group => {
+    return openingRowHtml + groups.map(group => {
         const monthHeader = `
             <tr class="month-row">
                 <td colspan="2">${escapeHtml(group.monthLabel)}</td>
@@ -212,6 +257,9 @@ const buildBodyRows = (groups, emptyMsg, showDeliveryDate) => {
  * @param {string} config.statementTitle    - centered heading, e.g. "Vaibhav (Gandey) Statement"
  * @param {string} config.dateRange         - parenthesized subtitle (e.g. "30 Mar 2026 - 10 Apr 2026")
  * @param {string} config.openingDate       - "30 Mar 2026"
+ * @param {string} [config.openingBalance]  - formatted carry-forward amount, defaults to "0.00"
+ * @param {string} [config.openingSuffix]   - " Dr" / " Cr" / "" for the carry-forward amount
+ * @param {boolean} [config.filtered]       - true when a date filter narrowed the entries
  * @param {Array}  config.groups            - month groups from buildMonthGroups()
  * @param {number} config.entriesCount
  * @param {Object} config.summary           - { debitLabel, creditLabel, debit, credit, balance, balanceSuffix, balanceLine }
@@ -225,6 +273,9 @@ export const buildStatementHtml = ({
     statementTitle,
     dateRange,
     openingDate,
+    openingBalance = '0.00',
+    openingSuffix = '',
+    filtered = false,
     groups,
     entriesCount,
     summary,
@@ -233,7 +284,12 @@ export const buildStatementHtml = ({
     emptyMsg,
 }) => {
     const showDeliveryDate = !!columns.deliveryHeader;
-    const bodyRows = buildBodyRows(groups, emptyMsg, showDeliveryDate);
+    // Only worth a dedicated table row when a filter is on — an unfiltered
+    // report always opens at zero, which the first month header already says.
+    const openingRow = filtered
+        ? { date: openingDate, balance: openingBalance, suffix: openingSuffix }
+        : null;
+    const bodyRows = buildBodyRows(groups, emptyMsg, showDeliveryDate, openingRow);
     const grandTotalRow = groups.length === 0 ? '' : `
         <tr class="grand-total">
             <td colspan="${showDeliveryDate ? 3 : 2}">Grand Total</td>
@@ -261,7 +317,7 @@ export const buildStatementHtml = ({
     <div class="summary">
         <div class="summary-cell">
             <div class="summary-label">Opening Balance</div>
-            <div class="summary-value">Rs. 0.00</div>
+            <div class="summary-value">Rs. ${openingBalance}<span class="dr-suffix">${openingSuffix}</span></div>
             <div class="summary-sub">(on ${escapeHtml(openingDate)})</div>
         </div>
         <div class="summary-cell">
@@ -279,7 +335,7 @@ export const buildStatementHtml = ({
         </div>
     </div>
 
-    <div class="entries-count">No. of Entries: ${entriesCount} (All)</div>
+    <div class="entries-count">No. of Entries: ${entriesCount} (${filtered ? 'Filtered' : 'All'})</div>
 
     <table>
         <thead>
