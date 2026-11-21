@@ -20,6 +20,28 @@ const ActivityLogSchema = new mongoose.Schema({
 
 ActivityLogSchema.index({ user_id: 1, created_at: -1 });
 ActivityLogSchema.index({ user_id: 1, entity_id: 1 });
-ActivityLogSchema.index({ created_at: 1 }, { expireAfterSeconds: 270 * 24 * 60 * 60 }); // TTL: auto-delete after 270 days (~9 months)
+// TTL: auto-delete after ~15 months (456 days)
+const ACTIVITY_TTL_SECONDS = 456 * 24 * 60 * 60;
+ActivityLogSchema.index({ created_at: 1 }, { expireAfterSeconds: ACTIVITY_TTL_SECONDS });
 
-module.exports = mongoose.model('ActivityLog', ActivityLogSchema);
+const ActivityLog = mongoose.model('ActivityLog', ActivityLogSchema);
+
+/**
+ * MongoDB does NOT update an existing TTL index when the schema value changes —
+ * Mongoose's autoIndex just fails with IndexOptionsConflict and the old expiry
+ * stays in force. This syncs the live index via collMod on startup.
+ */
+ActivityLog.syncTTL = async () => {
+    const indexes = await ActivityLog.collection.indexes().catch(() => []);
+    const ttl = indexes.find(i => i.key?.created_at === 1 && Object.keys(i.key).length === 1);
+    if (ttl && ttl.expireAfterSeconds !== ACTIVITY_TTL_SECONDS) {
+        await mongoose.connection.db.command({
+            collMod: ActivityLog.collection.collectionName,
+            index: { keyPattern: { created_at: 1 }, expireAfterSeconds: ACTIVITY_TTL_SECONDS },
+        });
+        return { from: ttl.expireAfterSeconds, to: ACTIVITY_TTL_SECONDS };
+    }
+    return null;
+};
+
+module.exports = ActivityLog;
