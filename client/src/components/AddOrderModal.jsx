@@ -25,7 +25,8 @@ export default function AddOrderModal({ onClose, onSuccess, editOrder, cards, se
     seller_id: '',
     delivery_status: 'No',
     ecomm_site: 'Amazon',
-    card_id: ''
+    card_id: '',
+    remark: ''
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
@@ -44,6 +45,7 @@ export default function AddOrderModal({ onClose, onSuccess, editOrder, cards, se
         delivered_date: editOrder.delivered_date ? editOrder.delivered_date.slice(0, 10) : '',
         card_id: editOrder.card_id?._id || editOrder.card_id || '',
         seller_id: editOrder.seller_id?._id || editOrder.seller_id || '',
+        remark: editOrder.remark || '',
         quantity: q,
         unit_order_amount: editOrder.order_amount / q,
         unit_return_amount: editOrder.return_amount / q,
@@ -86,10 +88,10 @@ export default function AddOrderModal({ onClose, onSuccess, editOrder, cards, se
     setLoading(true);
     try {
       if (editOrder) {
-        await updateOrder(editOrder._id, form);
+        await updateOrder(editOrder._id, { ...form, remark: form.remark.trim() });
         toast.success('Order updated');
       } else {
-        await addOrder(form);
+        await addOrder({ ...form, remark: form.remark.trim() });
         toast.success('Order added');
       }
       onSuccess();
@@ -305,6 +307,19 @@ export default function AddOrderModal({ onClose, onSuccess, editOrder, cards, se
                 onChange={e => set('cashback', Number(e.target.value))}
                 disabled={!!editOrder || !isCashbackEnabled}
               />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Remark <span style={{ color: 'var(--text-muted)', fontWeight: 400, fontSize: '0.78rem' }}>(optional)</span></label>
+              <textarea
+                className="form-input form-textarea"
+                rows={2}
+                placeholder="Add notes, reminders, or context about this order…"
+                value={form.remark}
+                onChange={e => set('remark', e.target.value.slice(0, 200))}
+                maxLength={200}
+              />
+              <div className="form-help" style={{ textAlign: 'right', marginTop: '4px' }}>{form.remark.length}/200</div>
             </div>
 
             {/* Summary */}
