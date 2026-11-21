@@ -2,8 +2,9 @@ import { CalendarRange } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 import { fmtDate } from '../utils/formatters';
+import { getToday } from '../constants';
 
-const today    = () => new Date().toISOString().slice(0, 10);
+const today    = getToday;
 const fyBounds = (offset = 0) => {
   const now = new Date();
   const yr  = now.getMonth() >= 3 ? now.getFullYear() + offset : now.getFullYear() - 1 + offset;

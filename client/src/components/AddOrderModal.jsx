@@ -7,9 +7,9 @@ import { cardLabel, sellerLabel } from '../utils/formatters';
 import SingleDatePicker from '../common/SingleDatePicker';
 import SearchableDropdown from '../common/SearchableDropdown';
 
-const today = getToday();
-
 export default function AddOrderModal({ onClose, onSuccess, editOrder, cards, sellers = [] }) {
+  // Computed per mount (not at module load) so it never goes stale past midnight
+  const today = getToday();
   const [form, setForm] = useState({
     order_date: today,
     delivered_date: '',
@@ -194,7 +194,6 @@ export default function AddOrderModal({ onClose, onSuccess, editOrder, cards, se
                   setForm(f => ({ ...f, card_id: newId, cashback: cb }));
                   if (errors.card_id) setErrors(e => ({ ...e, card_id: '' }));
                 }}
-                disabled={!!editOrder}
                 placeholder="Select a card"
                 error={errors.card_id}
               />
@@ -210,7 +209,6 @@ export default function AddOrderModal({ onClose, onSuccess, editOrder, cards, se
                   setForm(f => ({ ...f, seller_id: seller ? seller._id : '' }));
                   if (errors.seller_id) setErrors(e => ({ ...e, seller_id: '' }));
                 }}
-                disabled={!!editOrder}
                 placeholder="Select a buyer"
                 error={errors.seller_id}
               />
@@ -224,7 +222,6 @@ export default function AddOrderModal({ onClose, onSuccess, editOrder, cards, se
                   onChange={v => set('order_date', v)}
                   placeholder="Select date"
                   maxDate={today}
-                  disabled={!!editOrder}
                 />
                 {errors.order_date && <div className="form-error">{errors.order_date}</div>}
               </div>

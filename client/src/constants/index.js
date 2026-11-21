@@ -1,5 +1,10 @@
 // ─── Today's date helper (always fresh, never stale) ───────────────────────
-export const getToday = () => new Date().toISOString().slice(0, 10);
+// Uses the browser's LOCAL date. toISOString() returns the UTC date, which in
+// IST (UTC+5:30) is still "yesterday" between 00:00 and 05:30.
+export const getToday = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
 
 // ─── Pagination ────────────────────────────────────────────────────────────
 export const PAGE_SIZE = 10;

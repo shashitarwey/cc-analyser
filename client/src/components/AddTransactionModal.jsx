@@ -5,13 +5,14 @@ import ConfirmModal from '../common/ConfirmModal';
 import { toast } from 'react-hot-toast';
 import SearchableDropdown from '../common/SearchableDropdown';
 import SingleDatePicker from '../common/SingleDatePicker';
+import { getToday } from '../constants';
 
 export default function AddTransactionModal({ card, cards, onClose, onSave }) {
   const [form, setForm] = useState({
     card_id:     card?._id || '',
     amount:      '',
     description: '',
-    date:        new Date().toISOString().slice(0, 10),
+    date:        getToday(),
   });
   const [txList,   setTxList]   = useState([]);
   const [errors,   setErrors]   = useState({});
@@ -117,7 +118,7 @@ export default function AddTransactionModal({ card, cards, onClose, onSave }) {
                   <label className="form-label">Date</label>
                   <SingleDatePicker
                     value={form.date}
-                    maxDate={new Date().toISOString().slice(0, 10)}
+                    maxDate={getToday()}
                     onChange={val => set('date', val)}
                   />
                   {errors.date && <div className="form-error">{errors.date}</div>}

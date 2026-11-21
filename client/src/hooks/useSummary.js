@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { getSummary } from '../api';
+import { getToday } from '../constants';
 import { toast } from 'react-hot-toast';
 
-const today = () => new Date().toISOString().slice(0, 10);
+const today = getToday;
 
 const getFYStart = () => {
     const now = new Date();

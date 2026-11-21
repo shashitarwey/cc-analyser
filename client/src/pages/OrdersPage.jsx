@@ -6,7 +6,7 @@ import ActionMenu from '../common/ActionMenu';
 import Pagination from '../common/Pagination';
 import { ShoppingBag, MapPin, Pencil, Trash2, Filter, Search, X as XIcon, ChevronLeft, Download, MessageSquare, CheckSquare, Square, Truck, CheckCircle, History } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { ECOMM_SITES, STATUS_FILTER_OPTIONS } from '../constants';
+import { ECOMM_SITES, STATUS_FILTER_OPTIONS, getToday } from '../constants';
 import { fmtCurrency, fmtSignedCurrency, cardLabel, sellerLabel, pickTruthy } from '../utils/formatters';
 import { exportOrdersCSV } from '../utils/orderExport';
 import DateRangeDropdown from '../common/DateRangeDropdown';
@@ -129,7 +129,7 @@ export default function OrdersPage() {
         toast.error('No orders to export');
         return;
       }
-      const today = new Date().toISOString().slice(0, 10);
+      const today = getToday();
       exportOrdersCSV(allOrders, `orders_${today}.csv`);
       toast.success(`Exported ${allOrders.length} order${allOrders.length === 1 ? '' : 's'}`);
     } catch {
@@ -176,7 +176,7 @@ export default function OrdersPage() {
       onConfirm: async () => {
         setConfirm(null);
         try {
-          const delivered_date = status === 'Yes' ? new Date().toISOString().slice(0, 10) : '';
+          const delivered_date = status === 'Yes' ? getToday() : '';
           await bulkUpdateStatus([...selected], status, delivered_date);
           toast.success(`${selected.size} order(s) marked as ${label}`);
           clearSelection();
